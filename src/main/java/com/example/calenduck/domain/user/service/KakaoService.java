@@ -2,7 +2,6 @@ package com.example.calenduck.domain.user.service;
 
 import com.example.calenduck.domain.user.dto.request.KakaoUserInfoDto;
 import com.example.calenduck.domain.user.entity.User;
-import com.example.calenduck.domain.user.entity.UserInfo;
 import com.example.calenduck.domain.user.entity.UserRoleEnum;
 import com.example.calenduck.domain.user.repository.UserRepository;
 import com.example.calenduck.global.exception.GlobalErrorCode;
@@ -28,16 +27,13 @@ import javax.servlet.http.HttpServletResponse;
 @Service
 @RequiredArgsConstructor
 public class KakaoService {
-    private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
-    private final UserService userService;
 
     public User kakaoLogin(String code, HttpServletResponse response) throws JsonProcessingException {
         // 1. "인가 코드"로 "액세스 토큰" 요청
         // 인가코드 -> 로그인 후 서비스제공자(카카오)로부터 받는 임시 코드
         // 인가코드는 일회성 그리고 짧은 시간내에 사용되어야함
         log.info("code : " + code);
-        // 1. "인가 코드"로 "액세스 토큰" 요청
         String accessToken = getToken(code);
         log.info("accessToken : " + accessToken);
 
@@ -55,7 +51,7 @@ public class KakaoService {
 //        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, createToken);
 
 //        return createToken;
-        User user = userRepository.findById(kakaoUserInfo.getId())
+        User user = userRepository.findByKakaoId(kakaoUserInfo.getId())
                 .orElseThrow(() -> new GlobalException(GlobalErrorCode.USER_NOT_FOUND));
         return user;
 
@@ -120,25 +116,22 @@ public class KakaoService {
         String email = jsonNode.get("kakao_account").has("email") ? jsonNode.get("kakao_account").get("email").asText() : null;
 
         log.info("카카오 사용자 정보: " + id + ", " + nickname + ", " + email);
-        log.info("카카오 사용자 정보123123:" +  new KakaoUserInfoDto(id, nickname, email));
         return new KakaoUserInfoDto(id, nickname, email);
     }
 
-
     // 3. 회원가입
-    private void signupIfNeeded(KakaoUserInfoDto kakaoUserInfodto/*, TermsRequestDto termsRequestDto*/) {
+    private void signupIfNeeded(KakaoUserInfoDto kakaoUserInfodto) {
         Long kakaoId = kakaoUserInfodto.getId();
-        String nickname = kakaoUserInfodto.getNickname();
-        String email = kakaoUserInfodto.getEmail() != null ? kakaoUserInfodto.getEmail() : null;
 
         // 이미 회원가입한 사용자인지 확인
         if (userRepository.existsById(kakaoId)) {
             return;
         }
 
-        UserInfo userInfo = userService.saveKakaoUserInfo(kakaoUserInfodto);
-        userRepository.save(new User(kakaoId, nickname, email, userInfo, UserRoleEnum.USER));
+//        UserInfo userInfo = userService.saveKakaoUserInfo(kakaoUserInfodto);
+//        userRepository.save(new User(kakaoId, nickname, email, userInfo, UserRoleEnum.USER));
 //        userRepository.save(new User(kakaoUserInfodto, userInfo, UserRoleEnum.USER));
+        userRepository.save(new User(kakaoUserInfodto, UserRoleEnum.USER));
     }
 
 

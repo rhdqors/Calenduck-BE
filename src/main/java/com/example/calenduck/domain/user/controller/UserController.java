@@ -2,7 +2,6 @@ package com.example.calenduck.domain.user.controller;
 
 import com.example.calenduck.domain.user.entity.User;
 import com.example.calenduck.domain.user.service.KakaoService;
-import com.example.calenduck.domain.user.service.UserService;
 import com.example.calenduck.global.jwt.JwtUtil;
 import com.example.calenduck.global.message.ResponseMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
