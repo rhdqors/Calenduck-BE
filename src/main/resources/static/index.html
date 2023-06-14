@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>Main Page</title>
+    <!-- Add your CSS stylesheets if needed -->
+    <style>
+        /* CSS styles for the body */
+        body {
+            margin: 0;
+        }
+
+        /* CSS styles for the header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #f2f2f2;
+        }
+
+        /* CSS styles for the navigation bar */
+        .navbar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            background-color: #f2f2f2;
+        }
+
+        /* CSS styles for the search box */
+        .search-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        /* CSS styles for the page name (logo) */
+        .page-name {
+            text-align: left;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: -5px;
+        }
+
+        /* CSS styles for the menu */
+        .menu {
+            text-align: right;
+        }
+
+        /* CSS styles for the menu items */
+        .menu-item {
+            margin-left: 10px;
+            text-decoration: none;
+            color: #333;
+        }
+
+        /* CSS styles for the menu items on hover */
+        .menu-item:hover {
+            color: #333;
+            text-decoration: underline;
+        }
+
+        /* CSS styles for the home link */
+        .home-link {
+            color: #333;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        /* CSS styles for the search button */
+        .search-button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        /* CSS styles for the search icon */
+        .search-icon {
+            font-size: 18px;
+            color: #333;
+        }
+
+        /* CSS styles for the tickets section */
+        .tickets-section {
+            background-color: #f2f2f2;
+            padding: 20px;
+        }
+
+        /* CSS styles for the tickets container */
+        .tickets-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        /* CSS styles for each ticket */
+        .ticket {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 200px;
+            margin: 10px;
+            padding: 10px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* CSS styles for the ticket elements */
+        .ticket-photo {
+            width: 100%;
+            height: 200px;
+            background-color: #ccc;
+        }
+
+        .ticket-title {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .ticket-cast {
+            margin-top: 5px;
+        }
+
+        .ticket-date {
+            margin-top: 5px;
+        }
+
+        .ticket-venue {
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<script>
+    document.getElementById("loginButton").addEventListener("click", function(event) {
+        event.preventDefault(); // Prevent the default click behavior
+
+        // Make the HTTP request to the login endpoint
+        fetch("/users/kakao/login")
+            .then(response => response.json())
+            .then(data => {
+                // Handle the response data as needed
+                console.log(data); // You can display the response data in the console or update the page accordingly
+            })
+            .catch(error => {
+                // Handle any errors that occur during the request
+                console.error(error);
+            });
+    });
+</script>
+<body>
+<!-- Header section -->
+<div class="header">
+    <!-- Page name on the left -->
+    <div class="page-name">
+        <a href="/" class="home-link" style="text-decoration: none;">Calenduck</a>
+    </div>
+    <!-- Search box in the center -->
+    <div class="search-box">
+        <input type="text" placeholder="검색어를 입력하세요.">
+        <button type="submit" class="search-button"><span class="search-icon">&#128269;</span></button>
+    </div>
+    <!-- Menu on the right -->
+    <div class="menu">
+        <a href="#" id="loginButton" class="menu-item">Login</a>
+        <a href="/my-page" class="menu-item">My Page</a>
+        <a href="/tickets" class="menu-item">Tickets</a>
+        <a href="/events" class="menu-item">Events</a>
+    </div>
+</div>
+
+<!-- Musical tickets section -->
+<div class="tickets-container">
+    <!-- Ticket 1 -->
+    <div class="ticket">
+        <div class="ticket-photo"></div>
+        <div class="ticket-title">Ticket Title</div>
+        <div class="ticket-cast">Cast</div>
+        <div class="ticket-date">Performance Date</div>
+        <div class="ticket-venue">Performance Venue</div>
+    </div>
+
+    <!-- Ticket 2 -->
+    <div class="ticket">
+        <div class="ticket-photo"></div>
+        <div class="ticket-title">Ticket Title</div>
+        <div class="ticket-cast">Cast</div>
+        <div class="ticket-date">Performance Date</div>
+        <div class="ticket-venue">Performance Venue</div>
+    </div>
+    <div class="ticket">
+        <div class="ticket-photo"></div>
+        <div class="ticket-title">Ticket Title</div>
+        <div class="ticket-cast">Cast</div>
+        <div class="ticket-date">Performance Date</div>
+        <div class="ticket-venue">Performance Venue</div>
+    </div>
+    <div class="ticket">
+        <div class="ticket-photo"></div>
+        <div class="ticket-title">Ticket Title</div>
+        <div class="ticket-cast">Cast</div>
+        <div class="ticket-date">Performance Date</div>
+        <div class="ticket-venue">Performance Venue</div>
+    </div>
+    <div class="ticket">
+        <div class="ticket-photo"></div>
+        <div class="ticket-title">Ticket Title</div>
+        <div class="ticket-cast">Cast</div>
+        <div class="ticket-date">Performance Date</div>
+        <div class="ticket-venue">Performance Venue</div>
+    </div>
+    <div class="ticket">
+        <div class="ticket-photo"></div>
+        <div class="ticket-title">Ticket Title</div>
+        <div class="ticket-cast">Cast</div>
+        <div class="ticket-date">Performance Date</div>
+        <div class="ticket-venue">Performance Venue</div>
+    </div>
+    <div class="ticket">
+        <div class="ticket-photo"></div>
+        <div class="ticket-title">Ticket Title</div>
+        <div class="ticket-cast">Cast</div>
+        <div class="ticket-date">Performance Date</div>
+        <div class="ticket-venue">Performance Venue</div>
+    </div>
+    <div class="ticket">
+        <div class="ticket-photo"></div>
+        <div class="ticket-title">Ticket Title</div>
+        <div class="ticket-cast">Cast</div>
+        <div class="ticket-date">Performance Date</div>
+        <div class="ticket-venue">Performance Venue</div>
+    </div>
+    <div class="ticket">
+        <div class="ticket-photo"></div>
+        <div class="ticket-title">Ticket Title</div>
+        <div class="ticket-cast">Cast</div>
+        <div class="ticket-date">Performance Date</div>
+        <div class="ticket-venue">Performance Venue</div>
+    </div>
+    <div class="ticket">
+        <div class="ticket-photo"></div>
+        <div class="ticket-title">Ticket Title</div>
+        <div class="ticket-cast">Cast</div>
+        <div class="ticket-date">Performance Date</div>
+        <div class="ticket-venue">Performance Venue</div>
+    </div>
+
+
+    <!-- Add more tickets here if needed -->
+</div>
+
+<!-- Add the rest of your content here -->
+
+<!-- Add your JavaScript code if needed -->
+</body>
+</html>
