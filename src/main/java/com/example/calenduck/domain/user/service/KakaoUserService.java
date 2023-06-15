@@ -15,7 +15,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -26,7 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class KakaoService {
+public class KakaoUserService {
     private final UserRepository userRepository;
 
     public User kakaoLogin(String code, HttpServletResponse response) throws JsonProcessingException {
