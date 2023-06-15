@@ -68,6 +68,7 @@ public class KakaoUserService {
         body.add("grant_type", "authorization_code");
         body.add("client_id", "b0eb227d20bd3e34f8503571dbf24772");
         body.add("redirect_uri", "http://localhost:8080/users/kakao/login");
+        body.add("redirect_uri", "http://localhost:3000/auth");
         body.add("code", code);
 
         // HTTP 요청 보내기
