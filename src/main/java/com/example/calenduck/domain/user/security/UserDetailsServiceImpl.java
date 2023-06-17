@@ -1,6 +1,6 @@
 package com.example.calenduck.domain.user.security;
 
-import com.example.calenduck.domain.user.entity.User;
+import com.example.calenduck.domain.user.entity.KakaoUser;
 import com.example.calenduck.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,7 +19,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
      * email이 아니라 물리적인 id(PK)로 찾는게 맞음 -> 찾는 속도가 월등히 빠르고 효율적 */
     @Override
     public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
-        User user = userRepository.findById(Long.valueOf(id))
+        KakaoUser user = userRepository.findById(Long.valueOf(id))
             .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
         return new UserDetailsImpl(user, id);
     }

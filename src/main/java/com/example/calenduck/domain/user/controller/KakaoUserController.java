@@ -1,6 +1,6 @@
 package com.example.calenduck.domain.user.controller;
 
-import com.example.calenduck.domain.user.entity.User;
+import com.example.calenduck.domain.user.entity.KakaoUser;
 import com.example.calenduck.domain.user.service.KakaoUserService;
 import com.example.calenduck.global.jwt.JwtUtil;
 import com.example.calenduck.global.message.ResponseMessage;
@@ -9,12 +9,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 
 @RestController
+@RequestMapping("/users")
 @RequiredArgsConstructor
 public class KakaoUserController {
 
@@ -22,10 +24,10 @@ public class KakaoUserController {
     private final JwtUtil jwtUtil;
 
     @Operation(summary = "카카오 로그인", description = "카카오 로그인")
-    @GetMapping("/users/kakao/login")
+    @GetMapping("/kakao/login")
     public synchronized ResponseEntity<?> kakaoLogin(@RequestParam String code, HttpServletResponse response) throws JsonProcessingException {
         // code: 카카오 서버로부터 받은 인가 코드
-        User kakaoUser = kakaoService.kakaoLogin(code, response);
+        KakaoUser kakaoUser = kakaoService.kakaoLogin(code, response);
         String createToken =  jwtUtil.createToken(kakaoUser.getNickName(), kakaoUser.getKakaoEmail(), kakaoUser.getRole());
 
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, createToken);

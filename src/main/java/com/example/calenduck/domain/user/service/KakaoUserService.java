@@ -1,7 +1,7 @@
 package com.example.calenduck.domain.user.service;
 
 import com.example.calenduck.domain.user.dto.request.KakaoUserInfoDto;
-import com.example.calenduck.domain.user.entity.User;
+import com.example.calenduck.domain.user.entity.KakaoUser;
 import com.example.calenduck.domain.user.entity.UserRoleEnum;
 import com.example.calenduck.domain.user.repository.UserRepository;
 import com.example.calenduck.global.exception.GlobalErrorCode;
@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 public class KakaoUserService {
     private final UserRepository userRepository;
 
-    public User kakaoLogin(String code, HttpServletResponse response) throws JsonProcessingException {
+    public KakaoUser kakaoLogin(String code, HttpServletResponse response) throws JsonProcessingException {
         // 1. "인가 코드"로 "액세스 토큰" 요청
         // 인가코드 -> 로그인 후 서비스제공자(카카오)로부터 받는 임시 코드
         // 인가코드는 일회성 그리고 짧은 시간내에 사용되어야함
@@ -41,7 +41,7 @@ public class KakaoUserService {
         // 액세스 토큰으로 추가 정보를 요청할 수 있고 이용자의 동의를 얻은 기능 실행 가능(친구목록, 메시지 전송, 프로필가져오기 등??)
         // 액세스 토큰 만료시 리프레시토큰으로 새로 발급
         KakaoUserInfoDto kakaoUserInfo = getKakaoUserInfo(accessToken);
-
+        log.info("kakaoUserInfo : " + kakaoUserInfo);
         // 3. 회원가입
         signupIfNeeded(kakaoUserInfo);
 
@@ -50,7 +50,7 @@ public class KakaoUserService {
 //        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, createToken);
 
 //        return createToken;
-        User user = userRepository.findByKakaoId(kakaoUserInfo.getId())
+        KakaoUser user = userRepository.findByKakaoId(kakaoUserInfo.getId())
                 .orElseThrow(() -> new GlobalException(GlobalErrorCode.USER_NOT_FOUND));
         return user;
 
@@ -67,7 +67,7 @@ public class KakaoUserService {
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
         body.add("client_id", "b0eb227d20bd3e34f8503571dbf24772");
-        body.add("redirect_uri", "http://localhost:8080/users/kakao/login");
+//        body.add("redirect_uri", "http://localhost:8080/users/kakao/login");
         body.add("redirect_uri", "http://localhost:3000/auth");
         body.add("code", code);
 
@@ -131,7 +131,7 @@ public class KakaoUserService {
 //        UserInfo userInfo = userService.saveKakaoUserInfo(kakaoUserInfodto);
 //        userRepository.save(new User(kakaoId, nickname, email, userInfo, UserRoleEnum.USER));
 //        userRepository.save(new User(kakaoUserInfodto, userInfo, UserRoleEnum.USER));
-        userRepository.save(new User(kakaoUserInfodto, UserRoleEnum.USER));
+        userRepository.save(new KakaoUser(kakaoUserInfodto, UserRoleEnum.USER));
     }
 
 

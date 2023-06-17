@@ -1,6 +1,5 @@
 package com.example.calenduck.global.jwt;
 
-import com.example.calenduck.domain.user.entity.User;
 import com.example.calenduck.domain.user.entity.UserRoleEnum;
 import com.example.calenduck.domain.user.security.UserDetailsServiceImpl;
 import com.example.calenduck.global.exception.GlobalErrorCode;
@@ -22,8 +21,6 @@ import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Objects;
-
-import static com.example.calenduck.domain.user.entity.UserRoleEnum.USER;
 
 
 @Component
