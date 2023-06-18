@@ -1,6 +1,7 @@
 package com.example.calenduck.domain.performance.service;
 
 import com.example.calenduck.domain.performance.dto.response.BasePerformancesResponseDto;
+import com.example.calenduck.domain.performance.dto.response.DetailPerformanceResponseDto;
 import com.example.calenduck.domain.performance.repository.PerformanceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +14,6 @@ import java.util.*;
 public class PerformanceService {
 
     private final PerformanceRepository performanceRepository;
-    private final XmlToJson xmlToJson;
 
     // 전체 조회 & 메인
     // 포스터, 공연명, 출연진
@@ -26,8 +26,12 @@ public class PerformanceService {
 //            maps.get("poster");
 //            responseDto.
 //        }
-
         return responseDtos;
+    }
+
+    public DetailPerformanceResponseDto getDetailPerformance(Long performanceId) {
+
+        return null;
     }
 
 }

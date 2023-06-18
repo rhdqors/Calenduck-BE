@@ -17,7 +17,7 @@ import java.util.Map;
 
 @Slf4j
 @Component
-public class XmlToJson {
+public class XmlToMap {
     // 1. mt20 id + kopis 인증키로 공연 상세정보 xml로 불러오기 -> 파싱으로 json 등으로 변환해야 함
     // 외부 request 요청
     // todo 현재 고정 ip로 값 불러옴 -> 반복문 등을 통해 id 돌려야할 듯
