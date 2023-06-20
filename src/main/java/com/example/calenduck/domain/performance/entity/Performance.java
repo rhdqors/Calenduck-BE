@@ -1,5 +1,6 @@
 package com.example.calenduck.domain.performance.entity;
 
+import com.example.calenduck.domain.user.entity.KakaoUser;
 import lombok.Getter;
 
 import javax.persistence.*;
@@ -13,30 +14,10 @@ public class Performance {
     private Long id; // 공연 고유 번호
 
     @Column
-    private String poster;
+    private String mt20id; // 공연id 상세정보 request로 꺼내 쓰면 될듯
 
-    @Column
-    private String prfnm;
-
-    @Column
-    private String prfcast;
-
-    @Column
-    private String genrenm;
-
-    @Column
-    private String fcltynm;
-
-    @Column
-    private String dtguidance;
-
-    @Column
-    private String prfpdfrom;
-
-    @Column
-    private String prfpdto;
-
-    @Column
-    private String pcseguidance;
+    @ManyToOne
+    @JoinColumn(name = "kakaouser_id",nullable = false)
+    private KakaoUser kakaoUser;
 
 }
