@@ -1,5 +1,7 @@
 package com.example.calenduck.domain.performance.service;
 
+import com.example.calenduck.global.DatabaseConfig;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -16,102 +18,18 @@ import java.util.*;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class XmlToMap {
 
-//    // Presto
-//    public ResultSet prestoQueryExample() throws SQLException {
-//        ResultSet resultSet = null;
-//        Connection connection = null;
-//        try {
-//            // JDBC 드라이버 로드
-//            Class.forName("com.facebook.presto.jdbc.PrestoDriver");
-//            Properties properties = new Properties();
-//            properties.setProperty("user", "test");
-//
-//            // Presto에 연결
-//            connection = DriverManager.getConnection(
-//                    "jdbc:presto://3.35.79.182:8889/hive",
-//                    properties
-//            );
-//
-//            // 쿼리 실행
-//            Statement statement = connection.createStatement();
-//            String query = "SELECT * FROM  b_competition.name_with_mt20id limit 100";
-//            resultSet = statement.executeQuery(query);
-//            log.info("resultSet = " + resultSet);
-//            log.info("resultSet = " + resultSet.toString());
-//
-//            // 이름, 공연id 테스트 출력
-////            while (resultSet.next()) {
-////                log.info(resultSet.getString(1)+", "+resultSet.getString(2));
-////            }
-//
-//        } catch (ClassNotFoundException | SQLException e) {
-//            e.printStackTrace();
-//            if (resultSet != null) {
-//                resultSet.close();
-//            }
-//            if (connection != null) {
-//                connection.close();
-//            }
-//        }
-//        return resultSet;
-//    }
-
-
-//    // 1. presto 연결
-//    public static Statement ConnectionPresto() throws SQLException {
-//        Connection connection = null;
-//        try {
-//            Class.forName("com.facebook.presto.jdbc.PrestoDriver");
-//            Properties properties = new Properties();
-//            properties.setProperty("user", "test");
-//
-//            // Presto에 연결
-//            connection = DriverManager.getConnection(
-//                    "jdbc:presto://3.35.79.182:8889/hive",
-//                    properties
-//            );
-//
-//        } catch (ClassNotFoundException | SQLException e) {
-//            e.printStackTrace();
-//            if (connection != null) {
-//                connection.close();
-//            }
-//        }
-//        return connection.createStatement();
-//    }
-//
-//    // 2. presto에서 mt20id 쿼리실행 및 상세정보 xml파일 불러와 resultSet에 넣기
-//    public static ResultSet getMt20idResultSet() throws SQLException {
-//        Statement statement = ConnectionPresto();
-//        ResultSet resultSet = null;
-//        try {
-//            String query = "SELECT * FROM  b_competition.name_with_mt20id limit 100";
-//            resultSet = statement.executeQuery(query);
-//            log.info("resultSet = " + resultSet);
-//            log.info("resultSet = " + resultSet.toString());
-//
-//            // 이름, 공연id 테스트 출력
-////        while (resultSet.next()) {
-////            log.info(resultSet.getString(1)+", "+resultSet.getString(2));
-////        }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//            if (resultSet != null) {
-//                resultSet.close();
-//            }
-//        }
-//        return resultSet;
-//    }
+    private final DatabaseConfig databaseConfig;
 
     // 1. RDS 연결
     public Connection connectToRDS() throws SQLException {
         Connection connection = null;
         try {
-            String jdbcUrl = "jdbc:mysql://competition.cjyqslqcsafp.ap-northeast-2.rds.amazonaws.com:3306/competition";
-            String username = "competition";
-            String password = "!g794613";
+            String jdbcUrl = databaseConfig.getJdbcUrl();
+            String username = databaseConfig.getUsername();
+            String password = databaseConfig.getPassword();
 
             connection = DriverManager.getConnection(jdbcUrl, username, password);
         } catch (SQLException e) {
@@ -122,38 +40,6 @@ public class XmlToMap {
         }
         return connection;
     }
-
-    // 2. presto mt20id 쿼리 실행 및 상세정보 xml 파일 가져오기
-//    public static ResultSet getMt20idResultSet() throws SQLException {
-//        Connection connection = connectToRDS();
-//        Statement statement = null;
-//        ResultSet resultSet = null;
-//
-//        try {
-//            statement = connection.createStatement();
-//            String query = "SELECT * FROM competition.name_with_mt20id LIMIT 100";
-//            resultSet = statement.executeQuery(query);
-//
-//            // 이름, 공연id 테스트 출력
-//            while (resultSet.next()) {
-//                String name = resultSet.getString(1);
-//                String performanceId = resultSet.getString(2);
-//                log.info(name + ", " + performanceId);
-//                log.info("--------resultset123 = " + resultSet.toString());
-//            }
-//
-//
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//            if (resultSet != null) {
-//                resultSet.close();
-//            }
-//        }
-//        log.info("--------resultset = " + resultSet.toString());
-////        log.info("--------resultset1 = " + resultSet.getString(2));
-//        return resultSet;
-//    }
-
 
     // 2 + 3
     public List<String> getMt20idResultSet() throws SQLException {
@@ -183,29 +69,6 @@ public class XmlToMap {
         }
         return performanceIds;
     }
-
-    // 3. Presto에서 조회한 값중 공연id만 리스트에 담기 (중복값은 하나만)
-//    public static List<String> getPerformanceIdList() throws SQLException {
-//        List<String> performanceIds = new ArrayList<>();
-//        ResultSet resultSet = getMt20idResultSet();
-//
-//        try {
-//            while (resultSet.next()) {
-//                String performanceId = resultSet.getString(2);
-//                log.info("--------performanceId = " + performanceId);
-//                if (performanceId != null && !performanceId.trim().isEmpty() && !performanceIds.contains(performanceId)) {
-//                    performanceIds.add(performanceId);
-//                }
-//            }
-//            log.info("performanceIds = " + performanceIds.toString());
-//        } finally {
-//            // Move the resultSet.close() statement here
-//            if (resultSet != null) {
-//                resultSet.close();
-//            }
-//        }
-//        return performanceIds;
-//    }
 
     // 4. xml -> 타입 변환
     // poster = elements.select("poster").text(); 등으로 컬럼 지정 가능
