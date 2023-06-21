@@ -18,7 +18,7 @@ public class PrestoQueryExample {
 
             // Presto에 연결
             Connection connection = DriverManager.getConnection(
-                    "jdbc:presto://3.36.42.221:8889/hive",
+                    "jdbc:presto://3.38.112.170:8889/hive",
                     properties
             );
 

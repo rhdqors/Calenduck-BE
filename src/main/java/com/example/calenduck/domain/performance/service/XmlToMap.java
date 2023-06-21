@@ -3,7 +3,6 @@ package com.example.calenduck.domain.performance.service;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 
@@ -12,29 +11,218 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
+import java.sql.*;
+import java.util.*;
 
 @Slf4j
 @Component
 public class XmlToMap {
-    // 1. mt20 id + kopis 인증키로 공연 상세정보 xml로 불러오기 -> 파싱으로 json 등으로 변환해야 함
-    // 외부 request 요청
-    // todo 현재 고정 ip로 값 불러옴 -> 반복문 등을 통해 id 돌려야할 듯
-    public String detailPerformanceToXml() {
-        StringBuilder response = new StringBuilder();
+
+//    // Presto
+//    public ResultSet prestoQueryExample() throws SQLException {
+//        ResultSet resultSet = null;
+//        Connection connection = null;
+//        try {
+//            // JDBC 드라이버 로드
+//            Class.forName("com.facebook.presto.jdbc.PrestoDriver");
+//            Properties properties = new Properties();
+//            properties.setProperty("user", "test");
+//
+//            // Presto에 연결
+//            connection = DriverManager.getConnection(
+//                    "jdbc:presto://3.35.79.182:8889/hive",
+//                    properties
+//            );
+//
+//            // 쿼리 실행
+//            Statement statement = connection.createStatement();
+//            String query = "SELECT * FROM  b_competition.name_with_mt20id limit 100";
+//            resultSet = statement.executeQuery(query);
+//            log.info("resultSet = " + resultSet);
+//            log.info("resultSet = " + resultSet.toString());
+//
+//            // 이름, 공연id 테스트 출력
+////            while (resultSet.next()) {
+////                log.info(resultSet.getString(1)+", "+resultSet.getString(2));
+////            }
+//
+//        } catch (ClassNotFoundException | SQLException e) {
+//            e.printStackTrace();
+//            if (resultSet != null) {
+//                resultSet.close();
+//            }
+//            if (connection != null) {
+//                connection.close();
+//            }
+//        }
+//        return resultSet;
+//    }
+
+
+//    // 1. presto 연결
+//    public static Statement ConnectionPresto() throws SQLException {
+//        Connection connection = null;
+//        try {
+//            Class.forName("com.facebook.presto.jdbc.PrestoDriver");
+//            Properties properties = new Properties();
+//            properties.setProperty("user", "test");
+//
+//            // Presto에 연결
+//            connection = DriverManager.getConnection(
+//                    "jdbc:presto://3.35.79.182:8889/hive",
+//                    properties
+//            );
+//
+//        } catch (ClassNotFoundException | SQLException e) {
+//            e.printStackTrace();
+//            if (connection != null) {
+//                connection.close();
+//            }
+//        }
+//        return connection.createStatement();
+//    }
+//
+//    // 2. presto에서 mt20id 쿼리실행 및 상세정보 xml파일 불러와 resultSet에 넣기
+//    public static ResultSet getMt20idResultSet() throws SQLException {
+//        Statement statement = ConnectionPresto();
+//        ResultSet resultSet = null;
+//        try {
+//            String query = "SELECT * FROM  b_competition.name_with_mt20id limit 100";
+//            resultSet = statement.executeQuery(query);
+//            log.info("resultSet = " + resultSet);
+//            log.info("resultSet = " + resultSet.toString());
+//
+//            // 이름, 공연id 테스트 출력
+////        while (resultSet.next()) {
+////            log.info(resultSet.getString(1)+", "+resultSet.getString(2));
+////        }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//            if (resultSet != null) {
+//                resultSet.close();
+//            }
+//        }
+//        return resultSet;
+//    }
+
+    // 1. RDS 연결
+    public Connection connectToRDS() throws SQLException {
+        Connection connection = null;
         try {
-            // Create URL object with the API endpoint
-            // 여러가지 보려면 PF134308의 mt20 id 반복문으로 돌려야 할듯 ?
-            URL url = new URL("http://kopis.or.kr/openApi/restful/pblprfr/PF134308?service=60a3d3573c5e4d8bb052a4abebff27b6");
+            String jdbcUrl = "jdbc:mysql://competition.cjyqslqcsafp.ap-northeast-2.rds.amazonaws.com:3306/competition";
+            String username = "competition";
+            String password = "!g794613";
 
-            // Open a connection to the URL
+            connection = DriverManager.getConnection(jdbcUrl, username, password);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            if (connection != null) {
+                connection.close();
+            }
+        }
+        return connection;
+    }
+
+    // 2. presto mt20id 쿼리 실행 및 상세정보 xml 파일 가져오기
+//    public static ResultSet getMt20idResultSet() throws SQLException {
+//        Connection connection = connectToRDS();
+//        Statement statement = null;
+//        ResultSet resultSet = null;
+//
+//        try {
+//            statement = connection.createStatement();
+//            String query = "SELECT * FROM competition.name_with_mt20id LIMIT 100";
+//            resultSet = statement.executeQuery(query);
+//
+//            // 이름, 공연id 테스트 출력
+//            while (resultSet.next()) {
+//                String name = resultSet.getString(1);
+//                String performanceId = resultSet.getString(2);
+//                log.info(name + ", " + performanceId);
+//                log.info("--------resultset123 = " + resultSet.toString());
+//            }
+//
+//
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//            if (resultSet != null) {
+//                resultSet.close();
+//            }
+//        }
+//        log.info("--------resultset = " + resultSet.toString());
+////        log.info("--------resultset1 = " + resultSet.getString(2));
+//        return resultSet;
+//    }
+
+
+    // 2 + 3
+    public List<String> getMt20idResultSet() throws SQLException {
+        Connection connection = connectToRDS();
+        List<String> performanceIds = new ArrayList<>();
+        Statement statement = null;
+        ResultSet resultSet = null;
+
+        try {
+            statement = connection.createStatement();
+//            String query = "SELECT * FROM competition.name_with_mt20id LIMIT 100";
+            String query = "SELECT * FROM competition.name_with_mt20id ORDER BY mt20id ASC LIMIT 100";
+            resultSet = statement.executeQuery(query);
+
+            // 이름, 공연id 테스트 출력
+            while (resultSet.next()) {
+                String name = resultSet.getString(1);
+                String performanceId = resultSet.getString(2);
+                performanceIds.add(performanceId);
+                log.info(name + ", " + performanceId);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            if (resultSet != null) {
+                resultSet.close();
+            }
+        }
+        return performanceIds;
+    }
+
+    // 3. Presto에서 조회한 값중 공연id만 리스트에 담기 (중복값은 하나만)
+//    public static List<String> getPerformanceIdList() throws SQLException {
+//        List<String> performanceIds = new ArrayList<>();
+//        ResultSet resultSet = getMt20idResultSet();
+//
+//        try {
+//            while (resultSet.next()) {
+//                String performanceId = resultSet.getString(2);
+//                log.info("--------performanceId = " + performanceId);
+//                if (performanceId != null && !performanceId.trim().isEmpty() && !performanceIds.contains(performanceId)) {
+//                    performanceIds.add(performanceId);
+//                }
+//            }
+//            log.info("performanceIds = " + performanceIds.toString());
+//        } finally {
+//            // Move the resultSet.close() statement here
+//            if (resultSet != null) {
+//                resultSet.close();
+//            }
+//        }
+//        return performanceIds;
+//    }
+
+    // 4. xml -> 타입 변환
+    // poster = elements.select("poster").text(); 등으로 컬럼 지정 가능
+    public List<Elements> getElements() throws SQLException, IOException {
+//        List<String> performanceIds = getPerformanceIdList();
+        List<String> performanceIds = getMt20idResultSet();
+        List<Elements> elements = new ArrayList<>();
+
+        // --- url + id 조합으로 공연별 상세정보 조회 ---
+        for (String performanceId : performanceIds) {
+            log.info("performanceId = " + performanceId);
+
+            StringBuilder response = new StringBuilder();
+            URL url = new URL("http://kopis.or.kr/openApi/restful/pblprfr/" + performanceId + "?service=60a3d3573c5e4d8bb052a4abebff27b6");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-            // Set the request method to GET
             connection.setRequestMethod("GET");
 
-            // Get the response code
             int responseCode = connection.getResponseCode();
             log.info("Response Code: " + responseCode);
 
@@ -47,44 +235,24 @@ public class XmlToMap {
             }
             reader.close();
 
-            // response = 공연id의 상세정보
-            log.info("response = " + response);
-            log.info("Response XML:\n" + response.toString());
+            // response = 공연id의 상세정보 xml 보기
+//            log.info("Response XML:\n" + response.toString());
 
-            // Close the connection
-            connection.disconnect();
-        } catch (IOException e) {
-            e.printStackTrace();
+            // --- xml -> 문서 -> 문자열변수 저장 ---
+            Document doc = Jsoup.parse(response.toString());
+//            log.info("doc = " + doc.toString());
+
+            // 데이터 <db> 요소 안의 모든 데이터를 선택
+            elements.add(doc.select("db > *"));
+
+            log.info("elements = " + elements.toString());
         }
-        return response.toString();
+
+        return elements;
     }
 
-    // 2. xml 파싱 및 상세정보값 map에 키, 벨류 저장 -> 키값 입력해서 원하는 값 뽑아쓸 수 있음
-    public Map<String, String> xmlToMap() {
-        Map<String, String> keyValueMap = new HashMap<>();
-        String xmlResponse = detailPerformanceToXml();
-
-        // (html형식??)xml 문자열 xmlResponse -> document(문서) 객체로 파싱
-        Document doc = Jsoup.parse(xmlResponse);
-        log.info("doc = " + doc.toString());
-
-        // 데이터 <db> 요소 안의 모든 데이터를 선택
-        Elements elements = doc.select("db > *");
-        log.info("elements = " + elements.toString());
-
-        for (Element element : elements) {
-            // 키값 - <괄호 안의 내용>
-            String key = element.tagName();
-            // 벨류값 <>괄호 사이의 값<>
-            String value = element.text();
-            // 키, 벨류 맵
-            keyValueMap.put(key, value);
-        }
-        // 정보 하나만 조회시 .get 이용
-        log.info("poster = " + keyValueMap.get("poster"));
-        log.info(keyValueMap.toString());
-        return keyValueMap;
-    }
-
+//    public static void main(String [] args) throws SQLException {
+//        getPerformanceIdList();
+//    }
 
 }
