@@ -1,7 +1,7 @@
 package com.example.calenduck.domain.user.controller;
 
-import com.example.calenduck.domain.user.entity.KakaoUser;
-import com.example.calenduck.domain.user.service.KakaoUserService;
+import com.example.calenduck.domain.user.entity.User;
+import com.example.calenduck.domain.user.service.UserService;
 import com.example.calenduck.global.jwt.JwtUtil;
 import com.example.calenduck.global.message.ResponseMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -18,17 +18,17 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
-public class KakaoUserController {
+public class UserController {
 
-    private final KakaoUserService kakaoService;
+    private final UserService kakaoService;
     private final JwtUtil jwtUtil;
 
     @Operation(summary = "카카오 로그인", description = "카카오 로그인")
     @GetMapping("/kakao/login")
     public synchronized ResponseEntity<?> kakaoLogin(@RequestParam String code, HttpServletResponse response) throws JsonProcessingException {
         // code: 카카오 서버로부터 받은 인가 코드
-        KakaoUser kakaoUser = kakaoService.kakaoLogin(code, response);
-        String createToken =  jwtUtil.createToken(kakaoUser.getNickName(), kakaoUser.getKakaoEmail(), kakaoUser.getRole());
+        User user = kakaoService.kakaoLogin(code, response);
+        String createToken =  jwtUtil.createToken(user.getNickName(), user.getKakaoEmail(), user.getRole());
 
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, createToken);
 

@@ -30,7 +30,7 @@ out/
 **/resources/application-common.yml
 **/resources/application-db.yml
 **/com/example/calenduck/global/DatabaseConfig.java
-**/DatabaseConfig.java
+**/DataConfig.java
 
 ### NetBeans ###
 /nbproject/private/

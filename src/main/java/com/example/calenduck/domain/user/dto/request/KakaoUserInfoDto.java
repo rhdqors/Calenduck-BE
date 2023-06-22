@@ -13,6 +13,6 @@ public class KakaoUserInfoDto {
     public KakaoUserInfoDto(Long id, String nickname, String email) {
         this.id = id;
         this.nickname = nickname;
-        this.email = email;
+        if(email != null) this.email = email;
     }
 }
