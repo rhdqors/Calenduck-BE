@@ -1,6 +1,6 @@
 package com.example.calenduck.domain.user.security;
 
-import com.example.calenduck.domain.user.entity.KakaoUser;
+import com.example.calenduck.domain.user.entity.User;
 import com.example.calenduck.domain.user.entity.UserRoleEnum;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,15 +13,15 @@ import java.util.Collection;
 * UserDetailsService에서 반환하는 User 객체, 파라미터를 받아 생성됨*/
 public class UserDetailsImpl implements UserDetails {
 
-    private final KakaoUser user;
+    private final User user;
     private final String id;
 
-    public UserDetailsImpl(KakaoUser user, String id) {
+    public UserDetailsImpl(User user, String id) {
         this.user = user;
         this.id = id;
     }
 
-    public KakaoUser getUser() {
+    public User getUser() {
         return user;
     }
 

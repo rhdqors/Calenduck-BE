@@ -1,6 +1,6 @@
 package com.example.calenduck.domain.performance.service;
 
-import com.example.calenduck.global.DatabaseConfig;
+import com.example.calenduck.global.DataConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -21,7 +21,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class XmlToMap {
 
-    private final DatabaseConfig databaseConfig;
+    private final DataConfig databaseConfig;
 
     // 1. RDS 연결
     public Connection connectToRDS() throws SQLException {

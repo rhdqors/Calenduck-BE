@@ -1,6 +1,6 @@
 package com.example.calenduck.domain.performance.service;
 import com.example.calenduck.domain.performance.dto.response.BasePerformancesResponseDto;
-import com.example.calenduck.domain.performance.dto.response.DetailPerformanceResponseDto;
+import com.example.calenduck.domain.performance.entity.Performance;
 import com.example.calenduck.domain.performance.repository.PerformanceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +32,24 @@ public class PerformanceService {
             String poster = element.select("poster").text();
             String prfnm = element.select("prfnm").text();
             String prfcast = element.select("prfcast").text();
+            String genrenm = element.select("genrenm").text();
+            String fcltynm = element.select("fcltynm").text();
+            String dtguidance = element.select("dtguidance").text();
+            String stdate = element.select("prfpdfrom").text();
+            String eddate = element.select("prfpdto").text();
+            String pcseguidance = element.select("pcseguidance").text();
 
-            BasePerformancesResponseDto basePerformancesResponseDto = new BasePerformancesResponseDto(mt20id, poster, prfnm, prfcast);
+            BasePerformancesResponseDto basePerformancesResponseDto = new BasePerformancesResponseDto(
+                    mt20id,
+                    poster,
+                    prfnm,
+                    prfcast,
+                    genrenm,
+                    fcltynm,
+                    dtguidance,
+                    stdate,
+                    eddate,
+                    pcseguidance                    );
             performances.add(basePerformancesResponseDto);
         }
         return performances;
@@ -41,32 +57,55 @@ public class PerformanceService {
 
     // 상세 페이지
     // 받아오는 performanceId = mt20id
-    public DetailPerformanceResponseDto getDetailPerformance(String performanceId) throws SQLException, IOException {
-        List<Elements> elements = xmlToMap.getElements();
-        DetailPerformanceResponseDto detailPerformanceResponseDto = null;
-        log.info("------------performanceId = " + performanceId);
+//    public DetailPerformanceResponseDto getDetailPerformance(String performanceId) throws SQLException, IOException {
+//        List<Elements> elements = xmlToMap.getElements();
+//        DetailPerformanceResponseDto detailPerformanceResponseDto = null;
+//        log.info("------------performanceId = " + performanceId);
+//
+//        for (Elements element : elements) {
+//            String mt20id = element.select("mt20id").text();
+//            log.info("----------element = " + element);
+//            log.info("----------mt20id = " + mt20id);
+//
+//            if (mt20id.equals(performanceId)) {
+//                String poster = element.select("poster").text();
+//                String prfnm = element.select("prfnm").text();
+//                String prfcast = element.select("prfcast").text();
+//                String genrenm = element.select("genrenm").text();
+//                String fcltynm = element.select("fcltynm").text();
+//                String dtguidance = element.select("dtguidance").text();
+//                String stdate = element.select("prfpdfrom").text();
+//                String eddate = element.select("prfpdto").text();
+//                String pcseguidance = element.select("pcseguidance").text();
+//
+//                detailPerformanceResponseDto = new DetailPerformanceResponseDto(poster, prfnm, prfcast, genrenm, fcltynm, dtguidance, stdate, eddate, pcseguidance);
+//                break;
+//            }
+//        }
+//        return detailPerformanceResponseDto;
+//    }
 
-        for (Elements element : elements) {
-            String mt20id = element.select("mt20id").text();
-            log.info("----------element = " + element);
-            log.info("----------mt20id = " + mt20id);
+    @Transactional
+    public String bookmark(String mt20id/*, KakaoUser user*/) {
 
-            if (mt20id.equals(performanceId)) {
-                String poster = element.select("poster").text();
-                String prfnm = element.select("prfnm").text();
-                String prfcast = element.select("prfcast").text();
-                String genrenm = element.select("genrenm").text();
-                String fcltynm = element.select("fcltynm").text();
-                String dtguidance = element.select("dtguidance").text();
-                String stdate = element.select("prfpdfrom").text();
-                String eddate = element.select("prfpdto").text();
-                String pcseguidance = element.select("pcseguidance").text();
+        // 공연이 있나 확인해야하는지?
+//        performanceRepository.findByMt20id(performanceId).orElseThrow(() -> new GlobalException(GlobalErrorCode.NOT_FOUND_PERFORMANCE));
 
-                detailPerformanceResponseDto = new DetailPerformanceResponseDto(poster, prfnm, prfcast, genrenm, fcltynm, dtguidance, stdate, eddate, pcseguidance);
-                break;
-            }
+        String result = "찜목록 성공";
+//        if(performanceRepository.existsByKakaoUserAndMt20id(user, mt20id)) {
+//            performanceRepository.deleteByKakaoUserAndMt20id(user, mt20id);
+//            result = "북마크 취소";
+//        } else {
+//            performanceRepository.saveAndFlush(new Performance(mt20id, user));
+//        }
+        if(performanceRepository.existsByMt20id(mt20id)) {
+            performanceRepository.deleteByMt20id(mt20id);
+            result = "찜목록 취소";
+        } else {
+            performanceRepository.saveAndFlush(new Performance(mt20id));
         }
-        return detailPerformanceResponseDto;
+        return result;
     }
+
 
 }

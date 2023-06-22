@@ -9,13 +9,13 @@ import javax.persistence.*;
 @Entity(name = "users")
 @Getter
 @NoArgsConstructor
-public class KakaoUser {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 유저 고유 번호
 
-    @Column(nullable = false, unique = true)
+    @Column(/*nullable = false,*/ unique = true)
     private String nickName; // 카카오 사용자 이름 (필수 동의)
 
     @Column(unique = true)
@@ -29,7 +29,15 @@ public class KakaoUser {
     private UserRoleEnum role;
 
     // 카카오 로그인
-    public KakaoUser(KakaoUserInfoDto kakaoUserInfoDto, UserRoleEnum role) {
+
+    public User(String nickName, Long kakaoId, String kakaoEmail, UserRoleEnum role) {
+        this.nickName = nickName;
+        this.kakaoId = kakaoId;
+        this.kakaoEmail = kakaoEmail;
+        this.role = role;
+    }
+
+    public User(KakaoUserInfoDto kakaoUserInfoDto, UserRoleEnum role) {
         this.kakaoId = kakaoUserInfoDto.getId();
         this.nickName = kakaoUserInfoDto.getNickname();
         this.kakaoEmail = kakaoUserInfoDto.getEmail();

@@ -1,7 +1,7 @@
 package com.example.calenduck.domain.user.service;
 
 import com.example.calenduck.domain.user.dto.request.KakaoUserInfoDto;
-import com.example.calenduck.domain.user.entity.KakaoUser;
+import com.example.calenduck.domain.user.entity.User;
 import com.example.calenduck.domain.user.entity.UserRoleEnum;
 import com.example.calenduck.domain.user.repository.UserRepository;
 import com.example.calenduck.global.exception.GlobalErrorCode;
@@ -16,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -25,10 +26,11 @@ import javax.servlet.http.HttpServletResponse;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class KakaoUserService {
+public class UserService {
     private final UserRepository userRepository;
 
-    public KakaoUser kakaoLogin(String code, HttpServletResponse response) throws JsonProcessingException {
+    @Transactional
+    public User kakaoLogin(String code, HttpServletResponse response) throws JsonProcessingException {
         // 1. "인가 코드"로 "액세스 토큰" 요청
         // 인가코드 -> 로그인 후 서비스제공자(카카오)로부터 받는 임시 코드
         // 인가코드는 일회성 그리고 짧은 시간내에 사용되어야함
@@ -50,7 +52,7 @@ public class KakaoUserService {
 //        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, createToken);
 
 //        return createToken;
-        KakaoUser user = userRepository.findByKakaoId(kakaoUserInfo.getId())
+        User user = userRepository.findByKakaoId(kakaoUserInfo.getId())
                 .orElseThrow(() -> new GlobalException(GlobalErrorCode.USER_NOT_FOUND));
         return user;
 
@@ -67,8 +69,8 @@ public class KakaoUserService {
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
         body.add("client_id", "b0eb227d20bd3e34f8503571dbf24772");
-//        body.add("redirect_uri", "http://localhost:8080/users/kakao/login");
-        body.add("redirect_uri", "http://localhost:3000/auth");
+        body.add("redirect_uri", "http://localhost:8080/users/kakao/login");
+//        body.add("redirect_uri", "http://localhost:3000/auth");
         body.add("code", code);
 
         // HTTP 요청 보내기
@@ -120,30 +122,21 @@ public class KakaoUserService {
     }
 
     // 3. 회원가입
-    private void signupIfNeeded(KakaoUserInfoDto kakaoUserInfodto) {
+    private User signupIfNeeded(KakaoUserInfoDto kakaoUserInfodto) {
         Long kakaoId = kakaoUserInfodto.getId();
+        String nickname = kakaoUserInfodto.getNickname();
+        String email = kakaoUserInfodto.getEmail() != null ? kakaoUserInfodto.getEmail() : null;
 
+        log.info("카카오 사용자 정보: " + nickname);
+        log.info("카카오 사용자 정보: " + email);
+        log.info("카카오 사용자 정보: " + kakaoId);
         // 이미 회원가입한 사용자인지 확인
         if (userRepository.existsById(kakaoId)) {
-            return;
+            throw new GlobalException(GlobalErrorCode.USER_NOT_FOUND);
         }
 
-//        UserInfo userInfo = userService.saveKakaoUserInfo(kakaoUserInfodto);
-//        userRepository.save(new User(kakaoId, nickname, email, userInfo, UserRoleEnum.USER));
-//        userRepository.save(new User(kakaoUserInfodto, userInfo, UserRoleEnum.USER));
-        userRepository.save(new KakaoUser(kakaoUserInfodto, UserRoleEnum.USER));
+//        KakaoUser user = userRepository.save(new KakaoUser(kakaoUserInfodto, UserRoleEnum.USER));
+        return userRepository.save(new User(nickname, kakaoId, email, UserRoleEnum.USER));
     }
-
-
-//    private void registerKakaoUserIfNeeded(KakaoUserInfoDto kakaoUserInfo) {
-//        // DB 에 중복된 Kakao Id 가 있는지 확인
-//        Long kakaoId = kakaoUserInfo.getId();
-//        User kakaoUser = userRepository.findById(kakaoId).orElse(null);
-//
-//        kakaoUser = new User(kakaoId, kakaoUser.getKakaoEmail(), UserRoleEnum.USER);
-//        userRepository.save(kakaoUser);
-//
-//    }
-
 
 }
