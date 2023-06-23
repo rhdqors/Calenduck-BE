@@ -2,6 +2,8 @@ package com.example.calenduck.domain.performance.service;
 import com.example.calenduck.domain.performance.dto.response.BasePerformancesResponseDto;
 import com.example.calenduck.domain.performance.entity.Performance;
 import com.example.calenduck.domain.performance.repository.PerformanceRepository;
+import com.example.calenduck.global.exception.GlobalErrorCode;
+import com.example.calenduck.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.select.Elements;
@@ -55,7 +57,7 @@ public class PerformanceService {
         return performances;
     }
 
-    // 상세 페이지
+    // 상세 페이지 -> 메인에서 데이터 다 넘김
     // 받아오는 performanceId = mt20id
 //    public DetailPerformanceResponseDto getDetailPerformance(String performanceId) throws SQLException, IOException {
 //        List<Elements> elements = xmlToMap.getElements();
@@ -107,5 +109,9 @@ public class PerformanceService {
         return result;
     }
 
+    public Performance getPerfornance(String mt20id) {
+        return performanceRepository.findByMt20id(mt20id)
+                .orElseThrow(() -> new GlobalException(GlobalErrorCode.NOT_FOUND_PERFORMANCE));
+    }
 
 }
