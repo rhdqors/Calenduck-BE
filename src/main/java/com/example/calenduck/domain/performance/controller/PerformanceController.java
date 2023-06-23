@@ -33,17 +33,17 @@ public class PerformanceController {
 //        return ResponseMessage.SuccessResponse("상세 조회 성공", performanceService.getDetailPerformance(performanceId));
 //    }
 
-    @Operation(summary = "찜목록 성공, 취소", description = "찜목록 성공, 취소")
-    @PostMapping("/{mt20id}/bookmark")
-    public ResponseEntity<?> bookmark(@PathVariable("mt20id") String mt20id/*, @AuthenticationPrincipal UserDetailsImpl userDetails*/){
-        String message = "";
-//        if (userDetails != null) {
-//            message = performanceService.bookmark(mt20id, userDetails.getUser());
-        message = performanceService.bookmark(mt20id);
-//        } else {
-//            throw new GlobalException(GlobalErrorCode.INVALID_TOKEN);
-//        }
-        return ResponseMessage.SuccessResponse(message, "");
-    }
+//    @Operation(summary = "찜목록 성공, 취소", description = "찜목록 성공, 취소")
+//    @PostMapping("/{mt20id}/bookmark")
+//    public ResponseEntity<?> bookmark(@PathVariable("mt20id") String mt20id/*, @AuthenticationPrincipal UserDetailsImpl userDetails*/){
+//        String message = "";
+////        if (userDetails != null) {
+////            message = performanceService.bookmark(mt20id, userDetails.getUser());
+//        message = performanceService.bookmark(mt20id);
+////        } else {
+////            throw new GlobalException(GlobalErrorCode.INVALID_TOKEN);
+////        }
+//        return ResponseMessage.SuccessResponse(message, "");
+//    }
 
 }

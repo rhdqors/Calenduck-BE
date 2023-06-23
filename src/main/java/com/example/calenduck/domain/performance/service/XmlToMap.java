@@ -1,6 +1,6 @@
 package com.example.calenduck.domain.performance.service;
 
-import com.example.calenduck.global.DataConfig;
+import com.example.calenduck.global.DbConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
@@ -21,15 +21,15 @@ import java.util.*;
 @RequiredArgsConstructor
 public class XmlToMap {
 
-    private final DataConfig databaseConfig;
+    private final DbConfig dbConfig;
 
     // 1. RDS 연결
     public Connection connectToRDS() throws SQLException {
         Connection connection = null;
         try {
-            String jdbcUrl = databaseConfig.getJdbcUrl();
-            String username = databaseConfig.getUsername();
-            String password = databaseConfig.getPassword();
+            String jdbcUrl = dbConfig.getJdbcUrl();
+            String username = dbConfig.getUsername();
+            String password = dbConfig.getPassword();
 
             connection = DriverManager.getConnection(jdbcUrl, username, password);
         } catch (SQLException e) {

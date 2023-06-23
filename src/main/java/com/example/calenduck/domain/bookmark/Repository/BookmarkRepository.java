@@ -1,14 +1,10 @@
-package com.example.calenduck.domain.performance.repository;
+package com.example.calenduck.domain.bookmark.Repository;
 
-import com.example.calenduck.domain.performance.entity.Performance;
+import com.example.calenduck.domain.bookmark.Entity.Bookmark;
 import com.example.calenduck.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Optional;
-
-public interface PerformanceRepository extends JpaRepository<Performance, Long> {
-
-    Optional<Performance> findByMt20id(String mt20id);
+public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 
     boolean existsByUserAndMt20id(User user, String mt20id);
     void deleteByUserAndMt20id(User user, String mt20id);

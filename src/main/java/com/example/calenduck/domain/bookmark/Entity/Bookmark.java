@@ -1,5 +1,6 @@
-package com.example.calenduck.domain.performance.entity;
+package com.example.calenduck.domain.bookmark.Entity;
 
+import com.example.calenduck.domain.performance.entity.Performance;
 import com.example.calenduck.domain.user.entity.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,24 +10,25 @@ import javax.persistence.*;
 @Entity
 @Getter
 @NoArgsConstructor
-public class Performance {
+public class Bookmark {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // 공연 고유 번호
+    private Long id;
 
     @Column
-    private String mt20id; // 공연id 상세정보 request로 꺼내 쓰면 될듯
+    private String mt20id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id"/*,nullable = false*/)
+    @JoinColumn(name = "user_id")
     private User user;
 
-    public Performance(String mt20id, User user) {
+    public Bookmark(String mt20id, User user) {
         this.mt20id = mt20id;
         this.user = user;
     }
-    public Performance(String mt20id) {
+    public Bookmark(String mt20id) {
         this.mt20id = mt20id;
     }
+
 }
