@@ -1,6 +1,7 @@
 package com.example.calenduck.domain.performance.service;
 import com.example.calenduck.domain.performance.dto.response.BasePerformancesResponseDto;
-import com.example.calenduck.domain.performance.entity.Performance;
+import com.example.calenduck.domain.performance.entity.NameWithMt20id;
+import com.example.calenduck.domain.performance.repository.NameWithMt20idRepository;
 import com.example.calenduck.domain.performance.repository.PerformanceRepository;
 import com.example.calenduck.global.exception.GlobalErrorCode;
 import com.example.calenduck.global.exception.GlobalException;
@@ -20,6 +21,7 @@ import java.util.*;
 public class PerformanceService {
 
     private final PerformanceRepository performanceRepository;
+    private final NameWithMt20idRepository nameWithMt20idRepository;
     private final XmlToMap xmlToMap;
 
     // 전체 조회 & 메인 - 페이징 X
@@ -87,31 +89,30 @@ public class PerformanceService {
 //        return detailPerformanceResponseDto;
 //    }
 
-    @Transactional
-    public String bookmark(String mt20id/*, KakaoUser user*/) {
-
-        // 공연이 있나 확인해야하는지?
-//        performanceRepository.findByMt20id(performanceId).orElseThrow(() -> new GlobalException(GlobalErrorCode.NOT_FOUND_PERFORMANCE));
-
-        String result = "찜목록 성공";
-//        if(performanceRepository.existsByKakaoUserAndMt20id(user, mt20id)) {
-//            performanceRepository.deleteByKakaoUserAndMt20id(user, mt20id);
+//    @Transactional
+//    public String bookmark(String mt20id, User user) {
+//
+//        // 공연이 있나 확인해야하는지?
+//        performanceRepository.findByMt20id(mt20id).orElseThrow(() -> new GlobalException(GlobalErrorCode.NOT_FOUND_PERFORMANCE));
+//
+//        String result = "찜목록 성공";
+//        if(performanceRepository.existsByUserAndMt20id(user, mt20id)) {
+//            performanceRepository.deleteByUserAndMt20id(user, mt20id);
 //            result = "북마크 취소";
 //        } else {
 //            performanceRepository.saveAndFlush(new Performance(mt20id, user));
 //        }
-        if(performanceRepository.existsByMt20id(mt20id)) {
-            performanceRepository.deleteByMt20id(mt20id);
-            result = "찜목록 취소";
-        } else {
-            performanceRepository.saveAndFlush(new Performance(mt20id));
-        }
-        return result;
-    }
+////        if(performanceRepository.existsByMt20id(mt20id)) {
+////            performanceRepository.deleteByMt20id(mt20id);
+////            result = "찜목록 취소";
+////        } else {
+////            performanceRepository.saveAndFlush(new Performance(mt20id));
+////        }
+//        return result;
+//    }
 
-    public Performance getPerfornance(String mt20id) {
-        return performanceRepository.findByMt20id(mt20id)
-                .orElseThrow(() -> new GlobalException(GlobalErrorCode.NOT_FOUND_PERFORMANCE));
+    public List<NameWithMt20id> getNameWithMt20id(String mt20id) {
+        return nameWithMt20idRepository.findAllByMt20id(mt20id);
     }
 
 }

@@ -25,10 +25,10 @@ public class UserController {
 
     @Operation(summary = "카카오 로그인", description = "카카오 로그인")
     @GetMapping("/kakao/login")
-    public synchronized ResponseEntity<?> kakaoLogin(@RequestParam String code, HttpServletResponse response) throws JsonProcessingException {
+    public synchronized ResponseEntity<?> kakaoLogin(@RequestParam("code") String code, HttpServletResponse response) throws JsonProcessingException {
         // code: 카카오 서버로부터 받은 인가 코드
         User user = kakaoService.kakaoLogin(code, response);
-        String createToken =  jwtUtil.createToken(user.getNickName(), user.getKakaoEmail(), user.getRole());
+        String createToken =  jwtUtil.createToken(user.getNickname(), user.getKakaoemail(), user.getRole());
 
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, createToken);
 

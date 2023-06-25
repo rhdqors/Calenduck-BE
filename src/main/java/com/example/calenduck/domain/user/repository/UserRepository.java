@@ -7,6 +7,10 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    Optional<User> findByKakaoId(Long kakaoId);
+    Optional<User> findByKakaoid(Long kakaoid);
+    boolean existsByKakaoid(Long kakaoid);
+
+//    @Query(value = "INSERT INTO users (nickname, kakao_id, email, role) VALUES (?1, ?2, ?3, 'USER')", nativeQuery = true)
+//    void saveUser(String nickName, Long kakaoid, String email, UserRoleEnum role);
 
 }
