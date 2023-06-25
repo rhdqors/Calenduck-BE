@@ -76,6 +76,7 @@ public class WebSecurityConfig {
                 .and().cors()
                 .and().addFilterBefore(new JwtAuthFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
 
+
                 .logout()
                     .logoutRequestMatcher(new AntPathRequestMatcher("/users/logout"))
                     .invalidateHttpSession(true)

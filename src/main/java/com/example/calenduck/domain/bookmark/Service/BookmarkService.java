@@ -2,12 +2,15 @@ package com.example.calenduck.domain.bookmark.Service;
 
 import com.example.calenduck.domain.bookmark.Entity.Bookmark;
 import com.example.calenduck.domain.bookmark.Repository.BookmarkRepository;
+import com.example.calenduck.domain.bookmark.dto.response.myBookmarkResponseDto;
 import com.example.calenduck.domain.performance.entity.Performance;
 import com.example.calenduck.domain.performance.service.PerformanceService;
+import com.example.calenduck.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -19,8 +22,8 @@ public class BookmarkService {
     @Transactional
     public String bookmark(String mt20id/*, User user*/) {
 
-//         공연이 있나 확인해야하는지?
-        Performance performance = performanceService.getPerfornance(mt20id);
+        // 공연 있나 확인
+        performanceService.getNameWithMt20id(mt20id);
 
         String result = "찜목록 성공";
 //        if(bookmarkRepository.existsByUserAndMt20id(user, mt20id)) {
@@ -36,6 +39,11 @@ public class BookmarkService {
             bookmarkRepository.saveAndFlush(new Bookmark(mt20id));
         }
         return result;
+    }
+
+    @Transactional
+    public List<myBookmarkResponseDto> getBookmarks() {
+        return null;
     }
 
 }

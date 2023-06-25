@@ -19,6 +19,8 @@ public enum GlobalErrorCode {
     // 404 Not Found - 찾을 수 없음
     EMAIL_NOT_FOUND(NOT_FOUND, "존재하지 않는 이메일 입니다."),
     USER_NOT_FOUND(NOT_FOUND, "등록된 사용자가 없습니다"),
+    // 409
+    DUPLICATE_USER(CONFLICT, "중복된 사용자 입니다"),
 
     // Performance
     NOT_FOUND_PERFORMANCE(NOT_FOUND, "등록된 공연이 없습니다");

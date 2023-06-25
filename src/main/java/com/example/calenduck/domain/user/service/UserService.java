@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -22,6 +23,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -51,13 +53,13 @@ public class UserService {
 //        String createToken =  jwtUtil.createToken(kakaoUser);
 //        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, createToken);
 
-//        return createToken;
-        User user = userRepository.findByKakaoId(kakaoUserInfo.getId())
+//        return createToken;package com.example.calenduck.domain.user.service;
+
+        User user = userRepository.findByKakaoid(kakaoUserInfo.getId())
                 .orElseThrow(() -> new GlobalException(GlobalErrorCode.USER_NOT_FOUND));
         return user;
 
     }
-
 
     // 1. "인가 코드"로 "액세스 토큰" 요청
     private String getToken(String code) throws JsonProcessingException {
@@ -116,27 +118,28 @@ public class UserService {
         String nickname = jsonNode.get("properties")
                 .get("nickname").asText();
         String email = jsonNode.get("kakao_account").has("email") ? jsonNode.get("kakao_account").get("email").asText() : null;
+        String gender = jsonNode.get("kakao_account").has("gender") ? jsonNode.get("kakao_account").get("gender").asText() : null;
+        String age = jsonNode.get("kakao_account").has("age") ? jsonNode.get("kakao_account").get("age").asText() : null;
 
-        log.info("카카오 사용자 정보: " + id + ", " + nickname + ", " + email);
-        return new KakaoUserInfoDto(id, nickname, email);
+        log.info("카카오 사용자 정보: " + id + ", " + nickname + ", " + email + ", " +  gender + ", " + age);
+        return new KakaoUserInfoDto(id, nickname, email, gender, age);
     }
 
     // 3. 회원가입
-    private User signupIfNeeded(KakaoUserInfoDto kakaoUserInfodto) {
+    private void signupIfNeeded(KakaoUserInfoDto kakaoUserInfodto) {
         Long kakaoId = kakaoUserInfodto.getId();
-        String nickname = kakaoUserInfodto.getNickname();
+        String nickName = kakaoUserInfodto.getNickname();
         String email = kakaoUserInfodto.getEmail() != null ? kakaoUserInfodto.getEmail() : null;
 
-        log.info("카카오 사용자 정보: " + nickname);
+        log.info("카카오 사용자 정보: " + nickName);
         log.info("카카오 사용자 정보: " + email);
         log.info("카카오 사용자 정보: " + kakaoId);
-        // 이미 회원가입한 사용자인지 확인
-        if (userRepository.existsById(kakaoId)) {
-            throw new GlobalException(GlobalErrorCode.USER_NOT_FOUND);
-        }
 
-//        KakaoUser user = userRepository.save(new KakaoUser(kakaoUserInfodto, UserRoleEnum.USER));
-        return userRepository.save(new User(nickname, kakaoId, email, UserRoleEnum.USER));
+        if (userRepository.existsByKakaoid(kakaoId)) {
+            return;
+        }
+        userRepository.save(new User(kakaoUserInfodto, UserRoleEnum.USER));
+//        userRepository.saveUser(nickName, kakaoId, email, UserRoleEnum.USER);
     }
 
 }

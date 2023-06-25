@@ -31,8 +31,8 @@ out/
 **/resources/application-db.yml
 **/com/example/calenduck/global/DatabaseConfig.java
 **/DataConfig.java
-**/DbConfig.java
-**/DbConfig
+**/DatabaseConfig.java
+**/DatabaseConfig
 
 ### NetBeans ###
 /nbproject/private/

@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 @RestController
@@ -35,14 +36,14 @@ public class PerformanceController {
 
 //    @Operation(summary = "찜목록 성공, 취소", description = "찜목록 성공, 취소")
 //    @PostMapping("/{mt20id}/bookmark")
-//    public ResponseEntity<?> bookmark(@PathVariable("mt20id") String mt20id/*, @AuthenticationPrincipal UserDetailsImpl userDetails*/){
+//    public ResponseEntity<?> bookmark(@PathVariable("mt20id") String mt20id, @AuthenticationPrincipal UserDetailsImpl userDetails){
 //        String message = "";
-////        if (userDetails != null) {
-////            message = performanceService.bookmark(mt20id, userDetails.getUser());
-//        message = performanceService.bookmark(mt20id);
-////        } else {
-////            throw new GlobalException(GlobalErrorCode.INVALID_TOKEN);
-////        }
+//        if (userDetails != null) {
+//            message = performanceService.bookmark(mt20id, userDetails.getUser());
+////        message = performanceService.bookmark(mt20id);
+//        } else {
+//            throw new GlobalException(GlobalErrorCode.INVALID_TOKEN);
+//        }
 //        return ResponseMessage.SuccessResponse(message, "");
 //    }
 
