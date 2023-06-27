@@ -172,7 +172,7 @@ public class XmlToMap {
             // 데이터 <db> 요소 안의 모든 데이터를 선택
             elements.add(doc.select("db > *"));
 
-            log.info("elements = " + elements.toString());
+//            log.info("elements = " + elements.toString());
         }
 
         return elements;
