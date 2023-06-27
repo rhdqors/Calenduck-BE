@@ -5,8 +5,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.EntityListeners;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Getter
@@ -15,6 +14,7 @@ import java.time.LocalDateTime;
 public class Timestamped {
 //    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
 //    @DateTimeFormat(pattern="yyyy-MM-dd")
+
     @CreatedDate
     private LocalDateTime createdAt;
 

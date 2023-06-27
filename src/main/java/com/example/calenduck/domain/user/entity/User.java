@@ -19,10 +19,10 @@ public class User {
     private String nickname; // 카카오 사용자 이름 (필수 동의)
 
     @Column(unique = true)
-    private Long kakaoid; // 카카오 고유 id
+    private Long kakaoId; // 카카오 고유 id
 
     @Column(unique = true)
-    private String kakaoemail; // 카카오 이메일 (선택 동의)
+    private String kakaoEmail; // 카카오 이메일 (선택 동의)
 
     @Column(unique = true)
     private String gender;
@@ -35,9 +35,9 @@ public class User {
     private UserRoleEnum role;
 
     public User(KakaoUserInfoDto kakaoUserInfoDto, UserRoleEnum role) {
-        this.kakaoid = kakaoUserInfoDto.getId();
+        this.kakaoId = kakaoUserInfoDto.getId();
         this.nickname = kakaoUserInfoDto.getNickname();
-        this.kakaoemail = kakaoUserInfoDto.getEmail();
+        this.kakaoEmail = kakaoUserInfoDto.getEmail();
         this.gender = kakaoUserInfoDto.getGender();
         this.age = kakaoUserInfoDto.getAge();
         this.role = role;

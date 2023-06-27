@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -23,7 +22,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -55,7 +53,7 @@ public class UserService {
 
 //        return createToken;package com.example.calenduck.domain.user.service;
 
-        User user = userRepository.findByKakaoid(kakaoUserInfo.getId())
+        User user = userRepository.findByKakaoId(kakaoUserInfo.getId())
                 .orElseThrow(() -> new GlobalException(GlobalErrorCode.USER_NOT_FOUND));
         return user;
 
@@ -135,7 +133,7 @@ public class UserService {
         log.info("카카오 사용자 정보: " + email);
         log.info("카카오 사용자 정보: " + kakaoId);
 
-        if (userRepository.existsByKakaoid(kakaoId)) {
+        if (userRepository.existsByKakaoId(kakaoId)) {
             return;
         }
         userRepository.save(new User(kakaoUserInfodto, UserRoleEnum.USER));

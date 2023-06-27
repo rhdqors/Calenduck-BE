@@ -2,7 +2,6 @@ package com.example.calenduck.domain.performance.service;
 import com.example.calenduck.domain.performance.dto.response.BasePerformancesResponseDto;
 import com.example.calenduck.domain.performance.entity.NameWithMt20id;
 import com.example.calenduck.domain.performance.repository.NameWithMt20idRepository;
-import com.example.calenduck.domain.performance.repository.PerformanceRepository;
 import com.example.calenduck.global.exception.GlobalErrorCode;
 import com.example.calenduck.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,6 @@ import java.util.*;
 @RequiredArgsConstructor
 public class PerformanceService {
 
-    private final PerformanceRepository performanceRepository;
     private final NameWithMt20idRepository nameWithMt20idRepository;
     private final XmlToMap xmlToMap;
 
@@ -115,4 +113,7 @@ public class PerformanceService {
         return nameWithMt20idRepository.findAllByMt20id(mt20id);
     }
 
+    public NameWithMt20id getMt20id(String mt20id) {
+        return nameWithMt20idRepository.findByMt20id(mt20id).orElseThrow(() -> new GlobalException(GlobalErrorCode.NOT_FOUND_PERFORMANCE));
+    }
 }

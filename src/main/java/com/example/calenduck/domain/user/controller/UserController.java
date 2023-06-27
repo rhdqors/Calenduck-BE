@@ -28,7 +28,7 @@ public class UserController {
     public synchronized ResponseEntity<?> kakaoLogin(@RequestParam("code") String code, HttpServletResponse response) throws JsonProcessingException {
         // code: 카카오 서버로부터 받은 인가 코드
         User user = kakaoService.kakaoLogin(code, response);
-        String createToken =  jwtUtil.createToken(user.getNickname(), user.getKakaoemail(), user.getRole());
+        String createToken =  jwtUtil.createToken(user.getNickname(), user.getKakaoEmail(), user.getRole());
 
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, createToken);
 
@@ -37,37 +37,3 @@ public class UserController {
 
 }
 
-//      위의 코드를 통해 받아온 공연코드값을 GET 방식으로 자바에서 request를 보내고 xml을 읽어오는 방법
-//    public static void main(String[] args) {
-//        try {
-//            // Create URL object with the API endpoint
-//            URL url = new URL("http://kopis.or.kr/openApi/restful/pblprfr/PF134308?service=60a3d3573c5e4d8bb052a4abebff27b6");
-//
-//            // Open a connection to the URL
-//            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-//
-//            // Set the request method to GET
-//            connection.setRequestMethod("GET");
-//
-//            // Get the response code
-//            int responseCode = connection.getResponseCode();
-//            System.out.println("Response Code: " + responseCode);
-//
-//            // Read the response
-//            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-//            String line;
-//            StringBuilder response = new StringBuilder();
-//            while ((line = reader.readLine()) != null) {
-//                response.append(line);
-//            }
-//            reader.close();
-//
-//            // Print the XML response
-//            System.out.println("Response XML:\n" + response.toString());
-//
-//            // Close the connection
-//            connection.disconnect();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
