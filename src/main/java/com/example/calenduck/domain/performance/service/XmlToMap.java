@@ -1,11 +1,15 @@
 package com.example.calenduck.domain.performance.service;
 
+import com.example.calenduck.domain.bookmark.Entity.Bookmark;
+import com.example.calenduck.domain.bookmark.Service.BookmarkService;
 import com.example.calenduck.global.DatabaseConfig;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;
@@ -20,13 +24,18 @@ import java.util.*;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class XmlToMap {
 
-    private final DatabaseConfig databaseConfig;
     private final EntityManager entityManager;
+    private final BookmarkService bookmarkService;
 
-//    // 1. RDS 연결
+    @Autowired
+    public XmlToMap(EntityManager entityManager, @Lazy BookmarkService bookmarkService) {
+        this.entityManager = entityManager;
+        this.bookmarkService = bookmarkService;
+    }
+
+    //    // 1. RDS 연결
 //    public Connection connectToRDS() throws SQLException {
 //        Connection connection = null;
 //        try {
@@ -124,7 +133,6 @@ public class XmlToMap {
 
         String jpql = "SELECT n.mt20id FROM NameWithMt20id n ORDER BY n.mt20id ASC";
         TypedQuery<String> query = entityManager.createQuery(jpql, String.class);
-        log.info("---------------query = " + query);
         query.setMaxResults(10);
         List<String> resultList = query.getResultList();
 
@@ -136,7 +144,7 @@ public class XmlToMap {
         return performanceIds;
     }
 
-
+    // 전체 mt20id 상세정보 불러오기
     public List<Elements> getElements() throws SQLException, IOException {
         List<String> performanceIds = getMt20idResultSet();
         List<Elements> elements = new ArrayList<>();
@@ -163,7 +171,7 @@ public class XmlToMap {
             }
 
             // response = 공연id의 상세정보 xml 보기
-            // log.info("Response XML:\n" + response.toString());
+//             log.info("Response XML:\n" + response.toString());
 
             // --- xml -> 문서 -> 문자열변수 저장 ---
             Document doc = Jsoup.parse(response.toString());
@@ -171,11 +179,46 @@ public class XmlToMap {
 
             // 데이터 <db> 요소 안의 모든 데이터를 선택
             elements.add(doc.select("db > *"));
-
 //            log.info("elements = " + elements.toString());
         }
 
         return elements;
     }
+
+    // 찜목록 mt20id 상세정보 가져오기
+    public List<Elements> getBookmarkElements(String mt20id) throws SQLException, IOException {
+        List<String> performanceIds = new ArrayList<>();
+        List<Bookmark> bookmarks = bookmarkService.findBookmarks(mt20id);
+        for (Bookmark bookmark : bookmarks) {
+            performanceIds.add(bookmark.getMt20id());
+        }
+        List<Elements> elements = new ArrayList<>();
+
+        // --- url + id 조합으로 공연별 상세정보 조회 ---
+        for (String performanceId : performanceIds) {
+            log.info("performanceId = " + performanceId);
+
+            StringBuilder response = new StringBuilder();
+            URL url = new URL("http://kopis.or.kr/openApi/restful/pblprfr/" + performanceId + "?service=60a3d3573c5e4d8bb052a4abebff27b6");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+
+            int responseCode = connection.getResponseCode();
+            log.info("Response Code: " + responseCode);
+
+            // Read the response
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+            }
+            Document doc = Jsoup.parse(response.toString());
+            elements.add(doc.select("db > *"));
+        }
+        return elements;
+    }
+
 
 }

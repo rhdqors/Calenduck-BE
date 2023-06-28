@@ -4,12 +4,16 @@ import com.example.calenduck.domain.user.entity.User;
 import com.example.calenduck.global.entity.Timestamped;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 
 @Entity
 @Getter
 @NoArgsConstructor
+@Where(clause = "deleted_at IS NULL")
+@SQLDelete(sql = "UPDATE bookmark SET deleted_at = CONVERT_TZ(now(), 'UTC', 'Asia/Seoul') WHERE id = ?")
 public class Bookmark extends Timestamped {
 
     @Id
@@ -28,7 +32,8 @@ public class Bookmark extends Timestamped {
         this.user = user;
     }
 
-    public Bookmark(String mt20id) {
+    public Bookmark(String mt20id, User user) {
         this.mt20id = mt20id;
+        this.user = user;
     }
 }

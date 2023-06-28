@@ -25,20 +25,19 @@ public class BookmarkController {
     private final BookmarkService bookmarkService;
 
     @Operation(summary = "찜목록 성공, 취소", description = "찜목록 성공, 취소")
-    @PostMapping("/performances/{mt20id}/bookmark")
-    public ResponseEntity<?> bookmark(@PathVariable("mt20id") String mt20id/*, @AuthenticationPrincipal UserDetailsImpl userDetails*/){
-//        if (userDetails != null) {
-//            message = bookmarkService.bookmark(mt20id, userDetails.getUser());
-//        } else {
-//            throw new GlobalException(GlobalErrorCode.INVALID_TOKEN);
-//        }
-        return ResponseMessage.SuccessResponse("완료", bookmarkService.bookmark(mt20id));
+    @PostMapping("/performances/{mt20id}/bookmark/{year}/{month}/{day}")
+    public ResponseEntity<?> bookmark(@PathVariable("mt20id") String mt20id,
+                                      @PathVariable int year,
+                                      @PathVariable int month,
+                                      @PathVariable int day, @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return ResponseMessage.SuccessResponse("완료", bookmarkService.bookmark(mt20id, year, month, day, userDetails.getUser()));
     }
 
     @Operation(summary = "찜목록 전체 조회", description = "찜목록 전체 조회")
     @GetMapping("/performances/bookmark")
-    public ResponseEntity<?> getBookmarks(/*@AuthenticationPrincipal UserDetailsImpl userDetails*/) throws SQLException, IOException {
-        return ResponseMessage.SuccessResponse("전체 조회 성공", bookmarkService.getBookmarks(/*userDetails.getUser()*/));
+    public ResponseEntity<?> getBookmarks(@AuthenticationPrincipal UserDetailsImpl userDetails) throws SQLException, IOException {
+
+        return ResponseMessage.SuccessResponse("전체 조회 성공", bookmarkService.getBookmarks(userDetails.getUser()));
     }
 
 }

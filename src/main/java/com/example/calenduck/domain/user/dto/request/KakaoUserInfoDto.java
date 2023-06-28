@@ -8,15 +8,15 @@ import lombok.NoArgsConstructor;
 public class KakaoUserInfoDto {
 
     private Long id;
-    private String email;
     private String nickname;
+    private String email;
     private String gender;
     private String age;
 
-    public KakaoUserInfoDto(Long id, String email, String nickname, String gender, String age) {
+    public KakaoUserInfoDto(Long id, String nickname, String email, String gender, String age) {
         this.id = id;
-        if(email != null) this.email = email;
         this.nickname = nickname;
+        if(email != null) this.email = email;
         this.gender = gender;
         this.age = age;
     }
