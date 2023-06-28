@@ -23,7 +23,14 @@ public enum GlobalErrorCode {
     DUPLICATE_USER(CONFLICT, "중복된 사용자 입니다"),
 
     // Performance
-    NOT_FOUND_PERFORMANCE(NOT_FOUND, "등록된 공연이 없습니다");
+    NOT_FOUND_PERFORMANCE(NOT_FOUND, "등록된 공연이 없습니다"),
+
+    // Bookmark
+    // 400 BAD_REQUEST - 잘못된 요청
+    NOT_VALID_DATE(BAD_REQUEST, "유효한 날짜를 선택하세요."),
+    // 404 Not Found - 찾을 수 없음
+    BOOKMARK_NOT_FOUND(NOT_FOUND, "찜목록이 존재하지 않습니다.");
+
 
     private final HttpStatus httpStatus;
     private final String message;

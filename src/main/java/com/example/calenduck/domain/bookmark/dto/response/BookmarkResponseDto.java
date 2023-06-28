@@ -13,7 +13,7 @@ public class BookmarkResponseDto {
 
     private String message;
     private String date;
-    private LocalDate reservationDate;
+    private String reservationDate;
 
     // 찜목록 취소
     public BookmarkResponseDto(String message, LocalDateTime date) {
@@ -22,7 +22,7 @@ public class BookmarkResponseDto {
     }
 
     // 찜목록 성공
-    public BookmarkResponseDto(String message, LocalDateTime date, LocalDate reservationDate) {
+    public BookmarkResponseDto(String message, LocalDateTime date, String reservationDate) {
         this.message = message;
         this.date = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         this.reservationDate = reservationDate;

@@ -1,6 +1,7 @@
 package com.example.calenduck.global.entity;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -10,6 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
+@Setter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public class Timestamped {
@@ -17,11 +19,16 @@ public class Timestamped {
 //    @DateTimeFormat(pattern="yyyy-MM-dd")
 
     @CreatedDate
+    @Column
     private LocalDateTime createdAt;
 
     @LastModifiedDate
+    @Column
     private LocalDateTime modifiedAt;
 
-    private LocalDate reservationDate;
+    @Column(nullable = false)
+    protected String reservationDate;
+
     private LocalDateTime deletedAt;
+
 }

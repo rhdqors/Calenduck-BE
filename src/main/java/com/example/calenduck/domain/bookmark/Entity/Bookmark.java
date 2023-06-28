@@ -8,6 +8,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -27,6 +28,10 @@ public class Bookmark extends Timestamped {
     @JoinColumn(name = "user_id")
     private User user;
 
+    public Bookmark(String mt20id, User user, String reservationDate) {
+        this.mt20id = mt20id;
+        this.user = user;
+        this.reservationDate = reservationDate;
     public Bookmark(Long id, User user) {
         this.id = id;
         this.user = user;

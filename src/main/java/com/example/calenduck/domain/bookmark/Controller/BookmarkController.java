@@ -1,6 +1,7 @@
 package com.example.calenduck.domain.bookmark.Controller;
 
 import com.example.calenduck.domain.bookmark.Service.BookmarkService;
+import com.example.calenduck.domain.user.security.UserDetailsImpl;
 import com.example.calenduck.domain.bookmark.Service.BookmarkService;
 import com.example.calenduck.domain.user.security.UserDetailsImpl;
 import com.example.calenduck.global.exception.GlobalErrorCode;
@@ -36,7 +37,6 @@ public class BookmarkController {
     @Operation(summary = "찜목록 전체 조회", description = "찜목록 전체 조회")
     @GetMapping("/performances/bookmark")
     public ResponseEntity<?> getBookmarks(@AuthenticationPrincipal UserDetailsImpl userDetails) throws SQLException, IOException {
-
         return ResponseMessage.SuccessResponse("전체 조회 성공", bookmarkService.getBookmarks(userDetails.getUser()));
     }
 

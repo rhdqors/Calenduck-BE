@@ -4,6 +4,7 @@ import com.example.calenduck.domain.bookmark.Entity.Bookmark;
 import com.example.calenduck.domain.bookmark.Repository.BookmarkRepository;
 import com.example.calenduck.domain.bookmark.dto.response.BookmarkResponseDto;
 import com.example.calenduck.domain.bookmark.dto.response.MyBookmarkResponseDto;
+import com.example.calenduck.domain.performance.repository.NameWithMt20idRepository;
 import com.example.calenduck.domain.performance.entity.NameWithMt20id;
 import com.example.calenduck.domain.performance.repository.NameWithMt20idRepository;
 import com.example.calenduck.domain.performance.service.PerformanceService;
@@ -40,15 +41,20 @@ public class BookmarkService {
         if (!nameWithMt20idRepository.existsByMt20id(mt20id)) {
             throw new GlobalException(GlobalErrorCode.NOT_FOUND_PERFORMANCE);
         }
+        if (year == 0 || month == 0 || day == 0) {
+            throw new GlobalException(GlobalErrorCode.NOT_VALID_DATE);
+        }
+
+        String reservationDate = String.valueOf(year) + String.valueOf(month) + String.valueOf(day);
+        log.info("reservationDate ========== " + String.valueOf(reservationDate));
 
         if(bookmarkRepository.existsByUserAndMt20id(user, mt20id)) {
             bookmarkRepository.deleteByUserAndMt20id(user, mt20id);
             LocalDateTime deletedAt = LocalDateTime.now();
             return new BookmarkResponseDto("찜목록 취소", deletedAt);
         } else {
-            bookmarkRepository.saveAndFlush(new Bookmark(mt20id, user));
+            bookmarkRepository.saveAndFlush(new Bookmark(mt20id, user, reservationDate));
             LocalDateTime createdAt = LocalDateTime.now();
-            LocalDate reservationDate = LocalDate.of(year, month, day);
             log.info("reservationDate ==== " + String.valueOf(reservationDate));
             return new BookmarkResponseDto("찜목록 성공", createdAt, reservationDate);
         }
