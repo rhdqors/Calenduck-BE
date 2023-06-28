@@ -29,7 +29,6 @@ public class PerformanceService {
         List<Elements> elements = xmlToMap.getElements();
         log.info("----------elements = " + elements.toString());
         for (Elements element : elements) {
-            log.info("--------------------element = " + element);
             String mt20id = element.select("mt20id").text();
             String poster = element.select("poster").text();
             String prfnm = element.select("prfnm").text();
@@ -85,28 +84,6 @@ public class PerformanceService {
 //            }
 //        }
 //        return detailPerformanceResponseDto;
-//    }
-
-//    @Transactional
-//    public String bookmark(String mt20id, User user) {
-//
-//        // 공연이 있나 확인해야하는지?
-//        performanceRepository.findByMt20id(mt20id).orElseThrow(() -> new GlobalException(GlobalErrorCode.NOT_FOUND_PERFORMANCE));
-//
-//        String result = "찜목록 성공";
-//        if(performanceRepository.existsByUserAndMt20id(user, mt20id)) {
-//            performanceRepository.deleteByUserAndMt20id(user, mt20id);
-//            result = "북마크 취소";
-//        } else {
-//            performanceRepository.saveAndFlush(new Performance(mt20id, user));
-//        }
-////        if(performanceRepository.existsByMt20id(mt20id)) {
-////            performanceRepository.deleteByMt20id(mt20id);
-////            result = "찜목록 취소";
-////        } else {
-////            performanceRepository.saveAndFlush(new Performance(mt20id));
-////        }
-//        return result;
 //    }
 
     public List<NameWithMt20id> getNameWithMt20id(String mt20id) {

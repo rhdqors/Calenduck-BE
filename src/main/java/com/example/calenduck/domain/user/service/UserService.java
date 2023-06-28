@@ -6,6 +6,7 @@ import com.example.calenduck.domain.user.entity.UserRoleEnum;
 import com.example.calenduck.domain.user.repository.UserRepository;
 import com.example.calenduck.global.exception.GlobalErrorCode;
 import com.example.calenduck.global.exception.GlobalException;
+import com.example.calenduck.global.jwt.JwtUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
 
     @Transactional
     public User kakaoLogin(String code, HttpServletResponse response) throws JsonProcessingException {
@@ -48,7 +50,7 @@ public class UserService {
         signupIfNeeded(kakaoUserInfo);
 
         // 4. JWT 토큰 반환
-//        String createToken =  jwtUtil.createToken(kakaoUser);
+//        String createToken =  jwtUtil.createToken(kakaoUserInfo.getNickname(), kakaoUserInfo.getEmail(), UserRoleEnum.USER);
 //        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, createToken);
 
 //        return createToken;package com.example.calenduck.domain.user.service;
