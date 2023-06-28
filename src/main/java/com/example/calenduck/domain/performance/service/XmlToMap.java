@@ -2,6 +2,8 @@ package com.example.calenduck.domain.performance.service;
 
 import com.example.calenduck.domain.bookmark.Entity.Bookmark;
 import com.example.calenduck.domain.bookmark.Service.BookmarkService;
+import com.example.calenduck.global.DatabaseConfig;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

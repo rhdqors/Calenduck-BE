@@ -29,7 +29,6 @@ public class Timestamped {
     @Column(nullable = false)
     protected String reservationDate;
 
-    @Column
     private LocalDateTime deletedAt;
 
 }

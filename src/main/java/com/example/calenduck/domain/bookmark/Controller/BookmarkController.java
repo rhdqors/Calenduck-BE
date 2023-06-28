@@ -2,6 +2,10 @@ package com.example.calenduck.domain.bookmark.Controller;
 
 import com.example.calenduck.domain.bookmark.Service.BookmarkService;
 import com.example.calenduck.domain.user.security.UserDetailsImpl;
+import com.example.calenduck.domain.bookmark.Service.BookmarkService;
+import com.example.calenduck.domain.user.security.UserDetailsImpl;
+import com.example.calenduck.global.exception.GlobalErrorCode;
+import com.example.calenduck.global.exception.GlobalException;
 import com.example.calenduck.global.message.ResponseMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;

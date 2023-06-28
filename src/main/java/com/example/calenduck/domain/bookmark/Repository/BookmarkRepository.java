@@ -17,5 +17,7 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 //    @Modifying
 //    @Query("UPDATE Bookmark b SET b.modifiedAt = CURRENT_TIMESTAMP WHERE b.deletedAt IS NOT NULL")
 //    void updateModifiedAtWhenDeleted();
+    boolean existsByMt20id(String mt20id);
+    void deleteByMt20id(String mt20id);
 
 }
