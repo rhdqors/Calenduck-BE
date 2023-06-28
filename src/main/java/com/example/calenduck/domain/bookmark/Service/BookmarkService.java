@@ -97,7 +97,8 @@ public class BookmarkService {
                             dtguidance,
                             stdate,
                             eddate,
-                            pcseguidance
+                            pcseguidance,
+                            bookmark.getReservationDate()
                     );
                     myBookmarks.add(bookmarkDto);
                 }

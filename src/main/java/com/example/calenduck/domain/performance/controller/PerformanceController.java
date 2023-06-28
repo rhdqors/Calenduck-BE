@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,7 +25,7 @@ public class PerformanceController {
 
     @Operation(summary = "전체 조회 & 메인", description = "전체 조회 & 메인")
     @GetMapping()
-    public ResponseEntity<?> getAllPerformances() throws SQLException, IOException {
+    public ResponseEntity<?> getAllPerformances() throws SQLException, IOException, ExecutionException, InterruptedException {
         return ResponseMessage.SuccessResponse("전체 조회 성공", performanceService.getAllPerformances());
     }
 
