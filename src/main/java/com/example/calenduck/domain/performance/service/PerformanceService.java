@@ -1,4 +1,5 @@
 package com.example.calenduck.domain.performance.service;
+
 import com.example.calenduck.domain.performance.dto.response.BasePerformancesResponseDto;
 import com.example.calenduck.domain.performance.entity.NameWithMt20id;
 import com.example.calenduck.domain.performance.repository.NameWithMt20idRepository;
@@ -13,6 +14,7 @@ import javax.transaction.Transactional;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 @Service
 @Slf4j
@@ -24,11 +26,12 @@ public class PerformanceService {
 
     // 전체 조회 & 메인 - 페이징 X
     @Transactional
-    public List<BasePerformancesResponseDto> getAllPerformances() throws SQLException, IOException {
+    public List<BasePerformancesResponseDto> getAllPerformances() throws SQLException, IOException, ExecutionException, InterruptedException {
         List<BasePerformancesResponseDto> performances = new ArrayList<>();
         List<Elements> elements = xmlToMap.getElements();
-        log.info("----------elements = " + elements.toString());
+
         for (Elements element : elements) {
+            // Retrieve the required data from the element
             String mt20id = element.select("mt20id").text();
             String poster = element.select("poster").text();
             String prfnm = element.select("prfnm").text();
@@ -50,11 +53,55 @@ public class PerformanceService {
                     dtguidance,
                     stdate,
                     eddate,
-                    pcseguidance                    );
+                    pcseguidance
+            );
             performances.add(basePerformancesResponseDto);
         }
         return performances;
     }
+
+
+
+
+//    @Transactional
+//    public Page<BasePerformancesResponseDto> getAllPerformances(int pageIndex, int pageCount) throws SQLException, IOException {
+//        List<BasePerformancesResponseDto> performances = new ArrayList<>();
+//        List<Elements> elements = xmlToMap.getElements(pageIndex, pageCount);
+//        log.info("----------elements = " + elements.toString());
+//        for (Elements element : elements) {
+//            String mt20id = element.select("mt20id").text();
+//            String poster = element.select("poster").text();
+//            String prfnm = element.select("prfnm").text();
+//            String prfcast = element.select("prfcast").text();
+//            String genrenm = element.select("genrenm").text();
+//            String fcltynm = element.select("fcltynm").text();
+//            String dtguidance = element.select("dtguidance").text();
+//            String stdate = element.select("prfpdfrom").text();
+//            String eddate = element.select("prfpdto").text();
+//            String pcseguidance = element.select("pcseguidance").text();
+//
+//            BasePerformancesResponseDto basePerformancesResponseDto = new BasePerformancesResponseDto(
+//                    mt20id,
+//                    poster,
+//                    prfnm,
+//                    prfcast,
+//                    genrenm,
+//                    fcltynm,
+//                    dtguidance,
+//                    stdate,
+//                    eddate,
+//                    pcseguidance
+//            );
+//            performances.add(basePerformancesResponseDto);
+//        }
+//
+//        Long totalCount = xmlToMap.getTotalCount();
+//        Pageable pageable = PageRequest.of(pageIndex, pageCount);
+//        Page<BasePerformancesResponseDto> page = new PageImpl<>(performances, pageable, totalCount);
+//        return page;
+////        return performances;
+//    }
+
 
     // 상세 페이지 -> 메인에서 데이터 다 넘김
     // 받아오는 performanceId = mt20id

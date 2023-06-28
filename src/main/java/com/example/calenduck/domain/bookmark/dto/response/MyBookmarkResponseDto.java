@@ -1,5 +1,6 @@
 package com.example.calenduck.domain.bookmark.dto.response;
 
+import com.example.calenduck.domain.bookmark.Entity.Bookmark;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -17,8 +18,9 @@ public class MyBookmarkResponseDto {
     private String stdate; // 공연시작일자
     private String eddate; // 공연종료일자
     private String pcseguidance; // 티켓 가격
+    private String reservationDate; // 찜목록에 저장한 예약 날짜
 
-    public MyBookmarkResponseDto(String mt20id, String poster, String prfnm, String prfcast, String genrenm, String fcltynm, String dtguidance, String stdate, String eddate, String pcseguidance) {
+    public MyBookmarkResponseDto(String mt20id, String poster, String prfnm, String prfcast, String genrenm, String fcltynm, String dtguidance, String stdate, String eddate, String pcseguidance, String reservationDate) {
         this.mt20id = mt20id;
         this.poster = poster;
         this.prfnm = prfnm;
@@ -29,5 +31,6 @@ public class MyBookmarkResponseDto {
         this.stdate = stdate;
         this.eddate = eddate;
         this.pcseguidance = pcseguidance;
+        this.reservationDate = reservationDate;
     }
 }
