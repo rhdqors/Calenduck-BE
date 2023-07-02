@@ -7,11 +7,13 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import javax.transaction.Transactional;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -55,6 +57,8 @@ public class XmlToMap {
     }
 
     // 전체 mt20id 상세정보 불러오기
+    @Transactional
+//    @Cacheable(value = "elementsCache", key = "#root.methodName")
     public List<Elements> getElements() throws InterruptedException, ExecutionException {
         List<String> performanceIds = getMt20idResultSet();
         List<Elements> elements = new ArrayList<>();

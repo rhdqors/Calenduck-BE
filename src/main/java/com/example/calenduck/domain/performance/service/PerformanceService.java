@@ -8,6 +8,7 @@ import com.example.calenduck.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.select.Elements;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -26,6 +27,9 @@ public class PerformanceService {
 
     // 전체 조회 & 메인 - 페이징 X
     @Transactional
+    // key 값은 현재 메서드를 나타내는 sple(Spring Expression Language)언어
+    // 다시 현재 메서드가 호출되면 데이터를 다시 조회하는 것이 아닌 캐시된 데이터를 불러옴
+    @Cacheable(value = "elementsCache", key = "#root.methodName")
     public List<BasePerformancesResponseDto> getAllPerformances() throws SQLException, IOException, ExecutionException, InterruptedException {
         List<BasePerformancesResponseDto> performances = new ArrayList<>();
         List<Elements> elements = xmlToMap.getElements();
