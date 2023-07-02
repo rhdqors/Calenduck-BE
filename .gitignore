@@ -27,10 +27,11 @@ out/
 !**/src/test/**/out/
 **/resources/application.properties
 **/resources/application.yml
-**/resources/application-common.yml
-**/resources/application-db.yml
+**/resources/docker-compose.yml
+**/resources/Dockerfile
+**/resources/dump.rdb
+**/resources/redis.conf
 **/com/example/calenduck/global/DatabaseConfig.java
-**/DataConfig.java
 **/DatabaseConfig.java
 **/DatabaseConfig
 
