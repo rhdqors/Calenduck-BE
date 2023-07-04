@@ -1,6 +1,7 @@
 package com.example.calenduck.domain.bookmark.Controller;
 
 import com.example.calenduck.domain.bookmark.Service.BookmarkService;
+import com.example.calenduck.domain.bookmark.dto.request.EditBookmarkRequestDto;
 import com.example.calenduck.domain.user.security.UserDetailsImpl;
 import com.example.calenduck.domain.bookmark.Service.BookmarkService;
 import com.example.calenduck.domain.user.security.UserDetailsImpl;
@@ -11,11 +12,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -38,6 +37,16 @@ public class BookmarkController {
     @GetMapping("/performances/bookmark")
     public ResponseEntity<?> getBookmarks(@AuthenticationPrincipal UserDetailsImpl userDetails) throws SQLException, IOException {
         return ResponseMessage.SuccessResponse("전체 조회 성공", bookmarkService.getBookmarks(userDetails.getUser()));
+    }
+
+    @Operation(summary = "찜목록 상세 수정", description = "찜목록 상세 수정")
+    @PatchMapping("/performances/{mt20id}/bookmark/{year}/{month}/{day}")
+    public ResponseEntity<?> editBookmark(@PathVariable("mt20id") String mt20id,
+                                          @PathVariable int year,
+                                          @PathVariable int month,
+                                          @PathVariable int day, @AuthenticationPrincipal UserDetailsImpl userDetails, @Valid @RequestBody EditBookmarkRequestDto editBookmarkRequestDto){
+        bookmarkService.editBookmark(mt20id, year, month, day, userDetails.getUser(), editBookmarkRequestDto);
+        return ResponseMessage.SuccessResponse("완료", "");
     }
 
 }
