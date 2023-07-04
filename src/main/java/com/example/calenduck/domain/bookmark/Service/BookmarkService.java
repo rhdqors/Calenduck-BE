@@ -2,12 +2,10 @@ package com.example.calenduck.domain.bookmark.Service;
 
 import com.example.calenduck.domain.bookmark.Entity.Bookmark;
 import com.example.calenduck.domain.bookmark.Repository.BookmarkRepository;
+import com.example.calenduck.domain.bookmark.dto.request.EditBookmarkRequestDto;
 import com.example.calenduck.domain.bookmark.dto.response.BookmarkResponseDto;
 import com.example.calenduck.domain.bookmark.dto.response.MyBookmarkResponseDto;
 import com.example.calenduck.domain.performance.repository.NameWithMt20idRepository;
-import com.example.calenduck.domain.performance.entity.NameWithMt20id;
-import com.example.calenduck.domain.performance.repository.NameWithMt20idRepository;
-import com.example.calenduck.domain.performance.service.PerformanceService;
 import com.example.calenduck.domain.performance.service.XmlToMap;
 import com.example.calenduck.domain.user.entity.User;
 import com.example.calenduck.global.exception.GlobalErrorCode;
@@ -20,7 +18,6 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +30,7 @@ public class BookmarkService {
     private final BookmarkRepository bookmarkRepository;
     private final NameWithMt20idRepository nameWithMt20idRepository;
     private final XmlToMap xmlToMap;
+    private final EditBookmarkMapper editBookmarkMapper;
 
     // 북마크 성공/취소
     @Transactional
@@ -98,7 +96,9 @@ public class BookmarkService {
                             stdate,
                             eddate,
                             pcseguidance,
-                            bookmark.getReservationDate()
+                            bookmark.getReservationDate(),
+                            null,
+                            null
                     );
                     myBookmarks.add(bookmarkDto);
                 }
@@ -107,54 +107,29 @@ public class BookmarkService {
         return myBookmarks;
     }
 
+    // 북마크 상세 수정
+    @Transactional
+    public void editBookmark(String mt20id, int year, int month, int day, User user, EditBookmarkRequestDto editBookmarkRequestDto) {
 
-//    @Transactional
-//    public List<MyBookmarkResponseDto> getBookmarks(/*User user*/) throws SQLException, IOException {
-////        List<Bookmark> bookmarks = bookmarkRepository.findAllByUser(user);
-//        List<Elements> elements = xmlToMap.getElements();
-//        List<MyBookmarkResponseDto> myBookmarks = new ArrayList<>();
-//
-//        for (Elements element : elements) {
-//            String mt20id = element.select("mt20id").text();
-//            String poster = element.select("poster").text();
-//            String prfnm = element.select("prfnm").text();
-//            String prfcast = element.select("prfcast").text();
-//            String genrenm = element.select("genrenm").text();
-//            String fcltynm = element.select("fcltynm").text();
-//            String dtguidance = element.select("dtguidance").text();
-//            String stdate = element.select("prfpdfrom").text();
-//            String eddate = element.select("prfpdto").text();
-//            String pcseguidance = element.select("pcseguidance").text();
-//
-//            log.info("--------------------mt20id = " + mt20id + ", " + poster + ", " + prfnm + ", " + prfcast + ", " + genrenm + ", " +
-//                    fcltynm + ", " + dtguidance + ", " + stdate + ", " + eddate + ", " + pcseguidance);
-//
-//            List<Bookmark> bookmarks = bookmarkRepository.findAllByMt20id(mt20id);
-//            MyBookmarkResponseDto bookmarkDto = new MyBookmarkResponseDto();
-//
-//            for (Bookmark bookmark : bookmarks) {
-//                if (bookmark.getMt20id().equals(mt20id)) {
-//                    bookmarkDto = new MyBookmarkResponseDto(
-//                            mt20id,
-//                            poster,
-//                            prfnm,
-//                            prfcast,
-//                            genrenm,
-//                            fcltynm,
-//                            dtguidance,
-//                            stdate,
-//                            eddate,
-//                            pcseguidance
-//                    );
-//                }
-//            }
-//            myBookmarks.add(bookmarkDto);
-//        }
-//
-////        bookmarkRepository.saveAll(bookmarks); // Save the updated bookmarks
-//
-//        return myBookmarks;
-//    }
+        String reservationDate = String.valueOf(year) + String.valueOf(month) + String.valueOf(day);
+        Bookmark bookmark = findUserBookmark(user, mt20id);
+        log.info("reservationDate = " + reservationDate);
+
+        if (reservationDate.equals(bookmark.getReservationDate())) {
+            log.info("bookmark.getReservationDate() = " + bookmark.getReservationDate());
+            log.info("if 들어옴----");
+            editBookmarkMapper.updateBookmarkFromDto(editBookmarkRequestDto, bookmark);
+            bookmarkRepository.save(bookmark);
+        } else {
+            throw new GlobalException(GlobalErrorCode.NOT_VALID_DATE);
+        }
+    }
+
+
+    public Bookmark findUserBookmark(User user, String mt20id) {
+        return bookmarkRepository.findByUserAndMt20id(user, mt20id)
+                .orElseThrow(()-> new GlobalException(GlobalErrorCode.BOOKMARK_NOT_FOUND));
+    }
 
     public List<Bookmark> findBookmarks(String mt20id) {
         return bookmarkRepository.findAllByMt20id(mt20id);

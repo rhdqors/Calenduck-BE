@@ -19,8 +19,10 @@ public class MyBookmarkResponseDto {
     private String eddate; // 공연종료일자
     private String pcseguidance; // 티켓 가격
     private String reservationDate; // 찜목록에 저장한 예약 날짜
+    private String content;
+    private String alarm;
 
-    public MyBookmarkResponseDto(String mt20id, String poster, String prfnm, String prfcast, String genrenm, String fcltynm, String dtguidance, String stdate, String eddate, String pcseguidance, String reservationDate) {
+    public MyBookmarkResponseDto(String mt20id, String poster, String prfnm, String prfcast, String genrenm, String fcltynm, String dtguidance, String stdate, String eddate, String pcseguidance, String reservationDate, String content, String alarm) {
         this.mt20id = mt20id;
         this.poster = poster;
         this.prfnm = prfnm;
@@ -32,5 +34,7 @@ public class MyBookmarkResponseDto {
         this.eddate = eddate;
         this.pcseguidance = pcseguidance;
         this.reservationDate = reservationDate;
+        this.content = content;
+        this.alarm = alarm;
     }
 }

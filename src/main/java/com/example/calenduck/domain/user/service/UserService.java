@@ -23,6 +23,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -142,4 +143,9 @@ public class UserService {
 //        userRepository.saveUser(nickName, kakaoId, email, UserRoleEnum.USER);
     }
 
+    // 알람 전체 조회
+    public List<String> getAlarms(User user) {
+
+        return null;
+    }
 }
