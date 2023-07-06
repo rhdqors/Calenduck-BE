@@ -31,9 +31,9 @@ import org.springframework.web.client.RestTemplate;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 @Slf4j
@@ -158,34 +158,36 @@ public class UserService {
     }
 
     // 알람 전체 조회
-    public List<String> getAlarms(User user) throws ExecutionException, InterruptedException {
-        String jpql = "SELECT d.mt20id FROM DetailInfo d ORDER BY d.mt20id ASC";
-        TypedQuery<String> query = entityManager.createQuery(jpql, String.class);
-        List<String> resultList = query.getResultList();
-        for (String s : resultList) {
-            log.info("sssssssssss == " + s);
-        }
-        log.info("jpql == " + jpql);
-        log.info("query == " + query);
+    public List<String> getAlarms(User user) {
+        String formattedCurrentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
         List<String> results = new ArrayList<>();
-        String[] alarms = null;
-        String Prfnm = "";
-        List<Bookmark> bookmarks = bookmarkService.findBookmarks(user);
 
+        List<Bookmark> bookmarks = bookmarkService.findBookmarks(user);
         for (Bookmark bookmark : bookmarks) {
             DetailInfo detailInfo = detailInfoService.findDetailInfo(bookmark.getMt20id());
-            if(bookmark.getMt20id().equals(detailInfo.getMt20id())) {
-                Prfnm = detailInfo.getPrfnm();
+            String prfnm = detailInfo.getPrfnm();
+
+            String[] alarms = bookmark.getAlarm().split(",");
+            for (String alarm : alarms) {
+                String trimmedAlarm = alarm.trim();
+                if (trimmedAlarm.startsWith(formattedCurrentDate)) {
+                    int daysDifference = Integer.parseInt(bookmark.getReservationDate()) - Integer.parseInt(trimmedAlarm);
+                    if (daysDifference == 1) {
+                        results.add(prfnm + " 공연이 1일전입니다.");
+                    } else if (daysDifference == 3) {
+                        results.add(prfnm + " 공연이 3일전입니다.");
+                    } else if (daysDifference == 7) {
+                        results.add(prfnm + " 공연이 7일전입니다.");
+                    }
+                }
+                log.info("alarm == " + trimmedAlarm);
             }
             log.info("bookmark == " + bookmark.getMt20id());
-            alarms = bookmark.getAlarm().split(",");
-            results.addAll(Arrays.asList(alarms));
-            for (String alarm : alarms) {
-                log.info("alarm == " + alarm);
-            }
+            log.info("Prfnm == " + prfnm);
         }
-        log.info("Prfnm == " + Prfnm);
+
+        Collections.sort(results, Comparator.comparing(this::getDaysDifferenceFromResult));
 
         for (String result : results) {
             log.info("result == " + result);
@@ -193,4 +195,18 @@ public class UserService {
 
         return results;
     }
+
+    private int getDaysDifferenceFromResult(String result) {
+        if (result.contains("1일전")) {
+            return 1;
+        } else if (result.contains("3일전")) {
+            return 3;
+        } else if (result.contains("7일전")) {
+            return 7;
+        }
+        return 0;
+    }
+
+
+
 }
