@@ -11,14 +11,14 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
     List<Bookmark> findAllByUser(User user);
     List<Bookmark> findAllByMt20id(String mt20id);
     Optional<Bookmark> findByUserAndMt20id(User user, String mt20id);
+    Optional<Bookmark> findByUser(User user);
+    Optional<Bookmark> findBymt20id(String mt20id);
+    Bookmark findByUserAndMt20idAndReservationDate(User user, String mt20id, String reservationDate);
 
     boolean existsByUserAndMt20id(User user, String mt20id);
     void deleteByUserAndMt20id(User user, String mt20id);
 
-//    @Modifying
-//    @Query("UPDATE Bookmark b SET b.modifiedAt = CURRENT_TIMESTAMP WHERE b.deletedAt IS NOT NULL")
-//    void updateModifiedAtWhenDeleted();
-    boolean existsByMt20id(String mt20id);
-    void deleteByMt20id(String mt20id);
+    List<String> findAllByUserAndAlarm(User user, String alarm);
+
 
 }

@@ -29,7 +29,12 @@ public enum GlobalErrorCode {
     // 400 BAD_REQUEST - 잘못된 요청
     NOT_VALID_DATE(BAD_REQUEST, "유효한 날짜를 선택하세요."),
     // 404 Not Found - 찾을 수 없음
-    BOOKMARK_NOT_FOUND(NOT_FOUND, "찜목록이 존재하지 않습니다.");
+    BOOKMARK_NOT_FOUND(NOT_FOUND, "찜목록이 존재하지 않습니다."),
+    ALARM_NOT_FOUND(NOT_FOUND, "알람이 존재하지 않습니다."),
+
+    // DetailInfo
+    // 404 Not Found - 찾을 수 없음
+    NOT_FOUND_DETAILINFO(NOT_FOUND, "등록된 DETAILINFO가 없습니다");
 
 
     private final HttpStatus httpStatus;

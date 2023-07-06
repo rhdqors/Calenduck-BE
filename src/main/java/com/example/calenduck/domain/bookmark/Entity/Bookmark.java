@@ -15,8 +15,8 @@ import javax.persistence.*;
 @Getter
 @Setter
 @NoArgsConstructor
-@Where(clause = "deleted_at IS NULL")
-@SQLDelete(sql = "UPDATE bookmark SET deleted_at = CONVERT_TZ(now(), 'UTC', 'Asia/Seoul') WHERE id = ?")
+//@Where(clause = "deleted_at IS NULL")
+//@SQLDelete(sql = "UPDATE bookmark SET deleted_at = CONVERT_TZ(now(), 'UTC', 'Asia/Seoul') WHERE id = ?")
 public class Bookmark extends Timestamped {
 
     @Id
@@ -46,4 +46,5 @@ public class Bookmark extends Timestamped {
         this.content = editBookmarkRequestDto.getContent();
         this.alarm = editBookmarkRequestDto.getAlarm();
     }
+
 }

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @Slf4j
@@ -41,8 +42,8 @@ public class UserController {
 
     @Operation(summary = "알람 전체 조회", description = "알람 전체 조회")
     @GetMapping("/alarm")
-    public ResponseEntity<?> getAlarms(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseMessage.SuccessResponse("로그인 성공", userService.getAlarms(userDetails.getUser()));
+    public ResponseEntity<?> getAlarms(@AuthenticationPrincipal UserDetailsImpl userDetails) throws ExecutionException, InterruptedException {
+        return ResponseMessage.SuccessResponse("알람 조회 성공", userService.getAlarms(userDetails.getUser()));
     }
 
 

@@ -1,5 +1,10 @@
 package com.example.calenduck.domain.user.service;
 
+import com.example.calenduck.domain.bookmark.Entity.Bookmark;
+import com.example.calenduck.domain.bookmark.Service.BookmarkService;
+import com.example.calenduck.domain.detailInfo.entity.DetailInfo;
+import com.example.calenduck.domain.detailInfo.service.DetailInfoService;
+import com.example.calenduck.domain.performance.service.XmlToMap;
 import com.example.calenduck.domain.user.dto.request.KakaoUserInfoDto;
 import com.example.calenduck.domain.user.entity.User;
 import com.example.calenduck.domain.user.entity.UserRoleEnum;
@@ -12,6 +17,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.select.Elements;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -22,15 +28,23 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final JwtUtil jwtUtil;
+    private final BookmarkService bookmarkService;
+    private final XmlToMap xmlToMap;
+    private final EntityManager entityManager;
+    private final DetailInfoService detailInfoService;
 
     @Transactional
     public User kakaoLogin(String code, HttpServletResponse response) throws JsonProcessingException {
@@ -144,8 +158,39 @@ public class UserService {
     }
 
     // 알람 전체 조회
-    public List<String> getAlarms(User user) {
+    public List<String> getAlarms(User user) throws ExecutionException, InterruptedException {
+        String jpql = "SELECT d.mt20id FROM DetailInfo d ORDER BY d.mt20id ASC";
+        TypedQuery<String> query = entityManager.createQuery(jpql, String.class);
+        List<String> resultList = query.getResultList();
+        for (String s : resultList) {
+            log.info("sssssssssss == " + s);
+        }
+        log.info("jpql == " + jpql);
+        log.info("query == " + query);
 
-        return null;
+        List<String> results = new ArrayList<>();
+        String[] alarms = null;
+        String Prfnm = "";
+        List<Bookmark> bookmarks = bookmarkService.findBookmarks(user);
+
+        for (Bookmark bookmark : bookmarks) {
+            DetailInfo detailInfo = detailInfoService.findDetailInfo(bookmark.getMt20id());
+            if(bookmark.getMt20id().equals(detailInfo.getMt20id())) {
+                Prfnm = detailInfo.getPrfnm();
+            }
+            log.info("bookmark == " + bookmark.getMt20id());
+            alarms = bookmark.getAlarm().split(",");
+            results.addAll(Arrays.asList(alarms));
+            for (String alarm : alarms) {
+                log.info("alarm == " + alarm);
+            }
+        }
+        log.info("Prfnm == " + Prfnm);
+
+        for (String result : results) {
+            log.info("result == " + result);
+        }
+
+        return results;
     }
 }
