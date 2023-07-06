@@ -1,5 +1,6 @@
 package com.example.calenduck.domain.performance.controller;
 
+import com.example.calenduck.domain.performance.dto.response.BasePerformancesResponseDto;
 import com.example.calenduck.domain.performance.service.PerformanceService;
 import com.example.calenduck.domain.user.security.UserDetailsImpl;
 import com.example.calenduck.global.exception.GlobalErrorCode;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -25,8 +27,12 @@ public class PerformanceController {
 
     @Operation(summary = "전체 조회 & 메인", description = "전체 조회 & 메인")
     @GetMapping()
-    public ResponseEntity<?> getAllPerformances() throws SQLException, IOException, ExecutionException, InterruptedException {
-        return ResponseMessage.SuccessResponse("전체 조회 성공", performanceService.getAllPerformances());
+    public ResponseEntity<?> getAllPerformances(
+            @RequestParam(required = false) String prfnm,
+            @RequestParam(required = false) String prfcast
+    ) throws SQLException, IOException, ExecutionException, InterruptedException {
+        List<BasePerformancesResponseDto> performances = performanceService.getAllPerformances(prfnm, prfcast);
+        return ResponseMessage.SuccessResponse("전체 조회 완료", performances);
     }
 
 //    @Operation(summary = "상세 조회", description = "상세 조회")
