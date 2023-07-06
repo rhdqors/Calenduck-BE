@@ -16,9 +16,12 @@ import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.awt.print.Book;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +38,7 @@ public class BookmarkService {
     // 북마크 성공/취소
     @Transactional
     public BookmarkResponseDto bookmark(String mt20id, int year, int month, int day, User user) {
-        // 공연 있나 확인
+        // 공연 확인
         if (!nameWithMt20idRepository.existsByMt20id(mt20id)) {
             throw new GlobalException(GlobalErrorCode.NOT_FOUND_PERFORMANCE);
         }
@@ -44,16 +47,26 @@ public class BookmarkService {
         }
 
         String reservationDate = String.valueOf(year) + String.valueOf(month) + String.valueOf(day);
-        log.info("reservationDate ========== " + String.valueOf(reservationDate));
+        Bookmark bookmark = bookmarkRepository.findByUserAndMt20idAndReservationDate(user, mt20id, reservationDate);
+        if (bookmark != null) {
+            if (bookmark.getDeletedAt() == null) {
+                bookmark.setDeletedAt(LocalDateTime.now());
+                bookmark.setModifiedAt(LocalDateTime.now());
+            } else {
+                bookmark.setDeletedAt(null);
+            }
+        } else {
+            bookmark = new Bookmark(mt20id, user, reservationDate);
+            bookmark.setModifiedAt(LocalDateTime.now());
+        }
 
-        if(bookmarkRepository.existsByUserAndMt20id(user, mt20id)) {
-            bookmarkRepository.deleteByUserAndMt20id(user, mt20id);
-            LocalDateTime deletedAt = LocalDateTime.now();
+        bookmarkRepository.saveAndFlush(bookmark);
+
+        if (bookmark.getDeletedAt() != null) {
+            LocalDateTime deletedAt = bookmark.getDeletedAt();
             return new BookmarkResponseDto("찜목록 취소", deletedAt);
         } else {
-            bookmarkRepository.saveAndFlush(new Bookmark(mt20id, user, reservationDate));
-            LocalDateTime createdAt = LocalDateTime.now();
-            log.info("reservationDate ==== " + String.valueOf(reservationDate));
+            LocalDateTime createdAt = bookmark.getCreatedAt();
             return new BookmarkResponseDto("찜목록 성공", createdAt, reservationDate);
         }
     }
@@ -112,8 +125,46 @@ public class BookmarkService {
     public void editBookmark(String mt20id, int year, int month, int day, User user, EditBookmarkRequestDto editBookmarkRequestDto) {
 
         String reservationDate = String.valueOf(year) + String.valueOf(month) + String.valueOf(day);
-        Bookmark bookmark = findUserBookmark(user, mt20id);
-        log.info("reservationDate = " + reservationDate);
+
+        String[] alarm = editBookmarkRequestDto.getAlarm().split(",");
+        LocalDate date = LocalDate.parse(reservationDate, DateTimeFormatter.BASIC_ISO_DATE);
+        log.info("date == " + date);
+
+        StringBuilder resultBuilder = new StringBuilder();
+
+        for (String a : alarm) {
+            log.info("alarm == " + a);
+            LocalDate calculatedDate = date;
+
+            if (a.equals("1일전")) {
+                calculatedDate = calculatedDate.minusDays(1);
+            } else if (a.equals("3일전")) {
+                calculatedDate = calculatedDate.minusDays(3);
+            } else if (a.equals("7일전")) {
+                calculatedDate = calculatedDate.minusDays(7);
+            }
+
+            String formattedDate = calculatedDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+            log.info("formattedDate == " + formattedDate);
+
+            if (resultBuilder.length() > 0) {
+                resultBuilder.append(",");
+            }
+            resultBuilder.append(formattedDate);
+        }
+
+        String result = resultBuilder.toString();
+        log.info("Result: " + result);
+        editBookmarkRequestDto.setAlarm(result);
+        log.info("editBookmarkRequestDto.setAlarm(result) == " + editBookmarkRequestDto.getAlarm());
+
+        Bookmark bookmark = findByUserAndMt20idAndReservationDate(user, mt20id, reservationDate);
+        if(bookmark == null) {
+            throw new GlobalException(GlobalErrorCode.BOOKMARK_NOT_FOUND);
+        }
+        if(bookmark.getMt20id().equals(mt20id) && bookmark.getReservationDate().equals(reservationDate) && bookmark.getDeletedAt() != null) {
+            throw new GlobalException(GlobalErrorCode.BOOKMARK_NOT_FOUND);
+        }
 
         if (reservationDate.equals(bookmark.getReservationDate())) {
             log.info("bookmark.getReservationDate() = " + bookmark.getReservationDate());
@@ -125,13 +176,37 @@ public class BookmarkService {
         }
     }
 
-
+    // 유저가 저장한 찜목록 찾기
     public Bookmark findUserBookmark(User user, String mt20id) {
         return bookmarkRepository.findByUserAndMt20id(user, mt20id)
                 .orElseThrow(()-> new GlobalException(GlobalErrorCode.BOOKMARK_NOT_FOUND));
     }
 
+    public List<Bookmark> findBookmarks(User user) {
+        return bookmarkRepository.findAllByUser(user);
+    }
+
+    public Bookmark findBookmark(User user) {
+        return bookmarkRepository.findByUser(user)
+            .orElseThrow(() -> new GlobalException(GlobalErrorCode.BOOKMARK_NOT_FOUND));
+    }
+
+    public Bookmark findBookmarkToId(String mt20id) {
+        return bookmarkRepository.findBymt20id(mt20id)
+            .orElseThrow(() -> new GlobalException(GlobalErrorCode.BOOKMARK_NOT_FOUND));
+    }
+
     public List<Bookmark> findBookmarks(String mt20id) {
         return bookmarkRepository.findAllByMt20id(mt20id);
     }
+
+    // 알람 목록 조회
+    public List<String> findAllAlarm(User user, String alarm) {
+        return bookmarkRepository.findAllByUserAndAlarm(user, alarm);
+    }
+
+    public Bookmark findByUserAndMt20idAndReservationDate(User user, String mt20id, String reservationDate) {
+        return bookmarkRepository.findByUserAndMt20idAndReservationDate(user, mt20id, reservationDate);
+    }
+
 }
