@@ -29,17 +29,21 @@ public class PerformanceService {
     @Transactional
     // key 값은 현재 메서드를 나타내는 sple(Spring Expression Language)언어
     // 다시 현재 메서드가 호출되면 데이터를 다시 조회하는 것이 아닌 캐시된 데이터를 불러옴
-    @Cacheable(value = "elementsCache", key = "#root.methodName")
-    public List<BasePerformancesResponseDto> getAllPerformances() throws SQLException, IOException, ExecutionException, InterruptedException {
+    @Cacheable(value = "elementsCache", key = "#root.methodName + '_' + #prfnm + '_' + #prfcast")
+    public List<BasePerformancesResponseDto> getAllPerformances(String prfnm, String prfcast) throws SQLException, IOException, ExecutionException, InterruptedException {
         List<BasePerformancesResponseDto> performances = new ArrayList<>();
         List<Elements> elements = xmlToMap.getElements();
+
+        // Convert the search terms to lowercase for case-insensitive search
+        String lowercasePrfnm = prfnm != null ? prfnm.toLowerCase() : null;
+        String lowercasePrfcast = prfcast != null ? prfcast.toLowerCase() : null;
 
         for (Elements element : elements) {
             // Retrieve the required data from the element
             String mt20id = element.select("mt20id").text();
             String poster = element.select("poster").text();
-            String prfnm = element.select("prfnm").text();
-            String prfcast = element.select("prfcast").text();
+            String prfnmElement = element.select("prfnm").text();
+            String prfcastElement = element.select("prfcast").text();
             String genrenm = element.select("genrenm").text();
             String fcltynm = element.select("fcltynm").text();
             String dtguidance = element.select("dtguidance").text();
@@ -47,22 +51,29 @@ public class PerformanceService {
             String eddate = element.select("prfpdto").text();
             String pcseguidance = element.select("pcseguidance").text();
 
-            BasePerformancesResponseDto basePerformancesResponseDto = new BasePerformancesResponseDto(
-                    mt20id,
-                    poster,
-                    prfnm,
-                    prfcast,
-                    genrenm,
-                    fcltynm,
-                    dtguidance,
-                    stdate,
-                    eddate,
-                    pcseguidance
-            );
-            performances.add(basePerformancesResponseDto);
+            // Perform search based on prfnm and prfcast fields
+            boolean matchPrfnm = lowercasePrfnm == null || (prfnmElement != null && prfnmElement.toLowerCase().contains(lowercasePrfnm));
+            boolean matchPrfcast = lowercasePrfcast == null || (prfcastElement != null && prfcastElement.toLowerCase().contains(lowercasePrfcast));
+
+            if (matchPrfnm && matchPrfcast) {
+                BasePerformancesResponseDto basePerformancesResponseDto = new BasePerformancesResponseDto(
+                        mt20id,
+                        poster,
+                        prfnmElement,
+                        prfcastElement,
+                        genrenm,
+                        fcltynm,
+                        dtguidance,
+                        stdate,
+                        eddate,
+                        pcseguidance
+                );
+                performances.add(basePerformancesResponseDto);
+            }
         }
         return performances;
     }
+
 
 
 
