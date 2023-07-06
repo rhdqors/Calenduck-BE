@@ -16,7 +16,6 @@ import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.awt.print.Book;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -46,7 +45,9 @@ public class BookmarkService {
             throw new GlobalException(GlobalErrorCode.NOT_VALID_DATE);
         }
 
-        String reservationDate = String.valueOf(year) + String.valueOf(month) + String.valueOf(day);
+        String reservationDate = LocalDate.of(year, month, day)
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+
         Bookmark bookmark = bookmarkRepository.findByUserAndMt20idAndReservationDate(user, mt20id, reservationDate);
         if (bookmark != null) {
             if (bookmark.getDeletedAt() == null) {
@@ -124,7 +125,8 @@ public class BookmarkService {
     @Transactional
     public void editBookmark(String mt20id, int year, int month, int day, User user, EditBookmarkRequestDto editBookmarkRequestDto) {
 
-        String reservationDate = String.valueOf(year) + String.valueOf(month) + String.valueOf(day);
+        String reservationDate = LocalDate.of(year, month, day)
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
         String[] alarm = editBookmarkRequestDto.getAlarm().split(",");
         LocalDate date = LocalDate.parse(reservationDate, DateTimeFormatter.BASIC_ISO_DATE);
@@ -191,10 +193,10 @@ public class BookmarkService {
             .orElseThrow(() -> new GlobalException(GlobalErrorCode.BOOKMARK_NOT_FOUND));
     }
 
-    public Bookmark findBookmarkToId(String mt20id) {
-        return bookmarkRepository.findBymt20id(mt20id)
-            .orElseThrow(() -> new GlobalException(GlobalErrorCode.BOOKMARK_NOT_FOUND));
+    public List<Bookmark> findBookmarksToId(String mt20id) {
+        return bookmarkRepository.findAllByMt20id(mt20id);
     }
+
 
     public List<Bookmark> findBookmarks(String mt20id) {
         return bookmarkRepository.findAllByMt20id(mt20id);

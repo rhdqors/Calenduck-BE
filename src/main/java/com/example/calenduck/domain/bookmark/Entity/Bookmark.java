@@ -6,8 +6,7 @@ import com.example.calenduck.global.entity.Timestamped;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.Index;
 
 import javax.persistence.*;
 
@@ -24,6 +23,7 @@ public class Bookmark extends Timestamped {
     private Long id;
 
     @Column(nullable = false)
+    @Index(name = "idx_mt20id")
     private String mt20id;
 
     @Column
