@@ -36,16 +36,21 @@ public class BookmarkService {
 
     // 북마크 성공/취소
     @Transactional
-    public BookmarkResponseDto bookmark(String mt20id, int year, int month, int day, User user) {
+    public BookmarkResponseDto bookmark(String mt20id, String year, String month, String day, User user) {
+        log.info("mt20id == " + mt20id + "year == " + year + "month == " + month + "day == " + day);
         // 공연 확인
         if (!nameWithMt20idRepository.existsByMt20id(mt20id)) {
             throw new GlobalException(GlobalErrorCode.NOT_FOUND_PERFORMANCE);
         }
-        if (year == 0 || month == 0 || day == 0) {
+        if (year == null || month == null || day == null) {
             throw new GlobalException(GlobalErrorCode.NOT_VALID_DATE);
         }
 
-        String reservationDate = LocalDate.of(year, month, day)
+        int yearValue = Integer.parseInt(year);
+        int monthValue = Integer.parseInt(month);
+        int dayValue = Integer.parseInt(day);
+
+        String reservationDate = LocalDate.of(yearValue, monthValue, dayValue)
                 .format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 
         Bookmark bookmark = bookmarkRepository.findByUserAndMt20idAndReservationDate(user, mt20id, reservationDate);

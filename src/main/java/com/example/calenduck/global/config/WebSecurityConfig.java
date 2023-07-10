@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -56,16 +57,13 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable();
-//        http
-//            .csrf()
-//            .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-//            .and();
-
         // 기본 설정인 Session 방식은 사용하지 않고 JWT 방식을 사용하기 위한 설정
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.authorizeRequests()
-                .antMatchers("**").permitAll()
+
+                .antMatchers("/**").permitAll()
+                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 //                .antMatchers("/auth/google/callback").permitAll()
 //                .antMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()// Swagger 리소스에 대한 접근 허용
 //                .antMatchers("/users/signup").permitAll()
