@@ -27,9 +27,9 @@ public class BookmarkController {
     @Operation(summary = "찜목록 성공, 취소", description = "찜목록 성공, 취소")
     @PostMapping("/performances/{mt20id}/bookmark/{year}/{month}/{day}")
     public ResponseEntity<?> bookmark(@PathVariable("mt20id") String mt20id,
-                                      @PathVariable int year,
-                                      @PathVariable int month,
-                                      @PathVariable int day, @AuthenticationPrincipal UserDetailsImpl userDetails){
+                                      @PathVariable("year") String year,
+                                      @PathVariable("month") String month,
+                                      @PathVariable("day") String day, @AuthenticationPrincipal UserDetailsImpl userDetails){
         return ResponseMessage.SuccessResponse("완료", bookmarkService.bookmark(mt20id, year, month, day, userDetails.getUser()));
     }
 

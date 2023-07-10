@@ -35,23 +35,33 @@ public class PerformanceController {
         return ResponseMessage.SuccessResponse("전체 조회 완료", performances);
     }
 
-//    @Operation(summary = "상세 조회", description = "상세 조회")
-//    @GetMapping("/{performance-id}")
-//    public ResponseEntity<?> getDetailPerformance(@PathVariable("performance-id") String performanceId) throws SQLException, IOException {
-//        return ResponseMessage.SuccessResponse("상세 조회 성공", performanceService.getDetailPerformance(performanceId));
+    @Operation(summary = "장르별 인기도 - 지역별", description = "장르별 인기도 - 지역별")
+    @GetMapping("/popularity/genres/region")
+    public ResponseEntity<?> PopularityByGenreWithRegion() {
+        return ResponseMessage.SuccessResponse("장르별 인기도 - 지역별", performanceService.PopularityByGenreWithRegion());
+    }
+
+//    @Operation(summary = "장르별 인기도 - 랭킹점수 가산", description = "장르별 인기도 - 랭킹점수 가산")
+//    @GetMapping("/popularity/genre/rank")
+//    public ResponseEntity<?> PopularityByRegion() {
+//        return ResponseMessage.SuccessResponse("장르별 인기도 - 랭킹점수 가산", performanceService.PopularityByRegion());
 //    }
 
-//    @Operation(summary = "찜목록 성공, 취소", description = "찜목록 성공, 취소")
-//    @PostMapping("/{mt20id}/bookmark")
-//    public ResponseEntity<?> bookmark(@PathVariable("mt20id") String mt20id, @AuthenticationPrincipal UserDetailsImpl userDetails){
-//        String message = "";
-//        if (userDetails != null) {
-//            message = performanceService.bookmark(mt20id, userDetails.getUser());
-////        message = performanceService.bookmark(mt20id);
-//        } else {
-//            throw new GlobalException(GlobalErrorCode.INVALID_TOKEN);
-//        }
-//        return ResponseMessage.SuccessResponse(message, "");
-//    }
+    @Operation(summary = "Top 10", description = "Top 10")
+    @GetMapping("/topten")
+    public ResponseEntity<?> topTen() {
+        return ResponseMessage.SuccessResponse("Top 10", performanceService.topTen());
+    }
+
+    @Operation(summary = "지역별 인기 공연", description = "지역별 인기 공연")
+    @GetMapping("/popularity/region")
+    public ResponseEntity<?> PopularityByRegion() {
+        return ResponseMessage.SuccessResponse("지역별 인기 공연", performanceService.PopularityByRegion());
+    }
+
+
+
+
+
 
 }
