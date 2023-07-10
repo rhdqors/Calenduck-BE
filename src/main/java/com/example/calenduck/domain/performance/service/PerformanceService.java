@@ -209,15 +209,4 @@ public class PerformanceService {
         return rowsNode;
     }
 
-
-
-
-        public List<NameWithMt20id> getNameWithMt20id(String mt20id) {
-        return nameWithMt20idRepository.findAllByMt20id(mt20id);
-    }
-
-    public NameWithMt20id getMt20id(String mt20id) {
-        return nameWithMt20idRepository.findByMt20id(mt20id).orElseThrow(() -> new GlobalException(GlobalErrorCode.NOT_FOUND_PERFORMANCE));
-    }
-
 }

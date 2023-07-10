@@ -28,10 +28,5 @@ public class DetailInfoService {
                 .orElseThrow(() -> new GlobalException(GlobalErrorCode.BOOKMARK_NOT_FOUND));
     }
 
-//    public DetailInfo findDetailInfo(String mt20id) {
-//        Bookmark bookmark = bookmarkService.findBookmarkToId(mt20id);
-//        return detailInfoRepository.findByMt20id(bookmark.getMt20id())
-//                .orElseThrow(() -> new GlobalException(GlobalErrorCode.BOOKMARK_NOT_FOUND));
-//    }
 
 }
