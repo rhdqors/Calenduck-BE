@@ -30,29 +30,20 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        log.info("-------------1 + " + 1);
         // HTTP 요청에서 Authorization헤더를 찾아 토큰 반환
         String token = jwtUtil.resolveToken(request);
-        log.info("-------------2 + " + 2);
         // 토큰이 있다면 진행
         if(token != null) {
-            log.info("-------------3 + " + 3);
             // 토큰 유효성 검사 -> 만료,위조 등 유효하지 않음
             if(!jwtUtil.validateToken(token)){
-                log.info("-------------4 + " + 4);
                 jwtExceptionHandler(response, "Token Error", HttpStatus.UNAUTHORIZED.value());
-                log.info("-------------5 + " + 5);
                 return;
             }
-            log.info("-------------6 + " + 6);
             // 토큰 유효 -> getUserInfoFromToken메서드를 사용해 JWT 토큰의 payload에서 정보 반환
             Claims info = jwtUtil.getUserInfoFromToken(token);    //토큰에서 user정보 가져옴(payload)
-            log.info("-------------7 + " + 7);
             // Claims 객체에서 사용자 이름을 가져와 인증 설정
             setAuthentication(info.getSubject(), info.get("role", String.class));   //getSubject 헤더값
-            log.info("-------------8 + " + 8);
         }
-        log.info("-------------9 + " + 9);
         // 다음 단계 실행 -> 다른 필터 및 컨트롤러 실행
         filterChain.doFilter(request,response);
 

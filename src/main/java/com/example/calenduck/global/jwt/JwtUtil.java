@@ -54,14 +54,11 @@ public class JwtUtil {
     // 전달된 HttpServletRequest 객체에서 "Authorization" 헤더의 값에서 토큰을 추출하여 반환
     public String resolveToken(HttpServletRequest request) {
         // header 토큰을 가져오기
-        log.info("============ㅁ + " + "ㅁ");
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-        log.info("============ㄴ + " + "ㄴ");
+        log.info("bearerToken === "  + bearerToken);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
-            log.info("============ㅇ + " + "ㅇ");
             return bearerToken.substring(7);
         }
-        log.info("============ㄹ + " + "ㄹ");
         return null;
     }
 

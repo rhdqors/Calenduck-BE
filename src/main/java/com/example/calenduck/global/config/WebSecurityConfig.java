@@ -4,6 +4,7 @@ package com.example.calenduck.global.config;
 import com.example.calenduck.global.jwt.JwtUtil;
 import com.example.calenduck.global.jwt.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,6 +30,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 @EnableWebSecurity // 스프링 Security 지원을 가능하게 함
 @EnableGlobalMethodSecurity(securedEnabled = true) // @Secured 어노테이션 활성화
+@Slf4j
 public class WebSecurityConfig {
     private final JwtUtil jwtUtil;
 
@@ -61,7 +63,7 @@ public class WebSecurityConfig {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.authorizeRequests()
-
+                .antMatchers(HttpMethod.POST).permitAll()
                 .antMatchers("/**").permitAll()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 //                .antMatchers("/auth/google/callback").permitAll()
@@ -74,7 +76,6 @@ public class WebSecurityConfig {
                 .and().cors()
                 .and().addFilterBefore(new JwtAuthFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
 
-
                 .logout()
                     .logoutRequestMatcher(new AntPathRequestMatcher("/users/logout"))
                     .invalidateHttpSession(true)
@@ -85,10 +86,8 @@ public class WebSecurityConfig {
                 });
 
         http.exceptionHandling().accessDeniedPage("/api/user/forbidden");
-
         return http.build();
     }
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource(){
 
