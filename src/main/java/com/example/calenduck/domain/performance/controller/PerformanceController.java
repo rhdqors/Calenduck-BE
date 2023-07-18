@@ -30,6 +30,12 @@ public class PerformanceController {
         return ResponseMessage.SuccessResponse("전체 조회 완료", performances);
     }
 
+    @Operation(summary = "인기검색어 TOP 5", description = "인기검색어 TOP 5")
+    @GetMapping("/search/rank")
+    public ResponseEntity<?> searchRankList(){
+        return ResponseMessage.SuccessResponse("인기 검색어 조회 성공", performanceService.searchRankList());
+    }
+
     @Operation(summary = "장르별 인기도 - 지역별", description = "장르별 인기도 - 지역별")
     @GetMapping("/popularity/genres/region")
     public ResponseEntity<?> PopularityByGenreWithRegion() {
