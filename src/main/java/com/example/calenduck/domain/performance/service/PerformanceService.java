@@ -1,10 +1,7 @@
 package com.example.calenduck.domain.performance.service;
 
 import com.example.calenduck.domain.performance.dto.response.BasePerformancesResponseDto;
-import com.example.calenduck.domain.performance.entity.NameWithMt20id;
 import com.example.calenduck.domain.performance.repository.NameWithMt20idRepository;
-import com.example.calenduck.global.exception.GlobalErrorCode;
-import com.example.calenduck.global.exception.GlobalException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -28,24 +25,21 @@ import java.util.concurrent.ExecutionException;
 @RequiredArgsConstructor
 public class PerformanceService {
 
-    private final NameWithMt20idRepository nameWithMt20idRepository;
     private final XmlToMap xmlToMap;
 
-    // 전체 조회 & 메인 - 페이징 X
+    // 전체 조회 & 메인 & 검색
     @Transactional
     // key 값은 현재 메서드를 나타내는 sple(Spring Expression Language)언어
     // 다시 현재 메서드가 호출되면 데이터를 다시 조회하는 것이 아닌 캐시된 데이터를 불러옴
-    @Cacheable(value = "elementsCache", key = "#root.methodName + '_' + #prfnm + '_' + #prfcast")
+    @Cacheable(value = "elementsCache", condition = "#prfnm == null and #prfcast == null", key = "#root.methodName")
     public List<BasePerformancesResponseDto> getAllPerformances(String prfnm, String prfcast) throws SQLException, IOException, ExecutionException, InterruptedException {
         List<BasePerformancesResponseDto> performances = new ArrayList<>();
         List<Elements> elements = xmlToMap.getElements();
 
-        // Convert the search terms to lowercase for case-insensitive search
         String lowercasePrfnm = prfnm != null ? prfnm.toLowerCase() : null;
         String lowercasePrfcast = prfcast != null ? prfcast.toLowerCase() : null;
 
         for (Elements element : elements) {
-            // Retrieve the required data from the element
             String mt20id = element.select("mt20id").text();
             String poster = element.select("poster").text();
             String prfnmElement = element.select("prfnm").text();
@@ -57,7 +51,6 @@ public class PerformanceService {
             String eddate = element.select("prfpdto").text();
             String pcseguidance = element.select("pcseguidance").text();
 
-            // Perform search based on prfnm and prfcast fields
             boolean matchPrfnm = lowercasePrfnm == null || (prfnmElement != null && prfnmElement.toLowerCase().contains(lowercasePrfnm));
             boolean matchPrfcast = lowercasePrfcast == null || (prfcastElement != null && prfcastElement.toLowerCase().contains(lowercasePrfcast));
 

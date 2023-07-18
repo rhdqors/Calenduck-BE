@@ -7,7 +7,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +21,7 @@ import java.net.URL;
 import java.sql.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -38,6 +38,7 @@ public class XmlToMap {
 
     // 2 + 3
     public List<String> getMt20idResultSet() {
+        long startTime = System.currentTimeMillis();
         List<String> performanceIds = new ArrayList<>();
         Set<String> uniqueMt20ids = new HashSet<>();
 
@@ -47,60 +48,92 @@ public class XmlToMap {
         List<String> resultList = query.getResultList();
         log.info("-----------------------" + String.valueOf(resultList.size()));
         for (String performanceId : resultList) {
-                log.info("performanceId == " + performanceId);
+//                log.info("performanceId == " + performanceId);
             if (!uniqueMt20ids.contains(performanceId)) {
                 uniqueMt20ids.add(performanceId);
                 performanceIds.add(performanceId);
             }
         }
+        long endTime = System.currentTimeMillis();
+        long executionTime = endTime - startTime;
+        log.info("getMt20idResultSet execution time: " + executionTime + "ms");
+
         return performanceIds;
     }
 
     // 전체 mt20id 상세정보 불러오기
     @Transactional
-//    @Cacheable(value = "elementsCache", key = "#root.methodName")
     public List<Elements> getElements() throws InterruptedException, ExecutionException {
+        long startTime = System.currentTimeMillis();
         List<String> performanceIds = getMt20idResultSet();
-        List<Elements> elements = new ArrayList<>();
+        List<Elements> elementsList = new ArrayList<>();
 
-        ExecutorService executorService = Executors.newFixedThreadPool(10);
-        List<Future<Elements>> futures = new ArrayList<>();
+        ExecutorService executorService = Executors.newFixedThreadPool(40);
 
-        for (String performanceId : performanceIds) {
-            Callable<Elements> callableTask = () -> {
-                log.info("performanceId = " + performanceId);
-                StringBuilder response = new StringBuilder();
+        int batchSize = 50; // Set the desired batch size
+        List<List<String>> batches = new ArrayList<>();
+        for (int i = 0; i < performanceIds.size(); i += batchSize) {
+            int endIndex = Math.min(i + batchSize, performanceIds.size());
+            List<String> batch = performanceIds.subList(i, endIndex);
+            batches.add(batch);
+        }
 
-                URL url = new URL("http://kopis.or.kr/openApi/restful/pblprfr/" + performanceId + "?service=60a3d3573c5e4d8bb052a4abebff27b6");
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-                int responseCode = connection.getResponseCode();
-                log.info("Response Code: " + responseCode);
+        List<CompletableFuture<List<Elements>>> futures = batches.stream()
+                .map(batch -> CompletableFuture.supplyAsync(() -> {
+                    List<Elements> batchElements = new ArrayList<>();
+                    for (String performanceId : batch) {
+                        log.info("performanceId = " + performanceId);
+                        StringBuilder response = new StringBuilder();
 
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        response.append(line);
+                        try {
+                            URL url = new URL("http://kopis.or.kr/openApi/restful/pblprfr/" + performanceId + "?service=60a3d3573c5e4d8bb052a4abebff27b6");
+                            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                            connection.setRequestMethod("GET");
+                            int responseCode = connection.getResponseCode();
+
+                            try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                                String line;
+                                while ((line = reader.readLine()) != null) {
+                                    response.append(line);
+                                }
+                            }
+
+                            Document doc = Jsoup.parse(response.toString());
+                            Elements elements = doc.select("db > *");
+                            batchElements.add(elements);
+                        } catch (IOException e) {
+                            // Handle any exceptions
+                            log.error("Error occurred while fetching data for performanceId: " + performanceId, e);
+                        }
                     }
-                }
+                    return batchElements;
+                }, executorService))
+                .collect(Collectors.toList());
 
-                Document doc = Jsoup.parse(response.toString());
-                return doc.select("db > *");
-            };
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
 
-            Future<Elements> future = executorService.submit(callableTask);
-            futures.add(future);
+        allFutures.join();
+
+        for (CompletableFuture<List<Elements>> future : futures) {
+            List<Elements> batchElements = future.get();
+            elementsList.addAll(batchElements);
         }
 
         executorService.shutdown();
 
-        for (Future<Elements> future : futures) {
-            Elements result = future.get();
-            elements.add(result);
-        }
+        long endTime = System.currentTimeMillis();
+        long executionTime = endTime - startTime;
 
-        return elements;
+        log.info("getElements execution time: " + executionTime + "ms");
+
+        return elementsList;
     }
+
+
+
+
+
+
 
 
     // 찜목록 mt20id 상세정보 가져오기
