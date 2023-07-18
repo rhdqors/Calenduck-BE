@@ -2,18 +2,13 @@ package com.example.calenduck.domain.performance.controller;
 
 import com.example.calenduck.domain.performance.dto.response.BasePerformancesResponseDto;
 import com.example.calenduck.domain.performance.service.PerformanceService;
-import com.example.calenduck.domain.user.security.UserDetailsImpl;
-import com.example.calenduck.global.exception.GlobalErrorCode;
-import com.example.calenduck.global.exception.GlobalException;
 import com.example.calenduck.global.message.ResponseMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
