@@ -54,8 +54,8 @@ public class RedisCacheConfig extends CachingConfigurerSupport {
     public RedisCacheConfiguration cacheConfiguration() {
         return RedisCacheConfiguration.defaultCacheConfig()
                 .disableCachingNullValues()
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer(objectMapper)))
-                .entryTtl(Duration.ofMinutes(5));
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer(objectMapper)));
+//                .entryTtl(Duration.ofMinutes(5)); // 캐시 최대 저장 시간 5분
     }
 
     @Bean

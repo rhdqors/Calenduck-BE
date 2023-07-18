@@ -1,6 +1,7 @@
 package com.example.calenduck.domain.performance.service;
 
 import com.example.calenduck.domain.performance.dto.response.BasePerformancesResponseDto;
+import com.example.calenduck.domain.performance.dto.response.SearchRankResponseDto;
 import com.example.calenduck.domain.performance.repository.NameWithMt20idRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.select.Elements;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -19,6 +22,7 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -26,6 +30,7 @@ import java.util.concurrent.ExecutionException;
 public class PerformanceService {
 
     private final XmlToMap xmlToMap;
+    private final RedisTemplate<String, String> redisTemplate;
 
     // 전체 조회 & 메인 & 검색
     @Transactional
@@ -70,7 +75,30 @@ public class PerformanceService {
                 performances.add(basePerformancesResponseDto);
             }
         }
+
+        // 인기 검색어
+        if (prfnm != null) {
+            updatePopularSearchTerm(prfnm);
+        }
+        if (prfcast != null) {
+            updatePopularSearchTerm(prfcast);
+        }
+
         return performances;
+    }
+    // 인기 검색어 - 파라미터가 있다면 ? 키값 넣고 벨류값 1증가
+    private void updatePopularSearchTerm(String searchTerm) {
+        redisTemplate.opsForZSet().incrementScore("rank", searchTerm, 1);
+    }
+
+    // 인기검색어 리스트 1위~5위까지
+    public List<SearchRankResponseDto> searchRankList() {
+        String key = "rank";
+        // ZSetOperations 객체 생성
+        ZSetOperations<String, String> ZSetOperations = redisTemplate.opsForZSet();
+        // score순으로 5개 보여줌
+        Set<ZSetOperations.TypedTuple<String>> typedTuples = ZSetOperations.reverseRangeWithScores(key, 0, 4);
+        return typedTuples.stream().map(SearchRankResponseDto::convertToResponseRankingDto).collect(Collectors.toList());
     }
 
     // 인기도 - 지역별 장르
