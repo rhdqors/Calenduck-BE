@@ -1,16 +1,17 @@
 package com.example.calenduck.domain.performance.service;
 
 import com.example.calenduck.domain.performance.dto.response.BasePerformancesResponseDto;
-import com.example.calenduck.domain.performance.entity.NameWithMt20id;
+import com.example.calenduck.domain.performance.dto.response.SearchRankResponseDto;
 import com.example.calenduck.domain.performance.repository.NameWithMt20idRepository;
-import com.example.calenduck.global.exception.GlobalErrorCode;
-import com.example.calenduck.global.exception.GlobalException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.select.Elements;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -22,30 +23,30 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class PerformanceService {
 
-    private final NameWithMt20idRepository nameWithMt20idRepository;
     private final XmlToMap xmlToMap;
+    private final RedisTemplate<String, String> redisTemplate;
 
-    // 전체 조회 & 메인 - 페이징 X
+    // 전체 조회 & 메인 & 검색
     @Transactional
     // key 값은 현재 메서드를 나타내는 sple(Spring Expression Language)언어
     // 다시 현재 메서드가 호출되면 데이터를 다시 조회하는 것이 아닌 캐시된 데이터를 불러옴
-    @Cacheable(value = "elementsCache", key = "#root.methodName + '_' + #prfnm + '_' + #prfcast")
+//    @Cacheable(value = "elementsCache", condition = "#prfnm == null and #prfcast == null", key = "#root.methodName")
+    @CachePut(value = "elementsCache", condition = "#prfnm == null and #prfcast == null", key = "#root.methodName")
     public List<BasePerformancesResponseDto> getAllPerformances(String prfnm, String prfcast) throws SQLException, IOException, ExecutionException, InterruptedException {
         List<BasePerformancesResponseDto> performances = new ArrayList<>();
         List<Elements> elements = xmlToMap.getElements();
 
-        // Convert the search terms to lowercase for case-insensitive search
         String lowercasePrfnm = prfnm != null ? prfnm.toLowerCase() : null;
         String lowercasePrfcast = prfcast != null ? prfcast.toLowerCase() : null;
 
         for (Elements element : elements) {
-            // Retrieve the required data from the element
             String mt20id = element.select("mt20id").text();
             String poster = element.select("poster").text();
             String prfnmElement = element.select("prfnm").text();
@@ -57,7 +58,6 @@ public class PerformanceService {
             String eddate = element.select("prfpdto").text();
             String pcseguidance = element.select("pcseguidance").text();
 
-            // Perform search based on prfnm and prfcast fields
             boolean matchPrfnm = lowercasePrfnm == null || (prfnmElement != null && prfnmElement.toLowerCase().contains(lowercasePrfnm));
             boolean matchPrfcast = lowercasePrfcast == null || (prfcastElement != null && prfcastElement.toLowerCase().contains(lowercasePrfcast));
 
@@ -77,7 +77,30 @@ public class PerformanceService {
                 performances.add(basePerformancesResponseDto);
             }
         }
+
+        // 인기 검색어
+        if (prfnm != null) {
+            updatePopularSearchTerm(prfnm);
+        }
+        if (prfcast != null) {
+            updatePopularSearchTerm(prfcast);
+        }
+
         return performances;
+    }
+    // 인기 검색어 - 파라미터가 있다면 ? 키값 넣고 벨류값 1증가
+    private void updatePopularSearchTerm(String searchTerm) {
+        redisTemplate.opsForZSet().incrementScore("rank", searchTerm, 1);
+    }
+
+    // 인기검색어 리스트 1위~5위까지
+    public List<SearchRankResponseDto> searchRankList() {
+        String key = "rank";
+        // ZSetOperations 객체 생성
+        ZSetOperations<String, String> ZSetOperations = redisTemplate.opsForZSet();
+        // score순으로 5개 보여줌
+        Set<ZSetOperations.TypedTuple<String>> typedTuples = ZSetOperations.reverseRangeWithScores(key, 0, 4);
+        return typedTuples.stream().map(SearchRankResponseDto::convertToResponseRankingDto).collect(Collectors.toList());
     }
 
     // 인기도 - 지역별 장르

@@ -2,18 +2,13 @@ package com.example.calenduck.domain.performance.controller;
 
 import com.example.calenduck.domain.performance.dto.response.BasePerformancesResponseDto;
 import com.example.calenduck.domain.performance.service.PerformanceService;
-import com.example.calenduck.domain.user.security.UserDetailsImpl;
-import com.example.calenduck.global.exception.GlobalErrorCode;
-import com.example.calenduck.global.exception.GlobalException;
 import com.example.calenduck.global.message.ResponseMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -33,6 +28,12 @@ public class PerformanceController {
     ) throws SQLException, IOException, ExecutionException, InterruptedException {
         List<BasePerformancesResponseDto> performances = performanceService.getAllPerformances(prfnm, prfcast);
         return ResponseMessage.SuccessResponse("전체 조회 완료", performances);
+    }
+
+    @Operation(summary = "인기검색어 TOP 5", description = "인기검색어 TOP 5")
+    @GetMapping("/search/rank")
+    public ResponseEntity<?> searchRankList(){
+        return ResponseMessage.SuccessResponse("인기 검색어 조회 성공", performanceService.searchRankList());
     }
 
     @Operation(summary = "장르별 인기도 - 지역별", description = "장르별 인기도 - 지역별")
