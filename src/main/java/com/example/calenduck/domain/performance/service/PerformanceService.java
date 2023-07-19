@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.select.Elements;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
@@ -36,7 +37,8 @@ public class PerformanceService {
     @Transactional
     // key 값은 현재 메서드를 나타내는 sple(Spring Expression Language)언어
     // 다시 현재 메서드가 호출되면 데이터를 다시 조회하는 것이 아닌 캐시된 데이터를 불러옴
-    @Cacheable(value = "elementsCache", condition = "#prfnm == null and #prfcast == null", key = "#root.methodName")
+//    @Cacheable(value = "elementsCache", condition = "#prfnm == null and #prfcast == null", key = "#root.methodName")
+    @CachePut(value = "elementsCache", condition = "#prfnm == null and #prfcast == null", key = "#root.methodName")
     public List<BasePerformancesResponseDto> getAllPerformances(String prfnm, String prfcast) throws SQLException, IOException, ExecutionException, InterruptedException {
         List<BasePerformancesResponseDto> performances = new ArrayList<>();
         List<Elements> elements = xmlToMap.getElements();
