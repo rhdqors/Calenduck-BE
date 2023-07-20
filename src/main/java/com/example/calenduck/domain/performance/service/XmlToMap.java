@@ -47,7 +47,6 @@ public class XmlToMap {
 
         List<String> resultList = query.getResultList();
         log.info("-----------------------" + String.valueOf(resultList.size()));
-        log.info("resultList = " + resultList);
         for (String performanceId : resultList) {
 //                log.info("performanceId == " + performanceId);
             if (!uniqueMt20ids.contains(performanceId)) {
@@ -69,9 +68,9 @@ public class XmlToMap {
         List<Elements> elementsList = new ArrayList<>();
 
         // 스레드 풀 설정, 동시성 제어(한번에 40개)
-        ExecutorService executorService = Executors.newFixedThreadPool(40);
+        ExecutorService executorService = Executors.newFixedThreadPool(50);
 
-        int batchSize = 50;
+        int batchSize = 40;
         List<List<String>> batches = createBatches(performanceIds, batchSize);
         List<CompletableFuture<List<Elements>>> futures = processBatchesAsync(batches, executorService);
         waitForCompletion(futures);
@@ -97,7 +96,7 @@ public class XmlToMap {
         return batches;
     }
 
-    // 배치 비동기 처리
+    // 배치 비동기 처리 (멀티스레드)
     private List<CompletableFuture<List<Elements>>> processBatchesAsync(List<List<String>> batches, ExecutorService executorService) {
         return batches.stream()
                 .map(batch -> CompletableFuture.supplyAsync(() -> processBatch(batch), executorService))
@@ -108,6 +107,7 @@ public class XmlToMap {
     private List<Elements> processBatch(List<String> batch) {
         List<Elements> batchElements = new ArrayList<>();
         for (String performanceId : batch) {
+            log.info("performanceId == " + performanceId);
             StringBuilder response = new StringBuilder();
             try {
                 // API 요청 및 데이터 추출
