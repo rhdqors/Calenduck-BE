@@ -46,6 +46,10 @@ dependencies {
 	testImplementation 'junit:junit:4.13.1'
 	testImplementation 'org.mockito:mockito-core:4.8.0'
 	testImplementation 'org.mockito:mockito-junit-jupiter:4.8.0'
+	testImplementation 'org.mockito:mockito-inline:3.11.2'
+	// mock http 요청
+	testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.2'
+	testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
 
 	// presto
 	implementation 'com.facebook.presto:presto-jdbc:0.258' // use the appropriate version
@@ -66,6 +70,10 @@ dependencies {
 	// dto검사 Mapper용
 	implementation 'org.mapstruct:mapstruct:1.5.3.Final'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
+
+	// prometheus
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
 
 }
 
