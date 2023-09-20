@@ -86,7 +86,7 @@ public class XmlToMap {
     }
 
     // performanceId 배치 나눔
-    private List<List<String>> createBatches(List<String> performanceIds, int batchSize) {
+    List<List<String>> createBatches(List<String> performanceIds, int batchSize) {
         List<List<String>> batches = new ArrayList<>();
         for (int i = 0; i < performanceIds.size(); i += batchSize) {
             int endIndex = Math.min(i + batchSize, performanceIds.size());
@@ -138,13 +138,13 @@ public class XmlToMap {
     }
 
     // 모든 CompletableFuture 작업이 완료될 때까지 대기
-    private void waitForCompletion(List<CompletableFuture<List<Elements>>> futures) {
+    void waitForCompletion(List<CompletableFuture<List<Elements>>> futures) {
         CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
         allFutures.join();
     }
 
     // 각 CompletableFuture의 결과를 최종 목록에 추가
-    private void retrieveResults(List<CompletableFuture<List<Elements>>> futures, List<Elements> elementsList) throws ExecutionException, InterruptedException {
+    void retrieveResults(List<CompletableFuture<List<Elements>>> futures, List<Elements> elementsList) throws ExecutionException, InterruptedException {
         for (CompletableFuture<List<Elements>> future : futures) {
             List<Elements> batchElements = future.get();
             elementsList.addAll(batchElements);
