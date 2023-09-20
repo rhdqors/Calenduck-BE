@@ -3,7 +3,6 @@ package com.example.calenduck.domain.bookmark.dto.response;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 

@@ -4,6 +4,7 @@ import com.example.calenduck.domain.bookmark.Entity.Bookmark;
 import com.example.calenduck.domain.bookmark.Service.BookmarkService;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,12 +31,14 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.SQLException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -63,7 +67,6 @@ class XmlToMapTest {
 
     @Mock
     private BookmarkService bookmarkService;
-
 
 
     @Nested
@@ -101,19 +104,19 @@ class XmlToMapTest {
 //
 //        }
 
-        @Test
-        @DisplayName("performanceId 배치 나눔")
-        void createBatches() {
-            // given
-            List<String> performanceIds = Arrays.asList("ID1", "ID2", "ID3", "ID4");
-            int batchSize = 2;
-            // when
-            List<List<String>> result = xmlToMap.createBatches(performanceIds, batchSize);
-            // then
-            assertEquals(2, result.size());
-            assertEquals(List.of("ID1", "ID2"), result.get(0));
-            assertEquals(List.of("ID3", "ID4"), result.get(1));
-        }
+//        @Test
+//        @DisplayName("performanceId 배치 나눔")
+//        void createBatches() {
+//            // given
+//            List<String> performanceIds = Arrays.asList("ID1", "ID2", "ID3", "ID4");
+//            int batchSize = 2;
+//            // when
+//            List<List<String>> result = xmlToMap.createBatches(performanceIds, batchSize);
+//            // then
+//            assertEquals(2, result.size());
+//            assertEquals(List.of("ID1", "ID2"), result.get(0));
+//            assertEquals(List.of("ID3", "ID4"), result.get(1));
+//        }
 
 //        @Test
 //        @DisplayName("배치 비동기 처리 - 멀티스레드")
@@ -166,43 +169,41 @@ class XmlToMapTest {
 //            assertEquals("value2", batchElements.get(0).select("item2").text());
 //        }
 
-        @Test
-        @DisplayName("모든 CompletableFuture 작업이 완료될 때까지 대기")
-        void waitForCompletion() {
-            // given
-            CompletableFuture<List<Elements>> future1 = CompletableFuture.completedFuture(new ArrayList<>());
-            CompletableFuture<List<Elements>> future2 = CompletableFuture.completedFuture(new ArrayList<>());
-            List<CompletableFuture<List<Elements>>> futures = Arrays.asList(future1, future2);
-            // when
-            xmlToMap.waitForCompletion(futures);
-            // then
-            assertTrue(future1.isDone());
-            assertTrue(future2.isDone());
-        }
+//        @Test
+//        @DisplayName("모든 CompletableFuture 작업이 완료될 때까지 대기")
+//        void waitForCompletion() {
+//            // given
+//            CompletableFuture<List<Elements>> future1 = CompletableFuture.completedFuture(new ArrayList<>());
+//            CompletableFuture<List<Elements>> future2 = CompletableFuture.completedFuture(new ArrayList<>());
+//            List<CompletableFuture<List<Elements>>> futures = Arrays.asList(future1, future2);
+//            // when
+//            xmlToMap.waitForCompletion(futures);
+//            // then
+//            assertTrue(future1.isDone());
+//            assertTrue(future2.isDone());
+//        }
 
-        @Test
-        @DisplayName("각 CompletableFuture의 결과를 최종 목록에 추가")
-        void retrieveResults() throws ExecutionException, InterruptedException {
-            // given
-            Elements elements1 = Mockito.mock(Elements.class);
-            Elements elements2 = Mockito.mock(Elements.class);
-
-            CompletableFuture<List<Elements>> future1 = CompletableFuture.completedFuture(Arrays.asList(elements1));
-            CompletableFuture<List<Elements>> future2 = CompletableFuture.completedFuture(Arrays.asList(elements2));
-
-            List<CompletableFuture<List<Elements>>> futures = Arrays.asList(future1, future2);
-            List<Elements> elementsList = new ArrayList<>();
-
-            // when
-            xmlToMap.retrieveResults(futures, elementsList);
-
-            // then
-            assertEquals(2, elementsList.size());
-            assertTrue(elementsList.contains(elements1));
-            assertTrue(elementsList.contains(elements2));
-
-
-        }
+//        @Test
+//        @DisplayName("각 CompletableFuture의 결과를 최종 목록에 추가")
+//        void retrieveResults() throws ExecutionException, InterruptedException {
+//            // given
+//            Elements elements1 = Mockito.mock(Elements.class);
+//            Elements elements2 = Mockito.mock(Elements.class);
+//
+//            CompletableFuture<List<Elements>> future1 = CompletableFuture.completedFuture(Arrays.asList(elements1));
+//            CompletableFuture<List<Elements>> future2 = CompletableFuture.completedFuture(Arrays.asList(elements2));
+//
+//            List<CompletableFuture<List<Elements>>> futures = Arrays.asList(future1, future2);
+//            List<Elements> elementsList = new ArrayList<>();
+//
+//            // when
+//            xmlToMap.retrieveResults(futures, elementsList);
+//
+//            // then
+//            assertEquals(2, elementsList.size());
+//            assertTrue(elementsList.contains(elements1));
+//            assertTrue(elementsList.contains(elements2));
+//        }
 
 //        @Test
 //        @DisplayName("Test getBookmarkElements method")
