@@ -4,7 +4,14 @@ import com.example.calenduck.domain.user.dto.request.KakaoUserInfoDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
 
 @Entity(name = "users")
 @Getter
@@ -15,7 +22,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 유저 고유 번호
 
-    @Column(/*nullable = false,*/ unique = true)
+    @Column(unique = true)
     private String nickname; // 카카오 사용자 이름 (필수 동의)
 
     @Column(unique = true)

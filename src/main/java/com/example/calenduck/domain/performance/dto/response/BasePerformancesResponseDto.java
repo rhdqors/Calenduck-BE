@@ -2,7 +2,6 @@ package com.example.calenduck.domain.performance.dto.response;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @NoArgsConstructor
