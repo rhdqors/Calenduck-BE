@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -41,6 +42,12 @@ public class UserService implements UserBehavior {
     private final UserRepository userRepository;
     private final BookmarkService bookmarkService;
     private final DetailInfoService detailInfoService;
+
+    @Value("${kakao.client-id}")
+    private String clientId;
+
+    @Value("${kakao.redirect_url}")
+    private String redirectUrl;
 
     @Transactional
     @Override
@@ -88,9 +95,9 @@ public class UserService implements UserBehavior {
         // HTTP Body 생성
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
-        body.add("client_id", "b0eb227d20bd3e34f8503571dbf24772");
-//        body.add("redirect_uri", "http://localhost:8080/users/kakao/login");
-        body.add("redirect_uri", "http://localhost:3000/auth");
+        body.add("client_id", clientId);
+
+        body.add("redirect_url", redirectUrl);
         body.add("code", code);
 
         // HTTP 요청 보내기
