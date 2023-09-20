@@ -2,13 +2,11 @@ package com.example.calenduck.domain.performance.service;
 
 import com.example.calenduck.domain.performance.dto.response.BasePerformancesResponseDto;
 import com.example.calenduck.domain.performance.dto.response.SearchRankResponseDto;
-import com.example.calenduck.domain.performance.repository.NameWithMt20idRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.select.Elements;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;

@@ -1,6 +1,5 @@
 package com.example.calenduck.domain.bookmark.dto.response;
 
-import com.example.calenduck.domain.bookmark.Entity.Bookmark;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
