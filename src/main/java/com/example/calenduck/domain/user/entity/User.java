@@ -31,7 +31,7 @@ public class User {
     @Column(unique = true)
     private String kakaoEmail; // 카카오 이메일 (선택 동의)
 
-    @Column(unique = true)
+    @Column
     private String gender;
 
     @Column(unique = true)
