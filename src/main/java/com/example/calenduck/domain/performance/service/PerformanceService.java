@@ -104,12 +104,14 @@ public class PerformanceService implements PerformanceBehavior {
     }
     // 인기 검색어 저장 - 파라미터(검색어)가 있다면 ? 키, 벨류값 넣고 1증가
     @Override
+    @Transactional
     public void updatePopularSearchTerm(String searchTerm) {
         redisTemplate.opsForZSet().incrementScore("rank", searchTerm, 1);
     }
 
     // 인기검색어 조회 리스트 1위~5위까지
     @Override
+    @Transactional
     public List<SearchRankResponseDto> searchRankList() {
         String key = "rank";
         // ZSetOperations 객체 생성
@@ -121,6 +123,7 @@ public class PerformanceService implements PerformanceBehavior {
 
     // 인기도 - 지역별 장르
     @Override
+    @Transactional
     public JsonNode PopularityByGenreWithRegion() {
         String url = serverUrl + "/api/queries/3/results.json?api_key=DaPCdTfknrRmiIR6UVBG3eVgvwv9LhgB4WuGkCfC";
         JsonNode rowsNode = null;
@@ -170,6 +173,7 @@ public class PerformanceService implements PerformanceBehavior {
 
     // 탑텐
     @Override
+    @Transactional
     public JsonNode topTen() {
         String url = serverUrl + "/api/queries/5/results.json?api_key=B15NuqHs3MxTpejr9OS9AwXyPxTL85naIxsQkKgT";
         JsonNode rowsNode = null;
@@ -212,6 +216,7 @@ public class PerformanceService implements PerformanceBehavior {
 
     // 지역별 인기 공연
     @Override
+    @Transactional
     public JsonNode PopularityByRegion() {
         String url = serverUrl + "/api/queries/1/results.json?api_key=X7GrpYLJCgnCAAP410I63YfeLifwKKaViKAxz7SE";
         JsonNode rowsNode = null;
