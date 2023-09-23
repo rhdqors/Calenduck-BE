@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -27,7 +26,7 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class BookmarkService {
+public class BookmarkService implements BookmarkBehavior{
 
     private final BookmarkRepository bookmarkRepository;
     private final NameWithMt20idRepository nameWithMt20idRepository;
@@ -35,6 +34,7 @@ public class BookmarkService {
     private final EditBookmarkMapper editBookmarkMapper;
 
     // 북마크 성공/취소
+    @Override
     @Transactional
     public BookmarkResponseDto bookmark(String mt20id, String year, String month, String day, User user) {
         // 공연 확인
@@ -77,8 +77,9 @@ public class BookmarkService {
     }
 
     // 찜목록 전체 조회
+    @Override
     @Transactional
-    public List<MyBookmarkResponseDto> getBookmarks(User user) throws SQLException, IOException {
+    public List<MyBookmarkResponseDto> getBookmarks(User user) throws IOException {
         List<Bookmark> bookmarks = bookmarkRepository.findAllByUser(user);
         log.info("bookmark.size ===== " + bookmarks.size());
         for (int i=0; i<bookmarks.size(); i++) {
@@ -126,6 +127,7 @@ public class BookmarkService {
     }
 
     // 찜목록 상세 수정
+    @Override
     @Transactional
     public void editBookmark(String mt20id, String year, String month, String day, User user, EditBookmarkRequestDto editBookmarkRequestDto) {
 
