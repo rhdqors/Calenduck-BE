@@ -22,7 +22,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 유저 고유 번호
 
-    @Column(unique = true)
+    @Column
     private String nickname; // 카카오 사용자 이름 (필수 동의)
 
     @Column(unique = true)
@@ -34,7 +34,7 @@ public class User {
     @Column
     private String gender;
 
-    @Column(unique = true)
+    @Column
     private String age;
 
     @Column(nullable = false)
