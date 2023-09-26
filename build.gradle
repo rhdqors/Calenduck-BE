@@ -24,11 +24,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'mysql:mysql-connector-java:8.0.32'
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5'
 	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'com.mysql:mysql-connector-j'
-	implementation 'mysql:mysql-connector-java'
+//	runtimeOnly 'com.mysql:mysql-connector-j'
+	implementation 'mysql:mysql-connector-java:8.0.29'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
@@ -46,16 +45,17 @@ dependencies {
 	testImplementation 'junit:junit:4.13.1'
 	testImplementation 'org.mockito:mockito-core:4.8.0'
 	testImplementation 'org.mockito:mockito-junit-jupiter:4.8.0'
-
-	// presto
-	implementation 'com.facebook.presto:presto-jdbc:0.258' // use the appropriate version
+	testImplementation 'org.mockito:mockito-inline:3.11.2'
+	// mock http 요청
+	testImplementation 'com.squareup.okhttp3:mockwebserver:4.9.2'
+	testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
 
 	// swagger
 	implementation 'org.springdoc:springdoc-openapi-ui:1.6.6'
 	implementation 'io.springfox:springfox-swagger2:2.9.2'
 	implementation 'io.springfox:springfox-swagger-ui:2.9.2'
 
-	// xml 파싱용 jsoup
+	// jsoup
 	implementation 'org.jsoup:jsoup:1.14.3'
 
 	// Redis Cache
@@ -66,6 +66,14 @@ dependencies {
 	// dto검사 Mapper용
 	implementation 'org.mapstruct:mapstruct:1.5.3.Final'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
+
+	// prometheus
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+
+	// flyway
+	implementation'org.flywaydb:flyway-core:6.4.2'
+
 
 }
 

@@ -12,6 +12,7 @@ import static org.springframework.http.HttpStatus.*;
 public enum GlobalErrorCode {
     // User
     // 400 BAD_REQUEST - 잘못된 요청
+    JSON_PROCESSING_ERROR(BAD_REQUEST, "JSON 처리 중 오류가 발생했습니다."),
     NOT_VALID_EMAIL(BAD_REQUEST, "유효하지 않은 이메일 입니다."),
     DUPLICATE_NICK_NAME(BAD_REQUEST, "닉네임이 동일합니다."),
     // 401 Unauthorized - 권한 없음
@@ -21,6 +22,8 @@ public enum GlobalErrorCode {
     USER_NOT_FOUND(NOT_FOUND, "등록된 사용자가 없습니다"),
     // 409
     DUPLICATE_USER(CONFLICT, "중복된 사용자 입니다"),
+    // 500
+    UNEXPECTED_ERROR(INTERNAL_SERVER_ERROR, "예상치 못한 오류가 발생했습니다."),
 
     // Performance
     NOT_FOUND_PERFORMANCE(NOT_FOUND, "등록된 공연이 없습니다"),
