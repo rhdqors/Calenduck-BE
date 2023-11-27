@@ -5,6 +5,7 @@
    - srp(Single Responsibility Principle) 단일 책임 원칙 준수
 2. 서비스로직 메서드 분리
    - 함수가 한 가지 기능만 하도록 최대한 작게
+   - depth 2~3 유지 (목표: 2) -> for,if 같이쓰면 depth = 2
 3. Restful Api 확인
 4. 그 외...
 
