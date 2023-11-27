@@ -5,6 +5,7 @@ import com.example.calenduck.domain.bookmark.Service.BookmarkService;
 import com.example.calenduck.domain.detailInfo.entity.DetailInfo;
 import com.example.calenduck.domain.detailInfo.service.DetailInfoService;
 import com.example.calenduck.domain.user.entity.User;
+import com.example.calenduck.domain.user.enumstring.AlarmString;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -53,23 +54,21 @@ public class UserMyPage implements MyPageEmployee {
 
         if (trimmedAlarm.startsWith(formattedCurrentDate)) {
             int daysDifference = Integer.parseInt(bookmark.getReservationDate()) - Integer.parseInt(trimmedAlarm);
-            if (daysDifference == 1) {
-                alarmMessages.add(prfnm + " 공연이 1일전입니다.");
-            } else if (daysDifference == 3) {
-                alarmMessages.add(prfnm + " 공연이 3일전입니다.");
-            } else if (daysDifference == 7) {
-                alarmMessages.add(prfnm + " 공연이 7일전입니다.");
+            switch (daysDifference) {
+                case 1 -> alarmMessages.add(prfnm + AlarmString.A_DAY_BEFORE.getAlarm());
+                case 3 -> alarmMessages.add(prfnm + AlarmString.THREE_DAY_BEFORE.getAlarm());
+                case 7 -> alarmMessages.add(prfnm + AlarmString.A_WEEK_BEFORE.getAlarm());
             }
         }
         return alarmMessages;
     }
 
     private int getDaysDifferenceFromResult(String alarmMessage) {
-        if (alarmMessage.contains("1일전")) {
+        if (AlarmString.A_DAY_BEFORE.isContainedMessage(alarmMessage)) {
             return 1;
-        } else if (alarmMessage.contains("3일전")) {
+        } else if (AlarmString.THREE_DAY_BEFORE.isContainedMessage(alarmMessage)) {
             return 3;
-        } else if (alarmMessage.contains("7일전")) {
+        } else if (AlarmString.A_WEEK_BEFORE.isContainedMessage(alarmMessage)) {
             return 7;
         }
         return 0;
