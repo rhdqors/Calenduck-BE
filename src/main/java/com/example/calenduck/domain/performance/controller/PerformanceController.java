@@ -1,7 +1,9 @@
 package com.example.calenduck.domain.performance.controller;
 
 import com.example.calenduck.domain.performance.dto.response.BasePerformancesResponseDto;
-import com.example.calenduck.domain.performance.service.PerformanceService;
+import com.example.calenduck.domain.performance.service.PerformanceAnalyticsBehavior;
+import com.example.calenduck.domain.performance.service.PerformanceSearchBehavior;
+import com.example.calenduck.domain.performance.service.PerformanceServiceBehavior;
 import com.example.calenduck.global.message.ResponseMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +20,9 @@ import java.util.concurrent.ExecutionException;
 @RequestMapping("/performances")
 public class PerformanceController {
 
-    private final PerformanceService performanceService;
+    private final PerformanceServiceBehavior performanceService;
+    private final PerformanceSearchBehavior performanceSearchService;
+    private final PerformanceAnalyticsBehavior performanceAnalyticsBehavior;
 
     @Operation(summary = "전체 조회 & 메인", description = "전체 조회 & 메인")
     @GetMapping()
@@ -33,13 +37,13 @@ public class PerformanceController {
     @Operation(summary = "인기검색어 TOP 5", description = "인기검색어 TOP 5")
     @GetMapping("/search/rank")
     public ResponseEntity<?> searchRankList(){
-        return ResponseMessage.SuccessResponse("인기 검색어 조회 성공", performanceService.searchRankList());
+        return ResponseMessage.SuccessResponse("인기 검색어 조회 성공", performanceSearchService.searchRankList());
     }
 
     @Operation(summary = "장르별 인기도 - 지역별", description = "장르별 인기도 - 지역별")
     @GetMapping("/popularity/genres/region")
     public ResponseEntity<?> PopularityByGenreWithRegion() {
-        return ResponseMessage.SuccessResponse("장르별 인기도 - 지역별", performanceService.PopularityByGenreWithRegion());
+        return ResponseMessage.SuccessResponse("장르별 인기도 - 지역별", performanceAnalyticsBehavior.PopularityByGenreWithRegion());
     }
 
 //    @Operation(summary = "장르별 인기도 - 랭킹점수 가산", description = "장르별 인기도 - 랭킹점수 가산")
@@ -51,18 +55,13 @@ public class PerformanceController {
     @Operation(summary = "Top 10", description = "Top 10")
     @GetMapping("/topten")
     public ResponseEntity<?> topTen() {
-        return ResponseMessage.SuccessResponse("Top 10", performanceService.topTen());
+        return ResponseMessage.SuccessResponse("Top 10", performanceAnalyticsBehavior.topTen());
     }
 
     @Operation(summary = "지역별 인기 공연", description = "지역별 인기 공연")
     @GetMapping("/popularity/region")
     public ResponseEntity<?> PopularityByRegion() {
-        return ResponseMessage.SuccessResponse("지역별 인기 공연", performanceService.PopularityByRegion());
+        return ResponseMessage.SuccessResponse("지역별 인기 공연", performanceAnalyticsBehavior.PopularityByRegion());
     }
-
-
-
-
-
 
 }
