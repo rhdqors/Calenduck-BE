@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-
 import javax.servlet.http.HttpServletResponse;
 
 @Slf4j
@@ -42,26 +41,17 @@ public class UserService implements UserBehavior {
     public User kakaoLogin(String code, HttpServletResponse response) {
         try{
             // 1. "인가 코드"로 "액세스 토큰" 요청
-            // 인가코드 -> 로그인 후 서비스제공자(카카오)로부터 받는 임시 코드
-            // 인가코드는 일회성 그리고 짧은 시간내에 사용되어야함
-            log.info("code : " + code);
+            // 인가코드 -> 로그인 후 서비스제공자(카카오)로부터 받는 일회성 임시 코드
             String accessToken = getToken(code);
-            log.info("accessToken : " + accessToken);
 
             // 2. 토큰으로 카카오 API 호출 : "액세스 토큰"으로 "카카오 사용자 정보" 가져오기
-            // 액세스 토큰 서비스 제공자(카카오) api 호출할 떄 사용하는 인증 수단
             // 액세스 토큰으로 추가 정보를 요청할 수 있고 이용자의 동의를 얻은 기능 실행 가능(친구목록, 메시지 전송, 프로필가져오기 등??)
-            // 액세스 토큰 만료시 리프레시토큰으로 새로 발급
             KakaoUserInfoDto kakaoUserInfo = getKakaoUserInfo(accessToken);
-            log.info("kakaoUserInfo : " + kakaoUserInfo);
+
             // 3. 회원가입
             signupIfNeeded(kakaoUserInfo);
 
-            // 4. JWT 토큰 반환
-            // String createToken =  jwtUtil.createToken(kakaoUserInfo.getNickname(), kakaoUserInfo.getEmail(), UserRoleEnum.USER);
-            // response.addHeader(JwtUtil.AUTHORIZATION_HEADER, createToken);
-            // return createToken;package com.example.calenduck.domain.user.service;
-
+            // 4. 유저 저장
             User user = userRepository.findByKakaoId(kakaoUserInfo.getId())
                     .orElseThrow(() -> new GlobalException(GlobalErrorCode.USER_NOT_FOUND));
             return user;
@@ -84,7 +74,6 @@ public class UserService implements UserBehavior {
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
         body.add("client_id", clientId);
-
         body.add("redirect_url", redirectUrl);
         body.add("code", code);
 
@@ -133,12 +122,16 @@ public class UserService implements UserBehavior {
             String responseBody = response.getBody();
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(responseBody);
+
             Long id = jsonNode.get("id").asLong();
             String nickname = jsonNode.get("properties")
                     .get("nickname").asText();
-            String email = jsonNode.get("kakao_account").has("email") ? jsonNode.get("kakao_account").get("email").asText() : null;
-            String gender = jsonNode.get("kakao_account").has("gender") ? jsonNode.get("kakao_account").get("gender").asText() : null;
-            String age = jsonNode.get("kakao_account").has("age") ? jsonNode.get("kakao_account").get("age").asText() : null;
+            String email = jsonNode.get("kakao_account").has("email") ?
+                    jsonNode.get("kakao_account").get("email").asText() : null;
+            String gender = jsonNode.get("kakao_account").has("gender") ?
+                    jsonNode.get("kakao_account").get("gender").asText() : null;
+            String age = jsonNode.get("kakao_account").has("age") ?
+                    jsonNode.get("kakao_account").get("age").asText() : null;
 
             log.info("카카오 사용자 정보: " + id + ", " + nickname + ", " + email + ", " +  gender + ", " + age);
             return new KakaoUserInfoDto(id, nickname, email, gender, age);
@@ -148,21 +141,12 @@ public class UserService implements UserBehavior {
         }
     }
 
-    // 3. 회원가입
+    // 3. 신규 회원가입
     private void signupIfNeeded(KakaoUserInfoDto kakaoUserInfodto) {
         Long kakaoId = kakaoUserInfodto.getId();
-        String nickName = kakaoUserInfodto.getNickname();
-        String email = kakaoUserInfodto.getEmail() != null ? kakaoUserInfodto.getEmail() : null;
+        if (userRepository.existsByKakaoId(kakaoId)) return;
 
-        log.info("카카오 사용자 정보: " + nickName);
-        log.info("카카오 사용자 정보: " + email);
-        log.info("카카오 사용자 정보: " + kakaoId);
-
-        if (userRepository.existsByKakaoId(kakaoId)) {
-            return;
-        }
         userRepository.save(new User(kakaoUserInfodto, UserRoleEnum.USER));
-//        userRepository.saveUser(nickName, kakaoId, email, UserRoleEnum.USER);
     }
 
 }
