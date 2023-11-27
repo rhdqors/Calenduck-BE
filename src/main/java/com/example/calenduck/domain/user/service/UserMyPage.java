@@ -30,50 +30,49 @@ public class UserMyPage implements MyPageEmployee {
     @Override
     public List<String> getAlarms(User user) {
         String formattedCurrentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-
-        List<String> results = new ArrayList<>();
-
+        List<String> alarmMessages = new ArrayList<>();
         List<Bookmark> bookmarks = bookmarkService.findBookmarks(user);
+
         for (Bookmark bookmark : bookmarks) {
             DetailInfo detailInfo = detailInfoService.findDetailInfo(bookmark.getMt20id());
             String prfnm = detailInfo.getPrfnm();
-
             String[] alarms = bookmark.getAlarm().split(",");
+
             for (String alarm : alarms) {
                 String trimmedAlarm = alarm.trim();
-                if (trimmedAlarm.startsWith(formattedCurrentDate)) {
-                    int daysDifference = Integer.parseInt(bookmark.getReservationDate()) - Integer.parseInt(trimmedAlarm);
-                    if (daysDifference == 1) {
-                        results.add(prfnm + " 공연이 1일전입니다.");
-                    } else if (daysDifference == 3) {
-                        results.add(prfnm + " 공연이 3일전입니다.");
-                    } else if (daysDifference == 7) {
-                        results.add(prfnm + " 공연이 7일전입니다.");
-                    }
-                }
-                log.info("alarm == " + trimmedAlarm);
+                alarmMessages = checkAlarmMessage(formattedCurrentDate, trimmedAlarm, bookmark, prfnm);
             }
-            log.info("bookmark == " + bookmark.getMt20id());
-            log.info("Prfnm == " + prfnm);
         }
 
-        Collections.sort(results, Comparator.comparing(this::getDaysDifferenceFromResult));
-
-        for (String result : results) {
-            log.info("result == " + result);
-        }
-
-        return results;
+        Collections.sort(alarmMessages, Comparator.comparing(this::getDaysDifferenceFromResult));
+        return alarmMessages;
     }
 
-    private int getDaysDifferenceFromResult(String result) {
-        if (result.contains("1일전")) {
+    private List<String> checkAlarmMessage(String formattedCurrentDate, String trimmedAlarm, Bookmark bookmark, String prfnm) {
+        List<String> alarmMessages = new ArrayList<>();
+
+        if (trimmedAlarm.startsWith(formattedCurrentDate)) {
+            int daysDifference = Integer.parseInt(bookmark.getReservationDate()) - Integer.parseInt(trimmedAlarm);
+            if (daysDifference == 1) {
+                alarmMessages.add(prfnm + " 공연이 1일전입니다.");
+            } else if (daysDifference == 3) {
+                alarmMessages.add(prfnm + " 공연이 3일전입니다.");
+            } else if (daysDifference == 7) {
+                alarmMessages.add(prfnm + " 공연이 7일전입니다.");
+            }
+        }
+        return alarmMessages;
+    }
+
+    private int getDaysDifferenceFromResult(String alarmMessage) {
+        if (alarmMessage.contains("1일전")) {
             return 1;
-        } else if (result.contains("3일전")) {
+        } else if (alarmMessage.contains("3일전")) {
             return 3;
-        } else if (result.contains("7일전")) {
+        } else if (alarmMessage.contains("7일전")) {
             return 7;
         }
         return 0;
     }
+
 }

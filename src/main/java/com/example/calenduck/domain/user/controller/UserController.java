@@ -22,7 +22,7 @@ import java.util.concurrent.ExecutionException;
 
 @RestController
 @Slf4j
-@RequestMapping("/users")
+@RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -42,8 +42,8 @@ public class UserController {
     }
 
     @Operation(summary = "알람 전체 조회", description = "알람 전체 조회")
-    @GetMapping("/alarm")
-    public ResponseEntity<?> getAla인rms(@AuthenticationPrincipal UserDetailsImpl userDetails) throws ExecutionException, InterruptedException {
+    @GetMapping("/alarms")
+    public ResponseEntity<?> getAlarms(@AuthenticationPrincipal UserDetailsImpl userDetails) throws ExecutionException, InterruptedException {
         return ResponseMessage.SuccessResponse("알람 조회 성공", userMyPage.getAlarms(userDetails.getUser()));
     }
 
