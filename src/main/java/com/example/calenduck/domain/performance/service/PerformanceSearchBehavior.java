@@ -5,6 +5,6 @@ import com.example.calenduck.domain.performance.dto.response.SearchRankResponseD
 import java.util.List;
 
 public interface PerformanceSearchBehavior {
-    void updatePopularSearchTerm(String searchTerm); // 인기검색어에 저장
+    void updatePopularSearchWord(String searchTerm); // 인기검색어에 저장
     List<SearchRankResponseDto> searchRankList(); // 인기검색어 5위까지 조회
 }

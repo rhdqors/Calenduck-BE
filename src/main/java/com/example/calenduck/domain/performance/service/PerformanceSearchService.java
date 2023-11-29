@@ -23,7 +23,7 @@ public class PerformanceSearchService implements PerformanceSearchBehavior {
 
     @Override
     @Transactional
-    public void updatePopularSearchTerm(String searchTerm) {
+    public void updatePopularSearchWord(String searchTerm) {
         redisTemplate.opsForZSet().incrementScore("rank", searchTerm, 1);
     }
 
