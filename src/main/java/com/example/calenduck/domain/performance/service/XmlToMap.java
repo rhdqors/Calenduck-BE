@@ -51,26 +51,9 @@ public class XmlToMap implements XmlToMapBehavior {
     @Override
     public List<Elements> getElements() throws InterruptedException, ExecutionException {
         try{
-            long startTime = System.currentTimeMillis();
             List<String> mt20ids = queryForSaveMt20id();
-            List<Elements> elementsList = new ArrayList<>();
 
-            // 스레드 풀 설정, 동시성 제어(한번에 40개)
-            ExecutorService executorService = Executors.newFixedThreadPool(50);
-
-            int batchSize = 40;
-            List<List<String>> batches = createBatches(mt20ids, batchSize);
-            List<CompletableFuture<List<Elements>>> futures = processBatchesAsync(batches, executorService);
-            waitForCompletion(futures);
-            retrieveResults(futures, elementsList);
-
-            executorService.shutdown();
-
-            long endTime = System.currentTimeMillis();
-            long executionTime = endTime - startTime;
-            log.info("getElements execution time: " + executionTime + "ms");
-
-            return elementsList;
+            return startBatches(mt20ids);
         } catch(InterruptedException e) {
             Thread.currentThread().interrupt();
             log.error("스레드 중단됨", e);
@@ -136,6 +119,19 @@ public class XmlToMap implements XmlToMapBehavior {
         return uniqueMt20ids;
     }
 
+    private List<Elements> startBatches(List<String> mt20ids) throws ExecutionException, InterruptedException {
+        ExecutorService executorService = Executors.newFixedThreadPool(50);
+        int batchSize = 40;
+
+        List<List<String>> batches = createBatches(mt20ids, batchSize);
+        List<CompletableFuture<List<Elements>>> futures = processBatchesAsync(batches, executorService);
+        waitForCompletion(futures);
+        List<Elements> allElements = retrieveResults(futures);
+
+        executorService.shutdown();
+        return allElements;
+    }
+
     private List<List<String>> createBatches(List<String> performanceIds, int batchSize) {
         List<List<String>> batches = new ArrayList<>();
         for (int i = 0; i < performanceIds.size(); i += batchSize) {
@@ -154,6 +150,7 @@ public class XmlToMap implements XmlToMapBehavior {
 
     private List<Elements> processBatch(List<String> batch) {
         List<Elements> batchElements = new ArrayList<>();
+
         for (String performanceId : batch) {
             log.info("performanceId == " + performanceId);
             StringBuilder response = new StringBuilder();
@@ -192,11 +189,14 @@ public class XmlToMap implements XmlToMapBehavior {
     }
 
     // 각 CompletableFuture의 결과를 최종 목록에 추가
-    private void retrieveResults(List<CompletableFuture<List<Elements>>> futures, List<Elements> elementsList) throws ExecutionException, InterruptedException {
+    private List<Elements> retrieveResults(List<CompletableFuture<List<Elements>>> futures) throws ExecutionException, InterruptedException {
+        List<Elements> allElements = new ArrayList<>();
+
         for (CompletableFuture<List<Elements>> future : futures) {
             List<Elements> batchElements = future.get();
-            elementsList.addAll(batchElements);
+            allElements.addAll(batchElements);
         }
+        return allElements;
     }
 
 }
