@@ -90,7 +90,7 @@ public class BatchManager {
 
         for (String mt20id : batches) {
             try {
-                String response = httpRequest.openApiRequest(mt20id);
+                String response = httpRequest.requestExtraction(mt20id);
                 Elements elements = dataConversion.convertXml(response);
 
                 batchElements.add(elements);

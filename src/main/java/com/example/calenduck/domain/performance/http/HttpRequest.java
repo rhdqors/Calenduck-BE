@@ -25,7 +25,7 @@ public class HttpRequest {
     private String lastUrl;
 
     @Transactional
-    public String openApiRequest(String mt20id) throws IOException {
+    public String requestExtraction(String mt20id) throws IOException {
         URL url = new URL(firstUrl + mt20id + lastUrl);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
@@ -33,6 +33,10 @@ public class HttpRequest {
         int responseCode = connection.getResponseCode();
         log.info("responseCode = " + responseCode);
 
+        return readAndSaveRequest(connection);
+    }
+
+    private String readAndSaveRequest(HttpURLConnection connection) throws IOException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
             return reader.lines().collect(Collectors.joining());
         } finally {
