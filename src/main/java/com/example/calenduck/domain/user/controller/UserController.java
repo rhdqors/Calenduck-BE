@@ -2,6 +2,7 @@ package com.example.calenduck.domain.user.controller;
 
 import com.example.calenduck.domain.user.entity.User;
 import com.example.calenduck.domain.user.security.UserDetailsImpl;
+import com.example.calenduck.domain.user.service.UserMyPage;
 import com.example.calenduck.domain.user.service.UserService;
 import com.example.calenduck.global.jwt.JwtUtil;
 import com.example.calenduck.global.message.ResponseMessage;
@@ -21,12 +22,13 @@ import java.util.concurrent.ExecutionException;
 
 @RestController
 @Slf4j
-@RequestMapping("/users")
+@RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
     private final JwtUtil jwtUtil;
+    private final UserMyPage userMyPage;
 
     @Operation(summary = "카카오 로그인", description = "카카오 로그인")
     @GetMapping("/kakao/login")
@@ -34,16 +36,15 @@ public class UserController {
         // code: 카카오 서버로부터 받은 인가 코드
         User user = userService.kakaoLogin(code, response);
         String createToken =  jwtUtil.createToken(user.getNickname(), user.getKakaoEmail(), user.getRole());
-        log.info("createToken == " + createToken);
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, createToken);
 
         return ResponseMessage.SuccessResponse("로그인 성공", "");
     }
 
     @Operation(summary = "알람 전체 조회", description = "알람 전체 조회")
-    @GetMapping("/alarm")
+    @GetMapping("/alarms")
     public ResponseEntity<?> getAlarms(@AuthenticationPrincipal UserDetailsImpl userDetails) throws ExecutionException, InterruptedException {
-        return ResponseMessage.SuccessResponse("알람 조회 성공", userService.getAlarms(userDetails.getUser()));
+        return ResponseMessage.SuccessResponse("알람 조회 성공", userMyPage.getAlarms(userDetails.getUser()));
     }
 
 

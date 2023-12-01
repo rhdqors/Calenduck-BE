@@ -1,42 +1,25 @@
 package com.example.calenduck.domain.performance.service;
 
 import com.example.calenduck.domain.performance.dto.response.BasePerformancesResponseDto;
-import com.example.calenduck.domain.performance.dto.response.SearchRankResponseDto;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.calenduck.domain.performance.http.BatchManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class PerformanceService implements PerformanceBehavior {
+public class PerformanceService implements PerformanceServiceBehavior {
 
-    private final XmlToMap xmlToMap;
-    private final RedisTemplate<String, String> redisTemplate;
-//    Redis에 데이터 저장 및 업데이트.
-//    Redis에서 데이터 검색 및 가져오기.
-//    Redis의 리스트, 집합, 해시 등과 같은 다양한 데이터 구조 사용.
-//    Redis 트랜잭션 관리.
-//    Pub/Sub 메시징 시스템을 사용하여 메시지 발행 및 구독.
-    @Value("${server.url}")
-    private String serverUrl;
+    private final PerformanceSearchBehavior performanceSearchService;
+    private final BatchManager batchManager;
 
     // 전체 조회 & 메인 & 검색
     @Override
@@ -46,52 +29,12 @@ public class PerformanceService implements PerformanceBehavior {
     @Cacheable(value = "elementsCache", condition = "#prfnm == null and #prfcast == null", key = "#root.methodName")
     public List<BasePerformancesResponseDto> getAllPerformances(String prfnm, String prfcast) throws ExecutionException, InterruptedException {
         try {
-            List<BasePerformancesResponseDto> performances = new ArrayList<>();
-            List<Elements> elements = xmlToMap.getElements();
+            List<Elements> elements = batchManager.getElements();
+            String lowerPrfnm = searchPerformanceNullCheck(prfnm);
+            String lowerPrfcast = searchCastNullCheck(prfcast);
+            List<BasePerformancesResponseDto> performances = savePerformanceInformation(elements, lowerPrfnm, lowerPrfcast);
 
-            String lowercasePrfnm = prfnm != null ? prfnm.toLowerCase() : null;
-            String lowercasePrfcast = prfcast != null ? prfcast.toLowerCase() : null;
-
-            for (Elements element : elements) {
-                String mt20id = element.select("mt20id").text();
-                String poster = element.select("poster").text();
-                String prfnmElement = element.select("prfnm").text();
-                String prfcastElement = element.select("prfcast").text();
-                String genrenm = element.select("genrenm").text();
-                String fcltynm = element.select("fcltynm").text();
-                String dtguidance = element.select("dtguidance").text();
-                String stdate = element.select("prfpdfrom").text();
-                String eddate = element.select("prfpdto").text();
-                String pcseguidance = element.select("pcseguidance").text();
-
-                boolean matchPrfnm = lowercasePrfnm == null || (prfnmElement != null && prfnmElement.toLowerCase().contains(lowercasePrfnm));
-                boolean matchPrfcast = lowercasePrfcast == null || (prfcastElement != null && prfcastElement.toLowerCase().contains(lowercasePrfcast));
-
-                if (matchPrfnm && matchPrfcast) {
-                    BasePerformancesResponseDto basePerformancesResponseDto = new BasePerformancesResponseDto(
-                            mt20id,
-                            poster,
-                            prfnmElement,
-                            prfcastElement,
-                            genrenm,
-                            fcltynm,
-                            dtguidance,
-                            stdate,
-                            eddate,
-                            pcseguidance
-                    );
-                    performances.add(basePerformancesResponseDto);
-                }
-            }
-
-            // 인기 검색어
-            if (prfnm != null) {
-                updatePopularSearchTerm(prfnm);
-            }
-            if (prfcast != null) {
-                updatePopularSearchTerm(prfcast);
-            }
-
+            updateSearchWord(prfnm, prfcast);
             return performances;
         } catch (ExecutionException e) {
             log.error("실헹 에러 발생", e);
@@ -102,158 +45,50 @@ public class PerformanceService implements PerformanceBehavior {
             throw e;
         }
     }
-    // 인기 검색어 저장 - 파라미터(검색어)가 있다면 ? 키, 벨류값 넣고 1증가
-    @Override
-    @Transactional
-    public void updatePopularSearchTerm(String searchTerm) {
-        redisTemplate.opsForZSet().incrementScore("rank", searchTerm, 1);
+
+    private void updateSearchWord(String prfnm, String prfcast) {
+        if (prfnm != null) performanceSearchService.updatePopularSearchWord(prfnm);
+        if (prfcast != null) performanceSearchService.updatePopularSearchWord(prfcast);
     }
 
-    // 인기검색어 조회 리스트 1위~5위까지
-    @Override
-    @Transactional
-    public List<SearchRankResponseDto> searchRankList() {
-        String key = "rank";
-        // ZSetOperations 객체 생성
-        ZSetOperations<String, String> ZSetOperations = redisTemplate.opsForZSet();
-        // score순으로 5개 보여줌
-        Set<ZSetOperations.TypedTuple<String>> typedTuples = ZSetOperations.reverseRangeWithScores(key, 0, 4);
-        return typedTuples.stream().map(SearchRankResponseDto::convertToResponseRankingDto).collect(Collectors.toList());
+    private String searchPerformanceNullCheck(String prfnm) {
+        return prfnm != null ? prfnm.toLowerCase() : null;
     }
 
-    // 인기도 - 지역별 장르
-    @Override
-    @Transactional
-    public JsonNode PopularityByGenreWithRegion() {
-        String url = serverUrl + "/api/queries/3/results.json?api_key=DaPCdTfknrRmiIR6UVBG3eVgvwv9LhgB4WuGkCfC";
-        JsonNode rowsNode = null;
+    private String searchCastNullCheck(String prfcast) {
+        return prfcast != null ? prfcast.toLowerCase() : null;
+    }
 
-        try {
-            URL apiUrl = new URL(url);
-            HttpURLConnection connection = (HttpURLConnection) apiUrl.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Accept", "application/json");
+    private BasePerformancesResponseDto createPerformanceDto(Elements element) {
+        return new BasePerformancesResponseDto(
+                element.select("mt20id").text(),
+                element.select("poster").text(),
+                element.select("prfnm").text(),
+                element.select("prfcast").text(),
+                element.select("genrenm").text(),
+                element.select("fcltynm").text(),
+                element.select("dtguidance").text(),
+                element.select("prfpdfrom").text(),
+                element.select("prfpdto").text(),
+                element.select("pcseguidance").text()
+        );
+    }
 
-            int responseCode = connection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuilder response = new StringBuilder();
-                String line;
+    private boolean isMatch(String lowerPrfnm, String lowerPrfcast, BasePerformancesResponseDto dto) {
+        return (lowerPrfnm == null || dto.getPrfnm().toLowerCase().contains(lowerPrfnm))
+                && (lowerPrfcast == null || dto.getPrfcast().toLowerCase().contains(lowerPrfcast));
+    }
 
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
-                reader.close();
-                String jsonResponse = response.toString();
+    private List<BasePerformancesResponseDto> savePerformanceInformation(List<Elements> elements, String lowerPrfnm, String lowerPrfcast) {
+        List<BasePerformancesResponseDto> performances = new ArrayList<>();
 
-                // Parse JSON response
-                ObjectMapper objectMapper = new ObjectMapper();
-                JsonNode jsonNode = objectMapper.readTree(jsonResponse);
-                JsonNode dataNode = jsonNode.path("query_result").path("data");
-                rowsNode = dataNode.path("rows");
-
-                for (JsonNode rowNode : rowsNode) {
-                    log.info("rowNode == " + rowNode);
-                    String area = rowNode.path("area_nm").asText();
-                    String genre = rowNode.path("genre_nm").asText();
-                    double value = rowNode.path("\uc608\ub9e4\uc728").asDouble();
-
-                    log.info("area: " + area + ", genre: " + genre + ", value: " + value);
-                }
-                log.info("rowsNode == " + Arrays.toString(new JsonNode[]{rowsNode}));
-            } else {
-                log.error("HTTP 실패 코드: " + responseCode);
+        for (Elements element : elements) {
+            BasePerformancesResponseDto dto = createPerformanceDto(element);
+            if (isMatch(lowerPrfnm, lowerPrfcast, dto)) {
+                performances.add(dto);
             }
-            connection.disconnect();
-        } catch (IOException e) {
-            log.error("http 에러", e);
         }
-        return rowsNode;
-    }
-
-    // 탑텐
-    @Override
-    @Transactional
-    public JsonNode topTen() {
-        String url = serverUrl + "/api/queries/5/results.json?api_key=B15NuqHs3MxTpejr9OS9AwXyPxTL85naIxsQkKgT";
-        JsonNode rowsNode = null;
-
-        try {
-            URL apiUrl = new URL(url);
-            HttpURLConnection connection = (HttpURLConnection) apiUrl.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Accept", "application/json");
-
-            int responseCode = connection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuilder response = new StringBuilder();
-                String line;
-
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
-                reader.close();
-                String jsonResponse = response.toString();
-
-                // Parse JSON response
-                ObjectMapper objectMapper = new ObjectMapper();
-                JsonNode jsonNode = objectMapper.readTree(jsonResponse);
-                JsonNode dataNode = jsonNode.path("query_result").path("data");
-                rowsNode = dataNode.path("rows");
-
-                System.out.println("rowsNode: " + rowsNode);
-            } else {
-                System.out.println("HTTP Error Code: " + responseCode);
-            }
-            connection.disconnect();
-        } catch (IOException e) {
-            System.out.println("HTTP Error");
-            e.printStackTrace();
-        }
-        return rowsNode;
-    }
-
-    // 지역별 인기 공연
-    @Override
-    @Transactional
-    public JsonNode PopularityByRegion() {
-        String url = serverUrl + "/api/queries/1/results.json?api_key=X7GrpYLJCgnCAAP410I63YfeLifwKKaViKAxz7SE";
-        JsonNode rowsNode = null;
-
-        try {
-            URL apiUrl = new URL(url);
-            HttpURLConnection connection = (HttpURLConnection) apiUrl.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Accept", "application/json");
-
-            int responseCode = connection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuilder response = new StringBuilder();
-                String line;
-
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
-                reader.close();
-                String jsonResponse = response.toString();
-
-                // Parse JSON response
-                ObjectMapper objectMapper = new ObjectMapper();
-                JsonNode jsonNode = objectMapper.readTree(jsonResponse);
-                JsonNode dataNode = jsonNode.path("query_result").path("data");
-                rowsNode = dataNode.path("rows");
-
-                log.info("rowsNode == " + Arrays.toString(new JsonNode[]{rowsNode}));
-            } else {
-                log.error("HTTP 실패 코드: " + responseCode);
-            }
-            connection.disconnect();
-        } catch (IOException e) {
-            log.error("http 에러", e);
-        }
-        return rowsNode;
+        return performances;
     }
 
 }
