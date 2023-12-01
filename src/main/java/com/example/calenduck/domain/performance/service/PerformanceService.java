@@ -1,6 +1,7 @@
 package com.example.calenduck.domain.performance.service;
 
 import com.example.calenduck.domain.performance.dto.response.BasePerformancesResponseDto;
+import com.example.calenduck.domain.performance.http.BatchManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.select.Elements;
@@ -17,8 +18,8 @@ import java.util.concurrent.ExecutionException;
 @RequiredArgsConstructor
 public class PerformanceService implements PerformanceServiceBehavior {
 
-    private final XmlToMap xmlToMap;
     private final PerformanceSearchBehavior performanceSearchService;
+    private final BatchManager batchManager;
 
     // 전체 조회 & 메인 & 검색
     @Override
@@ -28,7 +29,7 @@ public class PerformanceService implements PerformanceServiceBehavior {
     @Cacheable(value = "elementsCache", condition = "#prfnm == null and #prfcast == null", key = "#root.methodName")
     public List<BasePerformancesResponseDto> getAllPerformances(String prfnm, String prfcast) throws ExecutionException, InterruptedException {
         try {
-            List<Elements> elements = xmlToMap.getElements();
+            List<Elements> elements = batchManager.getElements();
             String lowerPrfnm = searchPerformanceNullCheck(prfnm);
             String lowerPrfcast = searchCastNullCheck(prfcast);
             List<BasePerformancesResponseDto> performances = savePerformanceInformation(elements, lowerPrfnm, lowerPrfcast);
