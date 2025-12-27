@@ -5,8 +5,9 @@ import com.example.calenduck.domain.bookmark.Repository.BookmarkRepository;
 import com.example.calenduck.domain.bookmark.dto.request.EditBookmarkRequestDto;
 import com.example.calenduck.domain.bookmark.dto.response.BookmarkResponseDto;
 import com.example.calenduck.domain.bookmark.dto.response.MyBookmarkResponseDto;
+import com.example.calenduck.domain.performance.http.DataConversion;
+import com.example.calenduck.domain.performance.http.HttpRequest;
 import com.example.calenduck.domain.performance.repository.NameWithMt20idRepository;
-import com.example.calenduck.domain.performance.service.XmlToMap;
 import com.example.calenduck.domain.user.entity.User;
 import com.example.calenduck.global.exception.GlobalErrorCode;
 import com.example.calenduck.global.exception.GlobalException;
@@ -22,6 +23,10 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -30,7 +35,8 @@ public class BookmarkService implements BookmarkBehavior{
 
     private final BookmarkRepository bookmarkRepository;
     private final NameWithMt20idRepository nameWithMt20idRepository;
-    private final XmlToMap xmlToMap;
+    private final HttpRequest httpRequest;
+    private final DataConversion dataConversion;
     private final EditBookmarkMapper editBookmarkMapper;
 
     // 북마크 성공/취소
@@ -76,54 +82,71 @@ public class BookmarkService implements BookmarkBehavior{
         }
     }
 
-    // 찜목록 전체 조회
+    // 찜목록 전체 조회 - 병렬처리 적용
     @Override
     @Transactional
-    public List<MyBookmarkResponseDto> getBookmarks(User user) throws IOException {
+    public List<MyBookmarkResponseDto> getBookmarks(User user) {
         List<Bookmark> bookmarks = bookmarkRepository.findAllByUser(user);
         log.info("bookmark.size ===== " + bookmarks.size());
-        for (int i=0; i<bookmarks.size(); i++) {
-            log.info("bookmark.getMt20id() == " + bookmarks.get(i).getMt20id() + " " + (i+1) + "번째 값임");
+
+        if (bookmarks.isEmpty()) {
+            return new ArrayList<>();
         }
-        List<MyBookmarkResponseDto> myBookmarks = new ArrayList<>();
 
-        for (Bookmark bookmark : bookmarks) {
-        List<Elements> elements = xmlToMap.getBookmarkElements(bookmark.getMt20id());
+        ExecutorService executorService = Executors.newFixedThreadPool(Math.min(bookmarks.size(), 10));
 
-            for (Elements element : elements) {
-                log.info("element ====== " + element);
-                String mt20id = element.select("mt20id").text();
-                String poster = element.select("poster").text();
-                String prfnm = element.select("prfnm").text();
-                String prfcast = element.select("prfcast").text();
-                String genrenm = element.select("genrenm").text();
-                String fcltynm = element.select("fcltynm").text();
-                String dtguidance = element.select("dtguidance").text();
-                String stdate = element.select("prfpdfrom").text();
-                String eddate = element.select("prfpdto").text();
-                String pcseguidance = element.select("pcseguidance").text();
+        try {
+            // 각 북마크에 대해 병렬로 API 호출
+            List<CompletableFuture<MyBookmarkResponseDto>> futures = bookmarks.stream()
+                    .map(bookmark -> CompletableFuture.supplyAsync(() -> fetchBookmarkDetail(bookmark), executorService))
+                    .collect(Collectors.toList());
 
-                if (bookmark.getMt20id().equals(mt20id)) {
-                    MyBookmarkResponseDto bookmarkDto = new MyBookmarkResponseDto(
-                            mt20id,
-                            poster,
-                            prfnm,
-                            prfcast,
-                            genrenm,
-                            fcltynm,
-                            dtguidance,
-                            stdate,
-                            eddate,
-                            pcseguidance,
-                            bookmark.getReservationDate(),
-                            null,
-                            null
-                    );
-                    myBookmarks.add(bookmarkDto);
-                }
-            }
+            // 모든 작업 완료 대기 및 결과 수집
+            return futures.stream()
+                    .map(CompletableFuture::join)
+                    .filter(dto -> dto != null)
+                    .collect(Collectors.toList());
+        } finally {
+            executorService.shutdown();
         }
-        return myBookmarks;
+    }
+
+    // 단일 북마크에 대한 API 호출 및 DTO 변환
+    private MyBookmarkResponseDto fetchBookmarkDetail(Bookmark bookmark) {
+        try {
+            String response = httpRequest.requestExtraction(bookmark.getMt20id());
+            Elements element = dataConversion.convertXml(response);
+
+            String mt20id = element.select("mt20id").text();
+            String poster = element.select("poster").text();
+            String prfnm = element.select("prfnm").text();
+            String prfcast = element.select("prfcast").text();
+            String genrenm = element.select("genrenm").text();
+            String fcltynm = element.select("fcltynm").text();
+            String dtguidance = element.select("dtguidance").text();
+            String stdate = element.select("prfpdfrom").text();
+            String eddate = element.select("prfpdto").text();
+            String pcseguidance = element.select("pcseguidance").text();
+
+            return new MyBookmarkResponseDto(
+                    mt20id,
+                    poster,
+                    prfnm,
+                    prfcast,
+                    genrenm,
+                    fcltynm,
+                    dtguidance,
+                    stdate,
+                    eddate,
+                    pcseguidance,
+                    bookmark.getReservationDate(),
+                    null,
+                    null
+            );
+        } catch (IOException e) {
+            log.error("북마크 상세정보 조회 실패: mt20id={}", bookmark.getMt20id(), e);
+            return null;
+        }
     }
 
     // 찜목록 상세 수정
