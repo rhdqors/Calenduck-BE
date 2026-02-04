@@ -28,6 +28,28 @@
 -> 즐거운 문화 생활을 합시다.
 
 
+### 🛠 기술 스택
+- **Backend**: Java 17, Spring Boot 2.7.5, Spring Security, JPA
+- **Database**: MySQL, Redis
+- **Migration**: Flyway
+- **Auth**: OAuth 2.0 (Kakao)
+- **External API**: KOPIS 공연예술통합전산망
+
+### 🚀 기술적 도전 및 성과
+
+| 개선 항목 | Before | After | 개선율 |
+|-----------|--------|-------|--------|
+| 외부 API 배치 처리 | 49초 | 59ms | **99.8% ↓** |
+| DB 조회 최적화 | 매 요청 DB 접근 | Redis 캐싱 | DB 부하 감소 |
+| 인기검색어 | 미구현 | Redis Sorted Set | 실시간 랭킹 |
+
+#### 📝 상세 기술 블로그
+- [멀티스레드 + 배치 처리로 API 성능 99% 개선하기](https://rhdqors.tistory.com/123)
+- [Redis 캐싱으로 DB 부하 줄이기](#) <!-- TODO: 블로그 링크 -->
+- [Flyway로 DB 마이그레이션 관리하기](#) <!-- TODO: 블로그 링크 -->
+
+---
+
 ### 📑 ERD
 ![image](https://github.com/rhdqors/turkey-project/assets/108318494/eb1ce28e-f5e1-433e-b82f-5f39bdcd081f)
 
