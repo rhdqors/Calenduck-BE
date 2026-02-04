@@ -1,6 +1,6 @@
-package com.example.calenduck.domain.bookmark.Controller;
+package com.example.calenduck.domain.bookmark.controller;
 
-import com.example.calenduck.domain.bookmark.Service.BookmarkService;
+import com.example.calenduck.domain.bookmark.service.BookmarkService;
 import com.example.calenduck.domain.bookmark.dto.request.EditBookmarkRequestDto;
 import com.example.calenduck.domain.user.security.UserDetailsImpl;
 import com.example.calenduck.global.jwt.JwtUtil;

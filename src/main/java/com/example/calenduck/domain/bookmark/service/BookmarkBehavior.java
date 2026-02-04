@@ -1,4 +1,4 @@
-package com.example.calenduck.domain.bookmark.Service;
+package com.example.calenduck.domain.bookmark.service;
 
 import com.example.calenduck.domain.bookmark.dto.request.EditBookmarkRequestDto;
 import com.example.calenduck.domain.bookmark.dto.response.BookmarkResponseDto;

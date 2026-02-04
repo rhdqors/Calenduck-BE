@@ -1,7 +1,7 @@
 package com.example.calenduck.domain.detailInfo.service;
 
-import com.example.calenduck.domain.bookmark.Entity.Bookmark;
-import com.example.calenduck.domain.bookmark.Service.BookmarkService;
+import com.example.calenduck.domain.bookmark.entity.Bookmark;
+import com.example.calenduck.domain.bookmark.service.BookmarkService;
 import com.example.calenduck.domain.detailInfo.entity.DetailInfo;
 import com.example.calenduck.domain.detailInfo.repository.DetailInfoRepository;
 import com.example.calenduck.global.exception.GlobalErrorCode;

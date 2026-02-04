@@ -1,7 +1,7 @@
 package com.example.calenduck.domain.performance.service;
 
-import com.example.calenduck.domain.bookmark.Entity.Bookmark;
-import com.example.calenduck.domain.bookmark.Service.BookmarkService;
+import com.example.calenduck.domain.bookmark.entity.Bookmark;
+import com.example.calenduck.domain.bookmark.service.BookmarkService;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 
