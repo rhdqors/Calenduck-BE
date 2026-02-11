@@ -65,7 +65,10 @@ public class RedisCacheConfig extends CachingConfigurerSupport {
                 .build();
 
         SimpleCacheManager simpleCacheManager = new SimpleCacheManager();
-        simpleCacheManager.setCaches(Arrays.asList(redisCacheManager.getCache("elementsCache"))); // Set the cache name here
+        simpleCacheManager.setCaches(Arrays.asList(
+                redisCacheManager.getCache("elementsCache"),
+                redisCacheManager.getCache("performanceDetailCache")
+        ));
 
         return simpleCacheManager;
     }

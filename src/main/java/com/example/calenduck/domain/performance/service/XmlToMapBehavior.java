@@ -1,5 +1,6 @@
 package com.example.calenduck.domain.performance.service;
 
+import com.example.calenduck.domain.performance.dto.response.BasePerformancesResponseDto;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
@@ -11,4 +12,5 @@ public interface XmlToMapBehavior {
     List<String> getMt20idResultSet(); // db에서 mt20id 꺼내어 저장
     List<Elements> getElements() throws InterruptedException, ExecutionException; // 저장한 mt20id로  http 요청하여 elements로 반환
     List<Elements> getBookmarkElements(String mt20id) throws IOException; // 찜목록 mt20id 상세정보 조회
+    BasePerformancesResponseDto getPerformanceDetail(String mt20id) throws IOException; // 단건 공연 상세정보 조회 (캐시 적용)
 }

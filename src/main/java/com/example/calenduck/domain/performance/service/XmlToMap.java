@@ -2,11 +2,13 @@ package com.example.calenduck.domain.performance.service;
 
 import com.example.calenduck.domain.bookmark.Entity.Bookmark;
 import com.example.calenduck.domain.bookmark.Service.BookmarkService;
+import com.example.calenduck.domain.performance.dto.response.BasePerformancesResponseDto;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -202,6 +204,44 @@ public class XmlToMap implements XmlToMapBehavior {
             log.error("I/O error 발생" + e);
             throw e;
         }
+    }
+
+    // 단건 공연 상세정보 조회 (캐시 적용)
+    @Cacheable(value = "performanceDetailCache", key = "#mt20id")
+    @Override
+    public BasePerformancesResponseDto getPerformanceDetail(String mt20id) throws IOException {
+        log.info("캐시 미스 - KOPIS API 호출: mt20id = " + mt20id);
+
+        StringBuilder response = new StringBuilder();
+        URL url = new URL("http://kopis.or.kr/openApi/restful/pblprfr/" + mt20id + "?service=60a3d3573c5e4d8bb052a4abebff27b6");
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+
+        int responseCode = connection.getResponseCode();
+        log.info("Response Code: " + responseCode);
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                response.append(line);
+            }
+        }
+
+        Document doc = Jsoup.parse(response.toString());
+        Elements element = doc.select("db > *");
+
+        return new BasePerformancesResponseDto(
+                element.select("mt20id").text(),
+                element.select("poster").text(),
+                element.select("prfnm").text(),
+                element.select("prfcast").text(),
+                element.select("genrenm").text(),
+                element.select("fcltynm").text(),
+                element.select("dtguidance").text(),
+                element.select("prfpdfrom").text(),
+                element.select("prfpdto").text(),
+                element.select("pcseguidance").text()
+        );
     }
 
 }

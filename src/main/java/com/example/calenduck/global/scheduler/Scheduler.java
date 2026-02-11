@@ -14,8 +14,8 @@ public class Scheduler {
 
     private final PerformanceService performanceService;
 
-    // 매일 자정 메인페이지(전체 조회) 캐시 업데이트
-    @CacheEvict(value = "elementsCache", allEntries = true) // elementsCache 키값으로 존재하는 캐시 다 지우기
+    // 매일 자정 메인페이지(전체 조회) + 공연 상세정보 캐시 업데이트
+    @CacheEvict(value = {"elementsCache", "performanceDetailCache"}, allEntries = true)
     @Scheduled(cron = "0 0 0 * * *")
     public void updatePerformancesCacheAndClearCache() {
         try {
