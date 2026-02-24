@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface DetailInfoRepository extends JpaRepository<DetailInfo, Long> {
+public interface DetailInfoRepository extends JpaRepository<DetailInfo, String> {
 
     Optional<DetailInfo> findByMt20id(String mt20id);
 }
