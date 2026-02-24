@@ -41,7 +41,7 @@ public class UserMyPage implements MyPageEmployee {
 
             for (String alarm : alarms) {
                 String trimmedAlarm = alarm.trim();
-                alarmMessages = checkAlarmMessage(formattedCurrentDate, trimmedAlarm, bookmark, prfnm);
+                alarmMessages.addAll(checkAlarmMessage(formattedCurrentDate, trimmedAlarm, bookmark, prfnm));
             }
         }
 
