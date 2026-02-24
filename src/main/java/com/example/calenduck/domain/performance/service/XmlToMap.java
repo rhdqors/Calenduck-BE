@@ -7,6 +7,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +25,12 @@ import java.util.List;
 public class XmlToMap implements XmlToMapBehavior {
 
     private final BookmarkService bookmarkService;
+
+    @Value("${kopis.api.base-url}")
+    private String kopisBaseUrl;
+
+    @Value("${kopis.api.service-key}")
+    private String kopisServiceKey;
 
     @Autowired
     public XmlToMap(@Lazy BookmarkService bookmarkService) {
@@ -73,7 +80,7 @@ public class XmlToMap implements XmlToMapBehavior {
                 log.info("performanceId = " + performanceId);
 
                 StringBuilder response = new StringBuilder();
-                URL url = new URL("http://kopis.or.kr/openApi/restful/pblprfr/" + performanceId + "?service=60a3d3573c5e4d8bb052a4abebff27b6");
+                URL url = new URL(kopisBaseUrl + performanceId + "?service=" + kopisServiceKey);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
 
@@ -148,7 +155,7 @@ public class XmlToMap implements XmlToMapBehavior {
 //            StringBuilder response = new StringBuilder();
 //            try {
 //                // API 요청 및 데이터 추출
-//                URL url = new URL("http://kopis.or.kr/openApi/restful/pblprfr/" + performanceId + "?service=60a3d3573c5e4d8bb052a4abebff27b6");
+//                URL url = new URL(kopisBaseUrl + performanceId + "?service=" + kopisServiceKey);
 //                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 //                connection.setRequestMethod("GET");
 //                int responseCode = connection.getResponseCode();

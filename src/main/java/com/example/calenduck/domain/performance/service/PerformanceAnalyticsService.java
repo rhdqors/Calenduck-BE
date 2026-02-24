@@ -22,11 +22,20 @@ public class PerformanceAnalyticsService implements PerformanceAnalyticsBehavior
     @Value("${server.url}")
     private String serverUrl;
 
+    @Value("${redash.api-key.genre-region}")
+    private String genreRegionApiKey;
+
+    @Value("${redash.api-key.top-ten}")
+    private String topTenApiKey;
+
+    @Value("${redash.api-key.region}")
+    private String regionApiKey;
+
     // 인기도 - 지역별 장르
     @Override
     @Transactional
     public JsonNode PopularityByGenreWithRegion() {
-        String url = serverUrl + "/api/queries/3/results.json?api_key=DaPCdTfknrRmiIR6UVBG3eVgvwv9LhgB4WuGkCfC";
+        String url = serverUrl + "/api/queries/3/results.json?api_key=" + genreRegionApiKey;
         JsonNode rowsNode = null;
 
         try {
@@ -76,7 +85,7 @@ public class PerformanceAnalyticsService implements PerformanceAnalyticsBehavior
     @Override
     @Transactional
     public JsonNode topTen() {
-        String url = serverUrl + "/api/queries/5/results.json?api_key=B15NuqHs3MxTpejr9OS9AwXyPxTL85naIxsQkKgT";
+        String url = serverUrl + "/api/queries/5/results.json?api_key=" + topTenApiKey;
         JsonNode rowsNode = null;
 
         try {
@@ -119,7 +128,7 @@ public class PerformanceAnalyticsService implements PerformanceAnalyticsBehavior
     @Override
     @Transactional
     public JsonNode PopularityByRegion() {
-        String url = serverUrl + "/api/queries/1/results.json?api_key=X7GrpYLJCgnCAAP410I63YfeLifwKKaViKAxz7SE";
+        String url = serverUrl + "/api/queries/1/results.json?api_key=" + regionApiKey;
         JsonNode rowsNode = null;
 
         try {

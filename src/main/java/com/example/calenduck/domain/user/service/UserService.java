@@ -116,7 +116,7 @@ public class UserService implements UserBehavior {
                 kakaoUserInfoRequest,
                 String.class
         );
-        log.info("response : " + response);
+        // 민감 정보 로깅 제거 (카카오 API 응답에 개인정보 포함)
 
         try {
             String responseBody = response.getBody();
@@ -133,7 +133,7 @@ public class UserService implements UserBehavior {
             String age = jsonNode.get("kakao_account").has("age") ?
                     jsonNode.get("kakao_account").get("age").asText() : null;
 
-            log.info("카카오 사용자 정보: " + id + ", " + nickname + ", " + email + ", " +  gender + ", " + age);
+            log.info("카카오 로그인 처리: kakaoId={}", id);
             return new KakaoUserInfoDto(id, nickname, email, gender, age);
         } catch (JsonProcessingException e) {
             log.error("getKakaoUserInfo JSON processing error", e);

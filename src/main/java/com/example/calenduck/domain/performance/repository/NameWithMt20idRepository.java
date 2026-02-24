@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import javax.transaction.Transactional;
 import java.util.List;
 
-public interface NameWithMt20idRepository extends JpaRepository<NameWithMt20id, Long> {
+public interface NameWithMt20idRepository extends JpaRepository<NameWithMt20id, String> {
 
     @Transactional
     @Query("SELECT n.mt20id FROM NameWithMt20id n ORDER BY n.mt20id ASC")

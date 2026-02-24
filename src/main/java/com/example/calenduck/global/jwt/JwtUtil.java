@@ -55,7 +55,7 @@ public class JwtUtil {
     public String resolveToken(HttpServletRequest request) {
         // header 토큰을 가져오기
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-        log.info("bearerToken === "  + bearerToken);
+        // 토큰 값은 민감 정보이므로 로그 출력하지 않음
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
             return bearerToken.substring(7);
         }
@@ -103,7 +103,6 @@ public class JwtUtil {
         Claims claims;
 
         if (token != null) {
-            Object GlobalrrorCode;
             if (validateToken(token)) {
                 claims = getUserInfoFromToken(token);
                 return claims;
@@ -120,12 +119,10 @@ public class JwtUtil {
 
     // 인증 객체 생성
     public Authentication createAuthentication(String nickname, String role) {
-        UserDetails userDetails = null;
-        if(Objects.equals(role, "USER")){
-            userDetails = userDetailsService.loadUserByUsername(nickname);
+        if (!Objects.equals(role, UserRoleEnum.USER.name())) {
+            throw new GlobalException(GlobalErrorCode.INVALID_TOKEN);
         }
-
-        assert userDetails != null : "UserDetails must not be null";
+        UserDetails userDetails = userDetailsService.loadUserByUsername(nickname);
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 
