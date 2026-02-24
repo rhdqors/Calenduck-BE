@@ -44,3 +44,13 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Claude Code ###
+.claude/
+CLAUDE.md
+TEMPLATE-GUIDE.md
+{{FRONTEND_DIR}}/
+
+### Project docs ###
+final_questions.md
+final_questions_with_answers.md
