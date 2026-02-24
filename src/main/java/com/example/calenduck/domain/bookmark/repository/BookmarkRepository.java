@@ -1,6 +1,6 @@
-package com.example.calenduck.domain.bookmark.Repository;
+package com.example.calenduck.domain.bookmark.repository;
 
-import com.example.calenduck.domain.bookmark.Entity.Bookmark;
+import com.example.calenduck.domain.bookmark.entity.Bookmark;
 import com.example.calenduck.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;

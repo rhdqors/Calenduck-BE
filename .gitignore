@@ -51,6 +51,7 @@ CLAUDE.md
 TEMPLATE-GUIDE.md
 {{FRONTEND_DIR}}/
 
-### Project docs ###
+### Project Docs ###
+mydocs/
 final_questions.md
 final_questions_with_answers.md

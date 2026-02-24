@@ -1,4 +1,4 @@
-package com.example.calenduck.domain.bookmark.Entity;
+package com.example.calenduck.domain.bookmark.entity;
 
 import com.example.calenduck.domain.bookmark.dto.request.EditBookmarkRequestDto;
 import com.example.calenduck.domain.user.entity.User;
