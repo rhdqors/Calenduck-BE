@@ -62,13 +62,11 @@ public class BookmarkService implements BookmarkBehavior{
         if (bookmark != null) {
             if (bookmark.getDeletedAt() == null) {
                 bookmark.setDeletedAt(LocalDateTime.now());
-                bookmark.setModifiedAt(LocalDateTime.now());
             } else {
                 bookmark.setDeletedAt(null);
             }
         } else {
             bookmark = new Bookmark(mt20id, user, reservationDate);
-            bookmark.setModifiedAt(LocalDateTime.now());
         }
 
         bookmarkRepository.saveAndFlush(bookmark);

@@ -2,13 +2,14 @@ package com.example.calenduck.domain.bookmark.entity;
 
 import com.example.calenduck.domain.bookmark.dto.request.EditBookmarkRequestDto;
 import com.example.calenduck.domain.user.entity.User;
-import com.example.calenduck.global.entity.Timestamped;
+import com.example.calenduck.global.entity.BaseTimeEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Index;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -16,7 +17,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 //@Where(clause = "deleted_at IS NULL")
 //@SQLDelete(sql = "UPDATE bookmark SET deleted_at = CONVERT_TZ(now(), 'UTC', 'Asia/Seoul') WHERE id = ?")
-public class Bookmark extends Timestamped {
+public class Bookmark extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,6 +33,11 @@ public class Bookmark extends Timestamped {
     @Column
     private String alarm;
 
+    @Column(nullable = false)
+    private String reservationDate;
+
+    private LocalDateTime deletedAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -46,5 +52,4 @@ public class Bookmark extends Timestamped {
         this.content = editBookmarkRequestDto.getContent();
         this.alarm = editBookmarkRequestDto.getAlarm();
     }
-
 }
