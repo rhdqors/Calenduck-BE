@@ -8,7 +8,6 @@ import java.util.List;
 public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 
     List<Bookmark> findAllByUser(User user);
-    List<Bookmark> findAllByMt20id(String mt20id);
     Bookmark findByUserAndMt20idAndReservationDate(User user, String mt20id, String reservationDate);
 
 }
