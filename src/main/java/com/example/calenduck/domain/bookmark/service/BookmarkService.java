@@ -187,7 +187,7 @@ public class BookmarkService implements BookmarkBehavior{
 
         String alarmDates = resultBuilder.toString();
 
-        Bookmark bookmark = findByUserAndMt20idAndReservationDate(user, mt20id, reservationDate);
+        Bookmark bookmark = bookmarkRepository.findByUserAndMt20idAndReservationDate(user, mt20id, reservationDate);
         if(bookmark == null) {
             throw new GlobalException(GlobalErrorCode.BOOKMARK_NOT_FOUND);
         }
@@ -205,20 +205,6 @@ public class BookmarkService implements BookmarkBehavior{
 
     public List<Bookmark> findBookmarks(User user) {
         return bookmarkRepository.findAllByUser(user);
-    }
-
-
-    public List<Bookmark> findBookmarksToId(String mt20id) {
-        return bookmarkRepository.findAllByMt20id(mt20id);
-    }
-
-
-    public List<Bookmark> findBookmarks(String mt20id) {
-        return bookmarkRepository.findAllByMt20id(mt20id);
-    }
-
-    public Bookmark findByUserAndMt20idAndReservationDate(User user, String mt20id, String reservationDate) {
-        return bookmarkRepository.findByUserAndMt20idAndReservationDate(user, mt20id, reservationDate);
     }
 
 }
