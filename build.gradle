@@ -74,6 +74,12 @@ dependencies {
 	// flyway
 	implementation'org.flywaydb:flyway-core:6.4.2'
 
+	// dotenv (.env 파일에서 환경변수 로드)
+	implementation 'me.paulschwarz:spring-dotenv:2.5.4'
+
+	// dotenv (.env 파일에서 환경변수 로드)
+	implementation 'me.paulschwarz:spring-dotenv:2.5.4'
+
 
 }
 
