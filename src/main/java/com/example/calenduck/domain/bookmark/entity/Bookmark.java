@@ -1,11 +1,10 @@
 package com.example.calenduck.domain.bookmark.entity;
 
-import com.example.calenduck.domain.bookmark.dto.request.EditBookmarkRequestDto;
 import com.example.calenduck.domain.user.entity.User;
 import com.example.calenduck.global.entity.BaseTimeEntity;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.Index;
 
 import javax.persistence.*;
@@ -13,10 +12,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Setter
-@NoArgsConstructor
-//@Where(clause = "deleted_at IS NULL")
-//@SQLDelete(sql = "UPDATE bookmark SET deleted_at = CONVERT_TZ(now(), 'UTC', 'Asia/Seoul') WHERE id = ?")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Bookmark extends BaseTimeEntity {
 
     @Id
@@ -48,8 +44,20 @@ public class Bookmark extends BaseTimeEntity {
         this.reservationDate = reservationDate;
     }
 
-    public void updateBookmark(EditBookmarkRequestDto editBookmarkRequestDto) {
-        this.content = editBookmarkRequestDto.getContent();
-        this.alarm = editBookmarkRequestDto.getAlarm();
+    public void updateContent(String content, String alarm) {
+        this.content = content;
+        this.alarm = alarm;
+    }
+
+    public void softDelete() {
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    public void restore() {
+        this.deletedAt = null;
+    }
+
+    public boolean isDeleted() {
+        return this.deletedAt != null;
     }
 }
