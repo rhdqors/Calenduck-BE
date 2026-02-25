@@ -6,13 +6,12 @@ import com.example.calenduck.domain.user.entity.UserRoleEnum;
 import com.example.calenduck.domain.user.repository.UserRepository;
 import com.example.calenduck.global.exception.GlobalErrorCode;
 import com.example.calenduck.global.exception.GlobalException;
+import com.example.calenduck.global.jwt.JwtUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.servlet.http.HttpServletResponse;
 
 @Slf4j
 @Service
@@ -21,17 +20,20 @@ public class UserService implements UserBehavior {
 
     private final UserRepository userRepository;
     private final KakaoOAuthClient kakaoOAuthClient;
+    private final JwtUtil jwtUtil;
 
     @Transactional
     @Override
-    public User kakaoLogin(String code, HttpServletResponse response) {
+    public String kakaoLogin(String code) {
         try {
             String accessToken = kakaoOAuthClient.getToken(code);
             KakaoUserInfoDto kakaoUserInfo = kakaoOAuthClient.getKakaoUserInfo(accessToken);
             signupIfNeeded(kakaoUserInfo);
 
-            return userRepository.findByKakaoId(kakaoUserInfo.getId())
+            User user = userRepository.findByKakaoId(kakaoUserInfo.getId())
                     .orElseThrow(() -> new GlobalException(GlobalErrorCode.USER_NOT_FOUND));
+
+            return jwtUtil.createToken(user.getNickname(), user.getKakaoEmail(), user.getRole());
         } catch (JsonProcessingException e) {
             log.error("kakaoLogin JSON processing error", e);
             throw new GlobalException(GlobalErrorCode.JSON_PROCESSING_ERROR);
