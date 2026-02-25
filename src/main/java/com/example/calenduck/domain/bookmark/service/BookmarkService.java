@@ -37,7 +37,7 @@ public class BookmarkService implements BookmarkBehavior{
     private final NameWithMt20idRepository nameWithMt20idRepository;
     private final HttpRequest httpRequest;
     private final DataConversion dataConversion;
-    private final EditBookmarkMapper editBookmarkMapper;
+
 
     // 북마크 성공/취소
     @Override
@@ -60,10 +60,10 @@ public class BookmarkService implements BookmarkBehavior{
 
         Bookmark bookmark = bookmarkRepository.findByUserAndMt20idAndReservationDate(user, mt20id, reservationDate);
         if (bookmark != null) {
-            if (bookmark.getDeletedAt() == null) {
-                bookmark.setDeletedAt(LocalDateTime.now());
+            if (!bookmark.isDeleted()) {
+                bookmark.softDelete();
             } else {
-                bookmark.setDeletedAt(null);
+                bookmark.restore();
             }
         } else {
             bookmark = new Bookmark(mt20id, user, reservationDate);
@@ -71,9 +71,8 @@ public class BookmarkService implements BookmarkBehavior{
 
         bookmarkRepository.saveAndFlush(bookmark);
 
-        if (bookmark.getDeletedAt() != null) {
-            LocalDateTime deletedAt = bookmark.getDeletedAt();
-            return new BookmarkResponseDto("찜목록 취소", deletedAt);
+        if (bookmark.isDeleted()) {
+            return new BookmarkResponseDto("찜목록 취소", bookmark.getDeletedAt());
         } else {
             LocalDateTime createdAt = bookmark.getCreatedAt();
             return new BookmarkResponseDto("찜목록 성공", createdAt, reservationDate);
@@ -186,23 +185,18 @@ public class BookmarkService implements BookmarkBehavior{
             resultBuilder.append(formattedDate);
         }
 
-        String result = resultBuilder.toString();
-        log.info("Result: " + result);
-        editBookmarkRequestDto.setAlarm(result);
-        log.info("editBookmarkRequestDto.setAlarm(result) == " + editBookmarkRequestDto.getAlarm());
+        String alarmDates = resultBuilder.toString();
 
         Bookmark bookmark = findByUserAndMt20idAndReservationDate(user, mt20id, reservationDate);
         if(bookmark == null) {
             throw new GlobalException(GlobalErrorCode.BOOKMARK_NOT_FOUND);
         }
-        if(bookmark.getMt20id().equals(mt20id) && bookmark.getReservationDate().equals(reservationDate) && bookmark.getDeletedAt() != null) {
+        if(bookmark.getMt20id().equals(mt20id) && bookmark.getReservationDate().equals(reservationDate) && bookmark.isDeleted()) {
             throw new GlobalException(GlobalErrorCode.BOOKMARK_NOT_FOUND);
         }
 
         if (reservationDate.equals(bookmark.getReservationDate())) {
-            log.info("bookmark.getReservationDate() = " + bookmark.getReservationDate());
-            log.info("if 들어옴----");
-            editBookmarkMapper.updateBookmarkFromDto(editBookmarkRequestDto, bookmark);
+            bookmark.updateContent(editBookmarkRequestDto.getContent(), alarmDates);
             bookmarkRepository.save(bookmark);
         } else {
             throw new GlobalException(GlobalErrorCode.NOT_VALID_DATE);

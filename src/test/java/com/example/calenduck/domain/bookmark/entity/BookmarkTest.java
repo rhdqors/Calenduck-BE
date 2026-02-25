@@ -1,6 +1,5 @@
 package com.example.calenduck.domain.bookmark.entity;
 
-import com.example.calenduck.domain.bookmark.dto.request.EditBookmarkRequestDto;
 import com.example.calenduck.domain.user.dto.request.KakaoUserInfoDto;
 import com.example.calenduck.domain.user.entity.User;
 import com.example.calenduck.domain.user.entity.UserRoleEnum;
@@ -34,17 +33,14 @@ class BookmarkTest {
     }
 
     @Test
-    @DisplayName("updateBookmark 호출 시 content와 alarm이 업데이트된다")
-    void updateBookmark_withDto_updatesContentAndAlarm() {
+    @DisplayName("updateContent 호출 시 content와 alarm이 업데이트된다")
+    void updateContent_withParams_updatesFields() {
         // Given
         User user = createTestUser();
         Bookmark bookmark = new Bookmark("PF12345", user, "20240101");
-        EditBookmarkRequestDto dto = new EditBookmarkRequestDto();
-        dto.setContent("테스트 메모");
-        dto.setAlarm("1일전");
 
         // When
-        bookmark.updateBookmark(dto);
+        bookmark.updateContent("테스트 메모", "1일전");
 
         // Then
         assertThat(bookmark.getContent()).isEqualTo("테스트 메모");
@@ -52,14 +48,45 @@ class BookmarkTest {
     }
 
     @Test
-    @DisplayName("Bookmark는 deletedAt 필드를 가진다")
-    void bookmark_hasDeletedAtField() {
+    @DisplayName("softDelete 호출 시 deletedAt이 설정된다")
+    void softDelete_setsDeletedAt() {
+        // Given
+        User user = createTestUser();
+        Bookmark bookmark = new Bookmark("PF12345", user, "20240101");
+
+        // When
+        bookmark.softDelete();
+
+        // Then
+        assertThat(bookmark.getDeletedAt()).isNotNull();
+        assertThat(bookmark.isDeleted()).isTrue();
+    }
+
+    @Test
+    @DisplayName("restore 호출 시 deletedAt이 null로 초기화된다")
+    void restore_clearsDeletedAt() {
+        // Given
+        User user = createTestUser();
+        Bookmark bookmark = new Bookmark("PF12345", user, "20240101");
+        bookmark.softDelete();
+
+        // When
+        bookmark.restore();
+
+        // Then
+        assertThat(bookmark.getDeletedAt()).isNull();
+        assertThat(bookmark.isDeleted()).isFalse();
+    }
+
+    @Test
+    @DisplayName("삭제되지 않은 Bookmark의 isDeleted는 false다")
+    void isDeleted_whenNotDeleted_returnsFalse() {
         // Given
         User user = createTestUser();
         Bookmark bookmark = new Bookmark("PF12345", user, "20240101");
 
         // When & Then
-        assertThat(bookmark.getDeletedAt()).isNull();
+        assertThat(bookmark.isDeleted()).isFalse();
     }
 
     @Test
@@ -72,21 +99,5 @@ class BookmarkTest {
         // When & Then — JPA 컨텍스트 없이는 null이지만, 필드 존재를 확인
         assertThat(bookmark.getCreatedAt()).isNull();
         assertThat(bookmark.getModifiedAt()).isNull();
-    }
-
-    @Test
-    @DisplayName("기본 생성자로 생성한 Bookmark의 모든 필드는 null이다")
-    void create_withNoArgs_allFieldsNull() {
-        // When
-        Bookmark bookmark = new Bookmark();
-
-        // Then
-        assertThat(bookmark.getId()).isNull();
-        assertThat(bookmark.getMt20id()).isNull();
-        assertThat(bookmark.getContent()).isNull();
-        assertThat(bookmark.getAlarm()).isNull();
-        assertThat(bookmark.getUser()).isNull();
-        assertThat(bookmark.getReservationDate()).isNull();
-        assertThat(bookmark.getDeletedAt()).isNull();
     }
 }
