@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -26,7 +25,6 @@ public class BatchManager {
     private final DataConversion dataConversion;
     private final NameWithMt20idRepository nameWithMt20idRepository;
 
-    @Transactional
     public List<Elements> getElements() throws InterruptedException, ExecutionException {
         try{
             List<String> duplicateMt20ids = nameWithMt20idRepository.findAllMt20idsOrdered();

@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -33,8 +32,7 @@ public class PerformanceAnalyticsService implements PerformanceAnalyticsBehavior
 
     // 인기도 - 지역별 장르
     @Override
-    @Transactional
-    public JsonNode PopularityByGenreWithRegion() {
+    public JsonNode popularityByGenreWithRegion() {
         String url = serverUrl + "/api/queries/3/results.json?api_key=" + genreRegionApiKey;
         JsonNode rowsNode = null;
 
@@ -83,7 +81,6 @@ public class PerformanceAnalyticsService implements PerformanceAnalyticsBehavior
 
     // 탑텐
     @Override
-    @Transactional
     public JsonNode topTen() {
         String url = serverUrl + "/api/queries/5/results.json?api_key=" + topTenApiKey;
         JsonNode rowsNode = null;
@@ -126,8 +123,7 @@ public class PerformanceAnalyticsService implements PerformanceAnalyticsBehavior
 
     // 지역별 인기 공연
     @Override
-    @Transactional
-    public JsonNode PopularityByRegion() {
+    public JsonNode popularityByRegion() {
         String url = serverUrl + "/api/queries/1/results.json?api_key=" + regionApiKey;
         JsonNode rowsNode = null;
 

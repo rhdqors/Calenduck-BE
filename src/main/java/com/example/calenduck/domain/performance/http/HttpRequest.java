@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Transactional;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -24,7 +23,6 @@ public class HttpRequest {
     @Value("${request.last-url}")
     private String lastUrl;
 
-    @Transactional
     public String requestExtraction(String mt20id) throws IOException {
         URL url = new URL(firstUrl + mt20id + lastUrl);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();

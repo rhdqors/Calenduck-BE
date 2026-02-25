@@ -42,14 +42,14 @@ public class PerformanceController {
 
     @Operation(summary = "장르별 인기도 - 지역별", description = "장르별 인기도 - 지역별")
     @GetMapping("/popularity/genres/region")
-    public ResponseEntity<?> PopularityByGenreWithRegion() {
-        return ResponseMessage.SuccessResponse("장르별 인기도 - 지역별", performanceAnalyticsBehavior.PopularityByGenreWithRegion());
+    public ResponseEntity<?> popularityByGenreWithRegion() {
+        return ResponseMessage.SuccessResponse("장르별 인기도 - 지역별", performanceAnalyticsBehavior.popularityByGenreWithRegion());
     }
 
 //    @Operation(summary = "장르별 인기도 - 랭킹점수 가산", description = "장르별 인기도 - 랭킹점수 가산")
 //    @GetMapping("/popularity/genre/rank")
-//    public ResponseEntity<?> PopularityByRegion() {
-//        return ResponseMessage.SuccessResponse("장르별 인기도 - 랭킹점수 가산", performanceService.PopularityByRegion());
+//    public ResponseEntity<?> popularityByRegion() {
+//        return ResponseMessage.SuccessResponse("장르별 인기도 - 랭킹점수 가산", performanceService.popularityByRegion());
 //    }
 
     @Operation(summary = "Top 10", description = "Top 10")
@@ -60,8 +60,8 @@ public class PerformanceController {
 
     @Operation(summary = "지역별 인기 공연", description = "지역별 인기 공연")
     @GetMapping("/popularity/region")
-    public ResponseEntity<?> PopularityByRegion() {
-        return ResponseMessage.SuccessResponse("지역별 인기 공연", performanceAnalyticsBehavior.PopularityByRegion());
+    public ResponseEntity<?> popularityByRegion() {
+        return ResponseMessage.SuccessResponse("지역별 인기 공연", performanceAnalyticsBehavior.popularityByRegion());
     }
 
 }
