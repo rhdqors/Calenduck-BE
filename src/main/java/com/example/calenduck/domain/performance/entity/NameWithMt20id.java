@@ -1,6 +1,6 @@
 package com.example.calenduck.domain.performance.entity;
 
-import com.example.calenduck.global.entity.Timestamped;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
