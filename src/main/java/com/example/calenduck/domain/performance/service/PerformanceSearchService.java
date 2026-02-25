@@ -6,7 +6,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,13 +21,11 @@ public class PerformanceSearchService implements PerformanceSearchBehavior {
     //    Pub/Sub 메시징 시스템을 사용하여 메시지 발행 및 구독.
 
     @Override
-    @Transactional
     public void updatePopularSearchWord(String searchTerm) {
         redisTemplate.opsForZSet().incrementScore("rank", searchTerm, 1);
     }
 
     @Override
-    @Transactional
     public List<SearchRankResponseDto> searchRankList() {
         String key = "rank";
         // ZSetOperations 객체 생성

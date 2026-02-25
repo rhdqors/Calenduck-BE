@@ -5,14 +5,13 @@ import com.example.calenduck.global.entity.BaseTimeEntity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Index;
-
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(indexes = @Index(name = "idx_mt20id", columnList = "mt20id"))
 public class Bookmark extends BaseTimeEntity {
 
     @Id
@@ -20,7 +19,6 @@ public class Bookmark extends BaseTimeEntity {
     private Long id;
 
     @Column(nullable = false)
-    @Index(name = "idx_mt20id")
     private String mt20id;
 
     @Column
