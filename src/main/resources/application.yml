@@ -1,0 +1,110 @@
+# ===== Profile =====
+spring:
+  profiles:
+    active: db-local
+
+  # ===== MySQL =====
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  # ===== JPA / Hibernate =====
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+
+  # ===== Flyway =====
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+  # ===== Redis =====
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+
+  # ===== Cache TTL =====
+  cache:
+    redis:
+      time-to-live: 90000000  # 25시간 (ms)
+
+# ===== Server =====
+server:
+  port: 8080
+  url: ${SERVER_URL}
+
+# ===== JWT =====
+jwt:
+  secret:
+    key: ${JWT_SECRET_KEY}
+
+# ===== Kakao OAuth =====
+kakao:
+  client-id: ${KAKAO_CLIENT_ID}
+  redirect_url: ${KAKAO_REDIRECT_URL}
+
+# ===== Redash API =====
+redash:
+  api-key:
+    genre-region: ${REDASH_API_KEY_GENRE_REGION}
+    top-ten: ${REDASH_API_KEY_TOP_TEN}
+    region: ${REDASH_API_KEY_REGION}
+
+# ===== KOPIS API =====
+kopis:
+  api:
+    base-url: http://kopis.or.kr/openApi/restful/pblprfr/
+    service-key: ${KOPIS_API_SERVICE_KEY}
+
+# ===== Logging =====
+logging:
+  level:
+    com.example.calenduck: INFO
+
+# ===== Thread Pool =====
+app:
+  thread-pool:
+    batch:
+      core-size: 10
+      max-size: 50
+      queue-capacity: 100
+    bookmark:
+      core-size: 5
+      max-size: 20
+      queue-capacity: 50
+
+# ===== HTTP Timeout =====
+http:
+  connect-timeout: 5000   # 5초
+  read-timeout: 10000     # 10초
+
+# ===== Resilience4j =====
+resilience4j:
+  circuitbreaker:
+    instances:
+      kopisApi:
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 60s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        recordExceptions:
+          - java.io.IOException
+          - java.util.concurrent.ExecutionException
+  retry:
+    instances:
+      kopisApi:
+        maxAttempts: 3
+        waitDuration: 2s
+        retryExceptions:
+          - java.io.IOException

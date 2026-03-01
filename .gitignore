@@ -25,7 +25,7 @@ bin/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
-**/resources/application.yml
+### (application.yml은 커밋 추적 대상)
 **/resources/docker-compose.yml
 **/resources/Dockerfile
 **/resources/dump.rdb
