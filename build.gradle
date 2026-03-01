@@ -58,6 +58,12 @@ dependencies {
 	// flyway
 	implementation'org.flywaydb:flyway-core:6.4.2'
 
+	// Resilience4j
+	implementation 'io.github.resilience4j:resilience4j-spring-boot2:2.0.2'
+
+	// AOP (Resilience4j 어노테이션 동작에 필수)
+	implementation 'org.springframework.boot:spring-boot-starter-aop'
+
 	// dotenv (.env 파일에서 환경변수 로드)
 	implementation 'me.paulschwarz:spring-dotenv:2.5.4'
 }

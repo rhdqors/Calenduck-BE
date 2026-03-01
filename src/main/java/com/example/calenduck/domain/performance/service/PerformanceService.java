@@ -5,11 +5,13 @@ import com.example.calenduck.domain.performance.http.BatchManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.select.Elements;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -24,9 +26,10 @@ public class PerformanceService implements PerformanceServiceBehavior {
     // 전체 조회 & 메인 & 검색
     @Override
     @Transactional
-    // key 값은 현재 메서드를 나타내는 sple(Spring Expression Language)언어
-    // 다시 현재 메서드가 호출되면 데이터를 다시 조회하는 것이 아닌 캐시된 데이터를 불러옴
-    @Cacheable(value = "elementsCache", condition = "#prfnm == null and #prfcast == null", key = "#root.methodName")
+    @Cacheable(value = "elementsCache",
+            condition = "#prfnm == null and #prfcast == null",
+            key = "#root.methodName",
+            unless = "#result.isEmpty()")
     public List<BasePerformancesResponseDto> getAllPerformances(String prfnm, String prfcast) throws ExecutionException, InterruptedException {
         try {
             List<Elements> elements = batchManager.getElements();
@@ -37,12 +40,27 @@ public class PerformanceService implements PerformanceServiceBehavior {
             updateSearchWord(prfnm, prfcast);
             return performances;
         } catch (ExecutionException e) {
-            log.error("실헹 에러 발생", e);
+            log.error("실행 에러 발생", e);
             throw e;
         } catch (InterruptedException e) {
-            Thread.currentThread().interrupt(); // 현재 스레드의 인터럽트 상태를 다시 설정
+            Thread.currentThread().interrupt();
             log.error("스레드 중단됨", e);
             throw e;
+        }
+    }
+
+    // 스케줄러용 캐시 갱신 메서드
+    @Override
+    @CachePut(value = "elementsCache",
+            key = "'getAllPerformances'",
+            unless = "#result.isEmpty()")
+    public List<BasePerformancesResponseDto> refreshPerformancesCache() {
+        try {
+            List<Elements> elements = batchManager.getElements();
+            return savePerformanceInformation(elements, null, null);
+        } catch (Exception e) {
+            log.error("캐시 갱신 중 KOPIS API 호출 실패", e);
+            return Collections.emptyList();
         }
     }
 

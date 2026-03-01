@@ -2,7 +2,6 @@ package com.example.calenduck.domain.performance.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,8 +15,8 @@ import java.util.Arrays;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class PerformanceAnalyticsService implements PerformanceAnalyticsBehavior {
+
     @Value("${server.url}")
     private String serverUrl;
 
@@ -30,6 +29,12 @@ public class PerformanceAnalyticsService implements PerformanceAnalyticsBehavior
     @Value("${redash.api-key.region}")
     private String regionApiKey;
 
+    @Value("${http.connect-timeout}")
+    private int connectTimeout;
+
+    @Value("${http.read-timeout}")
+    private int readTimeout;
+
     // 인기도 - 지역별 장르
     @Override
     public JsonNode popularityByGenreWithRegion() {
@@ -41,6 +46,8 @@ public class PerformanceAnalyticsService implements PerformanceAnalyticsBehavior
             HttpURLConnection connection = (HttpURLConnection) apiUrl.openConnection();
             connection.setRequestMethod("GET");
             connection.setRequestProperty("Accept", "application/json");
+            connection.setConnectTimeout(connectTimeout);
+            connection.setReadTimeout(readTimeout);
 
             int responseCode = connection.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
@@ -54,27 +61,24 @@ public class PerformanceAnalyticsService implements PerformanceAnalyticsBehavior
                 reader.close();
                 String jsonResponse = response.toString();
 
-                // Parse JSON response
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode jsonNode = objectMapper.readTree(jsonResponse);
                 JsonNode dataNode = jsonNode.path("query_result").path("data");
                 rowsNode = dataNode.path("rows");
 
                 for (JsonNode rowNode : rowsNode) {
-                    log.info("rowNode == " + rowNode);
                     String area = rowNode.path("area_nm").asText();
                     String genre = rowNode.path("genre_nm").asText();
                     double value = rowNode.path("\uc608\ub9e4\uc728").asDouble();
-
-                    log.info("area: " + area + ", genre: " + genre + ", value: " + value);
+                    log.info("area: {}, genre: {}, value: {}", area, genre, value);
                 }
-                log.info("rowsNode == " + Arrays.toString(new JsonNode[]{rowsNode}));
+                log.info("rowsNode: {}", Arrays.toString(new JsonNode[]{rowsNode}));
             } else {
-                log.error("HTTP 실패 코드: " + responseCode);
+                log.error("HTTP 실패 코드: {}", responseCode);
             }
             connection.disconnect();
         } catch (IOException e) {
-            log.error("http 에러", e);
+            log.error("Redash API(지역별 장르) 호출 실패", e);
         }
         return rowsNode;
     }
@@ -90,6 +94,8 @@ public class PerformanceAnalyticsService implements PerformanceAnalyticsBehavior
             HttpURLConnection connection = (HttpURLConnection) apiUrl.openConnection();
             connection.setRequestMethod("GET");
             connection.setRequestProperty("Accept", "application/json");
+            connection.setConnectTimeout(connectTimeout);
+            connection.setReadTimeout(readTimeout);
 
             int responseCode = connection.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
@@ -103,20 +109,18 @@ public class PerformanceAnalyticsService implements PerformanceAnalyticsBehavior
                 reader.close();
                 String jsonResponse = response.toString();
 
-                // Parse JSON response
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode jsonNode = objectMapper.readTree(jsonResponse);
                 JsonNode dataNode = jsonNode.path("query_result").path("data");
                 rowsNode = dataNode.path("rows");
 
-                System.out.println("rowsNode: " + rowsNode);
+                log.info("topTen rowsNode: {}", rowsNode);
             } else {
-                System.out.println("HTTP Error Code: " + responseCode);
+                log.error("HTTP 실패 코드: {}", responseCode);
             }
             connection.disconnect();
         } catch (IOException e) {
-            System.out.println("HTTP Error");
-            e.printStackTrace();
+            log.error("Redash API(탑텐) 호출 실패", e);
         }
         return rowsNode;
     }
@@ -132,6 +136,8 @@ public class PerformanceAnalyticsService implements PerformanceAnalyticsBehavior
             HttpURLConnection connection = (HttpURLConnection) apiUrl.openConnection();
             connection.setRequestMethod("GET");
             connection.setRequestProperty("Accept", "application/json");
+            connection.setConnectTimeout(connectTimeout);
+            connection.setReadTimeout(readTimeout);
 
             int responseCode = connection.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
@@ -145,19 +151,18 @@ public class PerformanceAnalyticsService implements PerformanceAnalyticsBehavior
                 reader.close();
                 String jsonResponse = response.toString();
 
-                // Parse JSON response
                 ObjectMapper objectMapper = new ObjectMapper();
                 JsonNode jsonNode = objectMapper.readTree(jsonResponse);
                 JsonNode dataNode = jsonNode.path("query_result").path("data");
                 rowsNode = dataNode.path("rows");
 
-                log.info("rowsNode == " + Arrays.toString(new JsonNode[]{rowsNode}));
+                log.info("rowsNode: {}", Arrays.toString(new JsonNode[]{rowsNode}));
             } else {
-                log.error("HTTP 실패 코드: " + responseCode);
+                log.error("HTTP 실패 코드: {}", responseCode);
             }
             connection.disconnect();
         } catch (IOException e) {
-            log.error("http 에러", e);
+            log.error("Redash API(지역별 인기) 호출 실패", e);
         }
         return rowsNode;
     }
