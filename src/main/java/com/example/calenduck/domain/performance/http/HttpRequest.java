@@ -1,6 +1,5 @@
 package com.example.calenduck.domain.performance.http;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -14,22 +13,29 @@ import java.util.stream.Collectors;
 
 @Component
 @Slf4j
-@RequiredArgsConstructor
 public class HttpRequest {
 
-    @Value("${request.first-url}")
-    private String firstUrl;
+    @Value("${kopis.api.base-url}")
+    private String baseUrl;
 
-    @Value("${request.last-url}")
-    private String lastUrl;
+    @Value("${kopis.api.service-key}")
+    private String serviceKey;
+
+    @Value("${http.connect-timeout}")
+    private int connectTimeout;
+
+    @Value("${http.read-timeout}")
+    private int readTimeout;
 
     public String requestExtraction(String mt20id) throws IOException {
-        URL url = new URL(firstUrl + mt20id + lastUrl);
+        URL url = new URL(baseUrl + mt20id + "?service=" + serviceKey);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
+        connection.setConnectTimeout(connectTimeout);
+        connection.setReadTimeout(readTimeout);
 
         int responseCode = connection.getResponseCode();
-        log.info("responseCode = " + responseCode);
+        log.info("KOPIS API 응답코드: {}, mt20id: {}", responseCode, mt20id);
 
         return readAndSaveRequest(connection);
     }

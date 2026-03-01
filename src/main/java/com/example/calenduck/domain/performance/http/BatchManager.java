@@ -1,6 +1,8 @@
 package com.example.calenduck.domain.performance.http;
 
 import com.example.calenduck.domain.performance.repository.NameWithMt20idRepository;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -34,20 +37,27 @@ public class BatchManager {
         this.batchTaskExecutor = batchTaskExecutor;
     }
 
+    @CircuitBreaker(name = "kopisApi", fallbackMethod = "getElementsFallback")
+    @Retry(name = "kopisApi")
     public List<Elements> getElements() throws InterruptedException, ExecutionException {
-        try{
+        try {
             List<String> duplicateMt20ids = nameWithMt20idRepository.findAllMt20idsOrdered();
             List<String> uniqueMt20ids = saveUniqueMt20ids(duplicateMt20ids);
 
             return startBatches(uniqueMt20ids);
-        } catch(InterruptedException e) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             log.error("스레드 중단됨", e);
             throw e;
-        } catch(ExecutionException e) {
+        } catch (ExecutionException e) {
             log.error("실행 에러 발생", e);
             throw e;
         }
+    }
+
+    public List<Elements> getElementsFallback(Exception e) {
+        log.warn("KOPIS API 호출 실패, Circuit Breaker 작동: {}", e.getMessage());
+        return Collections.emptyList();
     }
 
     private List<String> saveUniqueMt20ids(List<String> duplicateMt20ids) {

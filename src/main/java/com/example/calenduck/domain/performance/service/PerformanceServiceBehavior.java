@@ -6,5 +6,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public interface PerformanceServiceBehavior {
-    List<BasePerformancesResponseDto> getAllPerformances(String prfnm, String prfcast) throws ExecutionException, InterruptedException; // 전체 공연 조회
+    List<BasePerformancesResponseDto> getAllPerformances(String prfnm, String prfcast) throws ExecutionException, InterruptedException;
+    List<BasePerformancesResponseDto> refreshPerformancesCache();
 }
