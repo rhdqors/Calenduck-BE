@@ -11,9 +11,10 @@ import com.example.calenduck.domain.performance.repository.NameWithMt20idReposit
 import com.example.calenduck.domain.user.entity.User;
 import com.example.calenduck.global.exception.GlobalErrorCode;
 import com.example.calenduck.global.exception.GlobalException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
@@ -24,19 +25,29 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class BookmarkService implements BookmarkBehavior{
 
     private final BookmarkRepository bookmarkRepository;
     private final NameWithMt20idRepository nameWithMt20idRepository;
     private final HttpRequest httpRequest;
     private final DataConversion dataConversion;
+    private final ThreadPoolTaskExecutor bookmarkTaskExecutor;
+
+    public BookmarkService(BookmarkRepository bookmarkRepository,
+                           NameWithMt20idRepository nameWithMt20idRepository,
+                           HttpRequest httpRequest,
+                           DataConversion dataConversion,
+                           @Qualifier("bookmarkTaskExecutor") ThreadPoolTaskExecutor bookmarkTaskExecutor) {
+        this.bookmarkRepository = bookmarkRepository;
+        this.nameWithMt20idRepository = nameWithMt20idRepository;
+        this.httpRequest = httpRequest;
+        this.dataConversion = dataConversion;
+        this.bookmarkTaskExecutor = bookmarkTaskExecutor;
+    }
 
 
     // 북마크 성공/취소
@@ -84,28 +95,22 @@ public class BookmarkService implements BookmarkBehavior{
     @Transactional
     public List<MyBookmarkResponseDto> getBookmarks(User user) {
         List<Bookmark> bookmarks = bookmarkRepository.findAllByUser(user);
-        log.info("bookmark.size ===== " + bookmarks.size());
+        log.info("bookmark.size = {}", bookmarks.size());
 
         if (bookmarks.isEmpty()) {
             return new ArrayList<>();
         }
 
-        ExecutorService executorService = Executors.newFixedThreadPool(Math.min(bookmarks.size(), 10));
+        // 각 북마크에 대해 병렬로 API 호출
+        List<CompletableFuture<MyBookmarkResponseDto>> futures = bookmarks.stream()
+                .map(bookmark -> CompletableFuture.supplyAsync(() -> fetchBookmarkDetail(bookmark), bookmarkTaskExecutor))
+                .collect(Collectors.toList());
 
-        try {
-            // 각 북마크에 대해 병렬로 API 호출
-            List<CompletableFuture<MyBookmarkResponseDto>> futures = bookmarks.stream()
-                    .map(bookmark -> CompletableFuture.supplyAsync(() -> fetchBookmarkDetail(bookmark), executorService))
-                    .collect(Collectors.toList());
-
-            // 모든 작업 완료 대기 및 결과 수집
-            return futures.stream()
-                    .map(CompletableFuture::join)
-                    .filter(dto -> dto != null)
-                    .collect(Collectors.toList());
-        } finally {
-            executorService.shutdown();
-        }
+        // 모든 작업 완료 대기 및 결과 수집
+        return futures.stream()
+                .map(CompletableFuture::join)
+                .filter(dto -> dto != null)
+                .collect(Collectors.toList());
     }
 
     // 단일 북마크에 대한 API 호출 및 DTO 변환
@@ -160,12 +165,12 @@ public class BookmarkService implements BookmarkBehavior{
 
         String[] alarm = editBookmarkRequestDto.getAlarm().split(",");
         LocalDate date = LocalDate.parse(reservationDate, DateTimeFormatter.BASIC_ISO_DATE);
-        log.info("date == " + date);
+        log.info("date = {}", date);
 
         StringBuilder resultBuilder = new StringBuilder();
 
         for (String a : alarm) {
-            log.info("alarm == " + a);
+            log.info("alarm = {}", a);
             LocalDate calculatedDate = date;
 
             if (a.equals("1일전")) {
@@ -177,7 +182,7 @@ public class BookmarkService implements BookmarkBehavior{
             }
 
             String formattedDate = calculatedDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-            log.info("formattedDate == " + formattedDate);
+            log.info("formattedDate = {}", formattedDate);
 
             if (resultBuilder.length() > 0) {
                 resultBuilder.append(",");

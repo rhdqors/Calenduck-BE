@@ -1,9 +1,10 @@
 package com.example.calenduck.domain.performance.http;
 
 import com.example.calenduck.domain.performance.repository.NameWithMt20idRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -13,17 +14,25 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class BatchManager {
     private final HttpRequest httpRequest;
     private final DataConversion dataConversion;
     private final NameWithMt20idRepository nameWithMt20idRepository;
+    private final ThreadPoolTaskExecutor batchTaskExecutor;
+
+    public BatchManager(HttpRequest httpRequest,
+                        DataConversion dataConversion,
+                        NameWithMt20idRepository nameWithMt20idRepository,
+                        @Qualifier("batchTaskExecutor") ThreadPoolTaskExecutor batchTaskExecutor) {
+        this.httpRequest = httpRequest;
+        this.dataConversion = dataConversion;
+        this.nameWithMt20idRepository = nameWithMt20idRepository;
+        this.batchTaskExecutor = batchTaskExecutor;
+    }
 
     public List<Elements> getElements() throws InterruptedException, ExecutionException {
         try{
@@ -36,7 +45,7 @@ public class BatchManager {
             log.error("스레드 중단됨", e);
             throw e;
         } catch(ExecutionException e) {
-            log.error("실헹 에러 발생", e);
+            log.error("실행 에러 발생", e);
             throw e;
         }
     }
@@ -55,16 +64,12 @@ public class BatchManager {
     }
 
     public List<Elements> startBatches(List<String> mt20ids) throws ExecutionException, InterruptedException {
-        ExecutorService executorService = Executors.newFixedThreadPool(50);
         int batchSize = 40;
 
         List<List<String>> batches = createBatches(mt20ids, batchSize);
-        List<CompletableFuture<List<Elements>>> futures = processBatchesAsync(batches, executorService);
+        List<CompletableFuture<List<Elements>>> futures = processBatchesAsync(batches);
         waitForCompletion(futures);
-        List<Elements> allElements = retrieveResults(futures);
-
-        executorService.shutdown();
-        return allElements;
+        return retrieveResults(futures);
     }
 
     private List<List<String>> createBatches(List<String> mt20ids, int batchSize) {
@@ -77,9 +82,9 @@ public class BatchManager {
         return batches;
     }
 
-    private List<CompletableFuture<List<Elements>>> processBatchesAsync(List<List<String>> batches, ExecutorService executorService) {
+    private List<CompletableFuture<List<Elements>>> processBatchesAsync(List<List<String>> batches) {
         return batches.stream()
-                .map(batch -> CompletableFuture.supplyAsync(() -> processBatch(batch), executorService))
+                .map(batch -> CompletableFuture.supplyAsync(() -> processBatch(batch), batchTaskExecutor))
                 .collect(Collectors.toList());
     }
 
@@ -93,7 +98,7 @@ public class BatchManager {
 
                 batchElements.add(elements);
             } catch (IOException e) {
-                log.error("mt20id(공연id)에 대한 데이터를 가져오며 에러 발생: " + mt20id, e);
+                log.error("mt20id에 대한 데이터를 가져오며 에러 발생: {}", mt20id, e);
             }
         }
         return batchElements;
