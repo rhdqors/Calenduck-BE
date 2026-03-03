@@ -7,6 +7,12 @@ export async function kakaoLogin(code: string) {
   return token || null
 }
 
+export async function devLogin() {
+  const response = await client.post<ApiResponse<string>>('/dev/login')
+  const token = response.headers['authorization']?.replace('Bearer ', '')
+  return token || null
+}
+
 export async function getAlarms() {
   const { data } = await client.get<ApiResponse<unknown[]>>('/user/alarms')
   return data.data
