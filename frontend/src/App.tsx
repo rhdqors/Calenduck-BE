@@ -8,6 +8,7 @@ import SearchPage from '@/pages/SearchPage'
 import PerformanceDetailPage from '@/pages/PerformanceDetailPage'
 import RankingPage from '@/pages/RankingPage'
 import BookmarkPage from '@/pages/BookmarkPage'
+import CalendarPage from '@/pages/CalendarPage'
 import AlarmPage from '@/pages/AlarmPage'
 import OAuthCallbackPage from '@/pages/OAuthCallbackPage'
 
@@ -27,6 +28,14 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <BookmarkPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/calendar"
+              element={
+                <ProtectedRoute>
+                  <CalendarPage />
                 </ProtectedRoute>
               }
             />
