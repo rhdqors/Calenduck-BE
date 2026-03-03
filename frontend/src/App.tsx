@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from '@/contexts/AuthContext'
 import Layout from '@/components/layout/Layout'
+import ErrorBoundary from '@/components/common/ErrorBoundary'
 import ProtectedRoute from '@/components/common/ProtectedRoute'
 import MainPage from '@/pages/MainPage'
 import SearchPage from '@/pages/SearchPage'
@@ -14,8 +15,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Layout>
-          <Routes>
+        <ErrorBoundary>
+          <Layout>
+            <Routes>
             <Route path="/" element={<MainPage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/performances/:mt20id" element={<PerformanceDetailPage />} />
@@ -37,8 +39,9 @@ export default function App() {
               }
             />
             <Route path="/oauth/kakao/callback" element={<OAuthCallbackPage />} />
-          </Routes>
-        </Layout>
+            </Routes>
+          </Layout>
+        </ErrorBoundary>
       </AuthProvider>
     </BrowserRouter>
   )
