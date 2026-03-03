@@ -2,7 +2,8 @@ import { usePerformances } from '@/hooks/usePerformances'
 import { useSearchRank } from '@/hooks/useSearchRank'
 import PerformanceGrid from '@/components/performance/PerformanceGrid'
 import ErrorFallback from '@/components/common/ErrorFallback'
-import { TrendingUp, Loader2 } from 'lucide-react'
+import { SkeletonGrid } from '@/components/common/SkeletonCard'
+import { TrendingUp } from 'lucide-react'
 
 export default function MainPage() {
   const { data: performances, isLoading, isError, refetch } = usePerformances()
@@ -33,9 +34,7 @@ export default function MainPage() {
       <section>
         <h2 className="mb-4 text-lg font-semibold">전체 공연</h2>
         {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
+          <SkeletonGrid />
         ) : isError ? (
           <ErrorFallback message="공연 목록을 불러올 수 없습니다." onRetry={() => refetch()} />
         ) : (
