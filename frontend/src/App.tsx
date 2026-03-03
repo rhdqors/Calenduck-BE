@@ -1,4 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { AuthProvider } from '@/contexts/AuthContext'
+import Layout from '@/components/layout/Layout'
+import ProtectedRoute from '@/components/common/ProtectedRoute'
 import MainPage from '@/pages/MainPage'
 import SearchPage from '@/pages/SearchPage'
 import PerformanceDetailPage from '@/pages/PerformanceDetailPage'
@@ -10,15 +13,33 @@ import OAuthCallbackPage from '@/pages/OAuthCallbackPage'
 export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<MainPage />} />
-        <Route path="/search" element={<SearchPage />} />
-        <Route path="/performances/:mt20id" element={<PerformanceDetailPage />} />
-        <Route path="/ranking" element={<RankingPage />} />
-        <Route path="/bookmarks" element={<BookmarkPage />} />
-        <Route path="/alarms" element={<AlarmPage />} />
-        <Route path="/oauth/kakao/callback" element={<OAuthCallbackPage />} />
-      </Routes>
+      <AuthProvider>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<MainPage />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/performances/:mt20id" element={<PerformanceDetailPage />} />
+            <Route path="/ranking" element={<RankingPage />} />
+            <Route
+              path="/bookmarks"
+              element={
+                <ProtectedRoute>
+                  <BookmarkPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/alarms"
+              element={
+                <ProtectedRoute>
+                  <AlarmPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/oauth/kakao/callback" element={<OAuthCallbackPage />} />
+          </Routes>
+        </Layout>
+      </AuthProvider>
     </BrowserRouter>
   )
 }
