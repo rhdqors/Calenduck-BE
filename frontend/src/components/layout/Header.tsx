@@ -17,9 +17,9 @@ export default function Header() {
   const kakaoLoginUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${KAKAO_REDIRECT_URI}&response_type=code`
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-        <Link to="/" className="text-xl font-bold tracking-tight text-foreground">
+        <Link to="/" className="bg-gradient-to-r from-primary to-coral bg-clip-text text-xl font-extrabold tracking-tight text-transparent">
           Calenduck
         </Link>
 
@@ -30,7 +30,7 @@ export default function Header() {
         <nav className="flex items-center gap-1">
           <Link
             to="/ranking"
-            className="rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+            className="rounded-lg p-2 text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
             title="인기 공연"
           >
             <TrendingUp className="h-5 w-5" />
@@ -40,21 +40,21 @@ export default function Header() {
             <>
               <Link
                 to="/bookmarks"
-                className="rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                className="rounded-lg p-2 text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
                 title="찜목록"
               >
                 <Bookmark className="h-5 w-5" />
               </Link>
               <Link
                 to="/alarms"
-                className="rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                className="rounded-lg p-2 text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
                 title="알람"
               >
                 <Bell className="h-5 w-5" />
               </Link>
               <button
                 onClick={logout}
-                className="rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                className="rounded-lg p-2 text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
                 title="로그아웃"
               >
                 <LogOut className="h-5 w-5" />
@@ -64,14 +64,14 @@ export default function Header() {
             <>
               <a
                 href={kakaoLoginUrl}
-                className="ml-2 rounded-md bg-[#FEE500] px-4 py-2 text-sm font-medium text-[#191919] hover:bg-[#FDD835] transition-colors"
+                className="ml-2 rounded-full bg-[#FEE500] px-4 py-2 text-sm font-semibold text-[#191919] shadow-sm hover:bg-[#FDD835] hover:shadow-md transition-all"
               >
                 카카오 로그인
               </a>
               {import.meta.env.DEV && (
                 <button
                   onClick={handleDevLogin}
-                  className="ml-1 rounded-md border border-dashed border-muted-foreground px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                  className="ml-1 rounded-full border border-dashed border-primary/40 px-3 py-2 text-xs font-medium text-primary hover:bg-primary/10 transition-colors"
                 >
                   Dev
                 </button>
@@ -81,7 +81,7 @@ export default function Header() {
         </nav>
       </div>
 
-      <div className="border-t border-border px-4 py-2 md:hidden">
+      <div className="border-t border-border/60 px-4 py-2 md:hidden">
         <SearchBar />
       </div>
     </header>
