@@ -18,7 +18,7 @@ export default function PerformanceCard({ performance }: PerformanceCardProps) {
     <Link
       to={`/performances/${mt20id}`}
       state={{ performance }}
-      className="group block overflow-hidden rounded-xl border border-border bg-card transition-all hover:shadow-lg hover:-translate-y-1"
+      className="group block overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm transition-all hover:shadow-xl hover:-translate-y-1.5 hover:border-primary/30"
     >
       <div className="aspect-[3/4] overflow-hidden bg-muted">
         <img
@@ -27,15 +27,15 @@ export default function PerformanceCard({ performance }: PerformanceCardProps) {
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           loading="lazy"
           onError={(e) => {
-            e.currentTarget.src = `https://placehold.co/300x400/1a1a2e/e94560?text=${encodeURIComponent(prfnm.slice(0, 4))}`
+            e.currentTarget.src = `https://placehold.co/300x400/7c3aed/ffffff?text=${encodeURIComponent(prfnm.slice(0, 4))}`
           }}
         />
       </div>
       <div className="p-3.5">
-        <span className="inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+        <span className="inline-block rounded-full bg-gradient-to-r from-primary/15 to-coral/15 px-2.5 py-0.5 text-xs font-semibold text-primary">
           {genrenm}
         </span>
-        <h3 className="mt-2 line-clamp-1 text-sm font-semibold text-card-foreground">
+        <h3 className="mt-2 line-clamp-1 text-sm font-bold text-card-foreground">
           {prfnm}
         </h3>
         <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">

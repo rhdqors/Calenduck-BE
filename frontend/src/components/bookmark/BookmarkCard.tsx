@@ -27,20 +27,20 @@ export default function BookmarkCard({ bookmark, onEdit }: BookmarkCardProps) {
   } = bookmark
 
   return (
-    <div className="flex gap-4 rounded-xl border border-border bg-card p-4 transition-all hover:shadow-md">
+    <div className="flex gap-4 rounded-2xl border border-border/60 bg-card p-4 shadow-sm transition-all hover:shadow-md hover:border-primary/30">
       <Link
         to={`/performances/${mt20id}`}
         state={{ performance: bookmark }}
         className="shrink-0"
       >
-        <div className="h-32 w-24 overflow-hidden rounded-lg bg-muted">
+        <div className="h-32 w-24 overflow-hidden rounded-xl bg-muted shadow-sm">
           <img
             src={poster}
             alt={prfnm}
             className="h-full w-full object-cover"
             loading="lazy"
             onError={(e) => {
-              e.currentTarget.src = `https://placehold.co/96x128/1a1a2e/e94560?text=${encodeURIComponent(prfnm.slice(0, 2))}`
+              e.currentTarget.src = `https://placehold.co/96x128/7c3aed/ffffff?text=${encodeURIComponent(prfnm.slice(0, 2))}`
             }}
           />
         </div>
@@ -50,16 +50,16 @@ export default function BookmarkCard({ bookmark, onEdit }: BookmarkCardProps) {
         <div className="space-y-1.5">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <span className="inline-block rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+              <span className="inline-block rounded-full bg-gradient-to-r from-primary/15 to-coral/15 px-2 py-0.5 text-xs font-semibold text-primary">
                 {genrenm}
               </span>
-              <h3 className="mt-1 text-sm font-semibold text-card-foreground line-clamp-1">
+              <h3 className="mt-1 text-sm font-bold text-card-foreground line-clamp-1">
                 {prfnm}
               </h3>
             </div>
             <button
               onClick={() => onEdit(bookmark)}
-              className="shrink-0 rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+              className="shrink-0 rounded-lg p-1.5 text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
               title="수정"
             >
               <Pencil className="h-4 w-4" />
@@ -76,21 +76,21 @@ export default function BookmarkCard({ bookmark, onEdit }: BookmarkCardProps) {
           </div>
         </div>
 
-        <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
           {reservationDate && (
-            <span className="inline-flex items-center gap-1 rounded-md bg-accent px-2 py-0.5">
+            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 font-medium text-primary">
               <Calendar className="h-3 w-3" />
               예약: {formatDate(reservationDate)}
             </span>
           )}
           {content && (
-            <span className="inline-flex items-center gap-1" title={content}>
+            <span className="inline-flex items-center gap-1 text-muted-foreground" title={content}>
               <FileText className="h-3 w-3" />
               메모
             </span>
           )}
           {alarm && (
-            <span className="inline-flex items-center gap-1">
+            <span className="inline-flex items-center gap-1 text-coral font-medium">
               <Bell className="h-3 w-3" />
               알람 설정됨
             </span>

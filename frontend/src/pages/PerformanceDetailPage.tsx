@@ -25,7 +25,7 @@ export default function PerformanceDetailPage() {
         <p className="text-muted-foreground">공연 정보를 찾을 수 없습니다.</p>
         <button
           onClick={() => navigate('/')}
-          className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90 transition-colors"
+          className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-md hover:bg-primary/90 hover:shadow-lg transition-all"
         >
           메인으로 돌아가기
         </button>
@@ -59,7 +59,7 @@ export default function PerformanceDetailPage() {
     <div className="space-y-6">
       <button
         onClick={() => navigate(-1)}
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
         뒤로가기
@@ -67,13 +67,13 @@ export default function PerformanceDetailPage() {
 
       <div className="flex flex-col gap-8 md:flex-row">
         <div className="w-full shrink-0 md:w-72">
-          <div className="overflow-hidden rounded-xl border border-border">
+          <div className="overflow-hidden rounded-2xl border border-border/60 shadow-lg">
             <img
               src={poster}
               alt={prfnm}
               className="h-auto w-full object-cover"
               onError={(e) => {
-                e.currentTarget.src = `https://placehold.co/300x400/1a1a2e/e94560?text=${encodeURIComponent(prfnm.slice(0, 4))}`
+                e.currentTarget.src = `https://placehold.co/300x400/7c3aed/ffffff?text=${encodeURIComponent(prfnm.slice(0, 4))}`
               }}
             />
           </div>
@@ -81,56 +81,24 @@ export default function PerformanceDetailPage() {
 
         <div className="flex-1 space-y-5">
           <div>
-            <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+            <span className="inline-block rounded-full bg-gradient-to-r from-primary/15 to-coral/15 px-3 py-1 text-sm font-semibold text-primary">
               {genrenm}
             </span>
             <h1 className="mt-3 text-2xl font-bold text-foreground">{prfnm}</h1>
           </div>
 
-          <div className="space-y-3 rounded-lg border border-border bg-card p-4">
-            <div className="flex items-start gap-3">
-              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">장소</p>
-                <p className="text-sm font-medium">{fcltynm}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <Calendar className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">기간</p>
-                <p className="text-sm font-medium">
-                  {formatDate(stdate)} ~ {formatDate(eddate)}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <Clock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">공연시간</p>
-                <p className="text-sm font-medium">{dtguidance}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <Users className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">출연진</p>
-                <p className="text-sm font-medium">{prfcast}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <CreditCard className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-              <div>
-                <p className="text-xs text-muted-foreground">티켓 가격</p>
-                <p className="text-sm font-medium">{pcseguidance}</p>
-              </div>
-            </div>
+          <div className="space-y-3 rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
+            <InfoRow icon={MapPin} label="장소" value={fcltynm} />
+            <InfoRow icon={Calendar} label="기간" value={`${formatDate(stdate)} ~ ${formatDate(eddate)}`} />
+            <InfoRow icon={Clock} label="공연시간" value={dtguidance} />
+            <InfoRow icon={Users} label="출연진" value={prfcast} />
+            <InfoRow icon={CreditCard} label="티켓 가격" value={pcseguidance} />
           </div>
 
           <div className="flex items-center gap-3">
             <button
               onClick={handleBookmark}
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary/80 px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-md hover:shadow-lg hover:brightness-110 transition-all"
             >
               <Bookmark className="h-4 w-4" />
               찜하기
@@ -140,6 +108,18 @@ export default function PerformanceDetailPage() {
             )}
           </div>
         </div>
+      </div>
+    </div>
+  )
+}
+
+function InfoRow({ icon: Icon, label, value }: { icon: typeof MapPin; label: string; value: string }) {
+  return (
+    <div className="flex items-start gap-3">
+      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary/60" />
+      <div>
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="text-sm font-medium">{value}</p>
       </div>
     </div>
   )
