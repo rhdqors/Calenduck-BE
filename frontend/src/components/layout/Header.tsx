@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
-import { Bookmark, Bell, TrendingUp, LogOut } from 'lucide-react'
+import { Bookmark, Bell, TrendingUp, CalendarDays, LogOut } from 'lucide-react'
 import SearchBar from '@/components/common/SearchBar'
 import { devLogin } from '@/api/user'
 
@@ -38,6 +38,13 @@ export default function Header() {
 
           {isAuthenticated ? (
             <>
+              <Link
+                to="/calendar"
+                className="rounded-lg p-2 text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                title="캘린더"
+              >
+                <CalendarDays className="h-5 w-5" />
+              </Link>
               <Link
                 to="/bookmarks"
                 className="rounded-lg p-2 text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
