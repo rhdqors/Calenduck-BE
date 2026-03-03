@@ -2,9 +2,15 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { Bookmark, Bell, TrendingUp, LogOut } from 'lucide-react'
 import SearchBar from '@/components/common/SearchBar'
+import { devLogin } from '@/api/user'
 
 export default function Header() {
-  const { isAuthenticated, logout } = useAuth()
+  const { isAuthenticated, login, logout } = useAuth()
+
+  const handleDevLogin = async () => {
+    const token = await devLogin()
+    if (token) login(token)
+  }
 
   const KAKAO_CLIENT_ID = import.meta.env.VITE_KAKAO_CLIENT_ID
   const KAKAO_REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI || 'http://localhost:5173/oauth/kakao/callback'
@@ -55,12 +61,22 @@ export default function Header() {
               </button>
             </>
           ) : (
-            <a
-              href={kakaoLoginUrl}
-              className="ml-2 rounded-md bg-[#FEE500] px-4 py-2 text-sm font-medium text-[#191919] hover:bg-[#FDD835] transition-colors"
-            >
-              카카오 로그인
-            </a>
+            <>
+              <a
+                href={kakaoLoginUrl}
+                className="ml-2 rounded-md bg-[#FEE500] px-4 py-2 text-sm font-medium text-[#191919] hover:bg-[#FDD835] transition-colors"
+              >
+                카카오 로그인
+              </a>
+              {import.meta.env.DEV && (
+                <button
+                  onClick={handleDevLogin}
+                  className="ml-1 rounded-md border border-dashed border-muted-foreground px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                >
+                  Dev
+                </button>
+              )}
+            </>
           )}
         </nav>
       </div>
