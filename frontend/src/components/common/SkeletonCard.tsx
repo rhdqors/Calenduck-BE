@@ -1,12 +1,12 @@
 export default function SkeletonCard() {
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-card animate-pulse">
-      <div className="aspect-[3/4] bg-muted" />
-      <div className="p-3.5 space-y-2">
-        <div className="h-5 w-16 rounded-full bg-muted" />
-        <div className="h-4 w-3/4 rounded bg-muted" />
-        <div className="h-3 w-1/2 rounded bg-muted" />
-        <div className="h-3 w-2/3 rounded bg-muted" />
+    <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm animate-pulse">
+      <div className="aspect-[3/4] bg-gradient-to-br from-muted to-muted/60" />
+      <div className="p-3.5 space-y-2.5">
+        <div className="h-5 w-16 rounded-full bg-primary/10" />
+        <div className="h-4 w-3/4 rounded-md bg-muted" />
+        <div className="h-3 w-1/2 rounded-md bg-muted" />
+        <div className="h-3 w-2/3 rounded-md bg-muted" />
       </div>
     </div>
   )
