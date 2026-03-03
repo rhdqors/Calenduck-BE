@@ -1,5 +1,7 @@
 # ===== Profile =====
 spring:
+  config:
+    import: optional:file:.env[.properties]
   profiles:
     active: db-local
 

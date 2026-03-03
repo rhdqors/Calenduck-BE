@@ -64,8 +64,6 @@ dependencies {
 	// AOP (Resilience4j 어노테이션 동작에 필수)
 	implementation 'org.springframework.boot:spring-boot-starter-aop'
 
-	// dotenv (.env 파일에서 환경변수 로드)
-	implementation 'me.paulschwarz:spring-dotenv:2.5.4'
 }
 
 tasks.named('test') {
