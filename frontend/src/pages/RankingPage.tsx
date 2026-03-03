@@ -16,19 +16,19 @@ export default function RankingPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
-        <TrendingUp className="h-5 w-5 text-primary" />
+        <TrendingUp className="h-5 w-5 text-coral" />
         <h1 className="text-xl font-bold">인기 공연</h1>
       </div>
 
-      <div className="flex gap-1 rounded-lg border border-border bg-muted p-1">
+      <div className="flex gap-1 rounded-2xl border border-border/60 bg-card p-1 shadow-sm">
         {tabs.map(({ key, label, icon: Icon }) => (
           <button
             key={key}
             onClick={() => setActiveTab(key)}
-            className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+            className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
               activeTab === key
-                ? 'bg-background text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-primary text-primary-foreground shadow-md'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
             }`}
           >
             <Icon className="h-4 w-4" />
@@ -51,7 +51,7 @@ function TopTenSection() {
   if (!data || !Array.isArray(data)) return null
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2.5">
       {data.map((item: Record<string, unknown>, index: number) => {
         const name = (item.name || item.prfnm || '') as string
         const count = (item.count || item.cnt || 0) as number
@@ -61,27 +61,27 @@ function TopTenSection() {
         return (
           <div
             key={index}
-            className="flex items-center gap-4 rounded-lg border border-border bg-card p-4"
+            className="flex items-center gap-4 rounded-2xl border border-border/60 bg-card p-4 shadow-sm transition-all hover:shadow-md"
           >
             <span
-              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold shadow-sm ${
                 rank <= 3
-                  ? 'bg-primary text-primary-foreground'
+                  ? 'bg-gradient-to-br from-primary to-coral text-white'
                   : 'bg-muted text-muted-foreground'
               }`}
             >
               {rank}
             </span>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-card-foreground truncate">{name}</p>
-              <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-muted">
+              <p className="text-sm font-semibold text-card-foreground truncate">{name}</p>
+              <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
                 <div
-                  className="h-full rounded-full bg-primary/70 transition-all duration-500"
+                  className="h-full rounded-full bg-gradient-to-r from-primary to-primary/60 transition-all duration-500"
                   style={{ width: `${(count / maxCount) * 100}%` }}
                 />
               </div>
             </div>
-            <span className="shrink-0 text-xs text-muted-foreground">{count.toLocaleString()}</span>
+            <span className="shrink-0 text-xs font-medium text-muted-foreground">{count.toLocaleString()}</span>
           </div>
         )
       })}
@@ -104,14 +104,14 @@ function RegionSection() {
         const count = (item.count || item.cnt || 0) as number
 
         return (
-          <div key={index} className="rounded-lg border border-border bg-card p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-semibold text-card-foreground">{region}</span>
-              <span className="text-xs text-muted-foreground">{count.toLocaleString()}</span>
+          <div key={index} className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm transition-all hover:shadow-md">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-bold text-card-foreground">{region}</span>
+              <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">{count.toLocaleString()}</span>
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full rounded-full bg-primary/70 transition-all duration-500"
+                className="h-full rounded-full bg-gradient-to-r from-primary to-coral/60 transition-all duration-500"
                 style={{ width: `${(count / maxCount) * 100}%` }}
               />
             </div>
@@ -129,13 +129,13 @@ function GenreSection() {
   if (!data || !Array.isArray(data)) return null
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-border">
-            <th className="px-4 py-3 text-left font-medium text-muted-foreground">장르</th>
-            <th className="px-4 py-3 text-left font-medium text-muted-foreground">지역</th>
-            <th className="px-4 py-3 text-right font-medium text-muted-foreground">인기도</th>
+          <tr className="border-b border-border/60 bg-muted/30">
+            <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">장르</th>
+            <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">지역</th>
+            <th className="px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">인기도</th>
           </tr>
         </thead>
         <tbody>
@@ -145,10 +145,14 @@ function GenreSection() {
             const count = (item.count || item.cnt || 0) as number
 
             return (
-              <tr key={index} className="border-b border-border last:border-0">
-                <td className="px-4 py-3 font-medium text-card-foreground">{genre}</td>
-                <td className="px-4 py-3 text-muted-foreground">{region}</td>
-                <td className="px-4 py-3 text-right text-muted-foreground">{count.toLocaleString()}</td>
+              <tr key={index} className="border-b border-border/40 last:border-0 transition-colors hover:bg-primary/5">
+                <td className="px-5 py-3.5 font-semibold text-card-foreground">{genre}</td>
+                <td className="px-5 py-3.5 text-muted-foreground">{region}</td>
+                <td className="px-5 py-3.5 text-right">
+                  <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                    {count.toLocaleString()}
+                  </span>
+                </td>
               </tr>
             )
           })}
@@ -161,7 +165,7 @@ function GenreSection() {
 function LoadingState() {
   return (
     <div className="flex items-center justify-center py-20">
-      <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
     </div>
   )
 }
