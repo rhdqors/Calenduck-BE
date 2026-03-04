@@ -1,10 +1,22 @@
-import { useState, useMemo, useRef, useEffect } from 'react'
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react'
 import { useTopTen, usePopularityByRegion, usePopularityByGenreRegion } from '@/hooks/useRanking'
 import { usePerformances } from '@/hooks/usePerformances'
 import PerformanceGrid from '@/components/performance/PerformanceGrid'
 import ErrorFallback from '@/components/common/ErrorFallback'
-import { TrendingUp, Loader2, Trophy, MapPin, Music, Inbox, Search, ChevronDown, X } from 'lucide-react'
+import { TrendingUp, Loader2, Trophy, MapPin, Music, Inbox, Search, ChevronDown, X, Bookmark } from 'lucide-react'
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import type { RankingCount, Performance } from '@/types/performance'
+
+const GENRE_COLORS = [
+  'oklch(0.65 0.24 285)', // primary-ish purple
+  'oklch(0.68 0.16 25)',  // coral
+  'oklch(0.7 0.18 160)',  // teal
+  'oklch(0.72 0.17 60)',  // amber
+  'oklch(0.6 0.2 320)',   // pink
+  'oklch(0.65 0.15 200)', // cyan
+  'oklch(0.7 0.14 110)',  // lime
+  'oklch(0.6 0.18 250)',  // blue
+]
 
 type Tab = 'topten' | 'facility' | 'genre'
 
@@ -105,10 +117,54 @@ function TopTenSection({ performances }: { performances: Performance[] }) {
   if (!ranking || ranking.length === 0) return <EmptyState message="아직 북마크된 공연이 없습니다." />
   if (topPerformances.length === 0) return <EmptyState message="공연 데이터를 불러오는 중입니다." />
 
+  const maxCount = Math.max(...ranking.map((r) => r.count))
+
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">북마크가 많은 인기 공연</p>
-      <PerformanceGrid performances={topPerformances} />
+    <div className="space-y-8">
+      <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
+        <div className="mb-4 flex items-center gap-2">
+          <Bookmark className="h-4 w-4 text-coral" />
+          <h3 className="text-sm font-semibold">북마크 순위</h3>
+        </div>
+        <div className="space-y-2.5">
+          {ranking.map((r, i) => {
+            const ratio = maxCount > 0 ? (r.count / maxCount) * 100 : 0
+            const isTop3 = i < 3
+            return (
+              <div key={r.id ?? r.name} className="group flex items-center gap-3">
+                <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${
+                  isTop3
+                    ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-sm'
+                    : 'bg-muted text-muted-foreground'
+                }`}>
+                  {i + 1}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex items-baseline justify-between gap-2">
+                    <span className="truncate text-sm font-medium">{r.name}</span>
+                    <span className="shrink-0 text-xs font-semibold text-primary">{r.count}</span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-muted/60">
+                    <div
+                      className={`h-full rounded-full transition-all duration-700 ease-out ${
+                        isTop3
+                          ? 'bg-gradient-to-r from-primary to-coral'
+                          : 'bg-primary/40'
+                      }`}
+                      style={{ width: `${ratio}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      <div>
+        <p className="mb-4 text-sm text-muted-foreground">공연 상세</p>
+        <PerformanceGrid performances={topPerformances} />
+      </div>
     </div>
   )
 }
@@ -237,21 +293,99 @@ function GenreSection({ performances }: { performances: Performance[] }) {
     return performances.filter((p) => p.genrenm === selected)
   }, [performances, selected])
 
+  const total = useMemo(() => {
+    if (!genres) return 0
+    return genres.reduce((sum, g) => sum + g.count, 0)
+  }, [genres])
+
+  const handlePieClick = useCallback((_: unknown, index: number) => {
+    if (!genres) return
+    const clickedName = genres[index].name
+    setSelected((prev) => (prev === clickedName ? null : clickedName))
+  }, [genres])
+
   if (isLoading) return <LoadingState />
   if (isError) return <ErrorFallback message="장르별 데이터를 불러올 수 없습니다." onRetry={() => refetch()} />
   if (!genres || genres.length === 0) return <EmptyState message="장르별 데이터가 없습니다." />
 
   return (
     <div className="space-y-6">
-      <CategoryChips items={genres} selected={selected} onSelect={setSelected} />
+      <div className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm">
+        <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
+          <div className="relative h-48 w-48 shrink-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={genres}
+                  dataKey="count"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={80}
+                  paddingAngle={3}
+                  strokeWidth={0}
+                  onClick={handlePieClick}
+                  cursor="pointer"
+                >
+                  {genres.map((_, i) => (
+                    <Cell
+                      key={i}
+                      fill={GENRE_COLORS[i % GENRE_COLORS.length]}
+                      opacity={selected && selected !== genres[i].name ? 0.3 : 1}
+                      className="transition-opacity duration-300"
+                    />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <span className="text-2xl font-bold">{total}</span>
+              <span className="text-xs text-muted-foreground">전체 공연</span>
+            </div>
+          </div>
+
+          <div className="flex flex-1 flex-wrap gap-2 self-center">
+            {genres.map((genre, i) => {
+              const pct = total > 0 ? ((genre.count / total) * 100).toFixed(1) : '0'
+              const isActive = selected === genre.name
+              return (
+                <button
+                  key={genre.name}
+                  onClick={() => setSelected((prev) => (prev === genre.name ? null : genre.name))}
+                  className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-sm transition-all ${
+                    isActive
+                      ? 'border-transparent shadow-md ring-2 ring-primary/30'
+                      : 'border-border/60 hover:shadow-sm'
+                  }`}
+                  style={isActive ? { backgroundColor: GENRE_COLORS[i % GENRE_COLORS.length] + '22' } : {}}
+                >
+                  <span
+                    className="h-3 w-3 shrink-0 rounded-full"
+                    style={{ backgroundColor: GENRE_COLORS[i % GENRE_COLORS.length] }}
+                  />
+                  <span className="font-medium">{genre.name}</span>
+                  <span className="text-xs text-muted-foreground">{pct}%</span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+
       {selected ? (
         filtered.length > 0 ? (
-          <PerformanceGrid performances={filtered} />
+          <div>
+            <p className="mb-4 text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">{selected}</span> 공연 {filtered.length}개
+            </p>
+            <PerformanceGrid performances={filtered} />
+          </div>
         ) : (
           <EmptyState message="해당 장르의 공연이 없습니다." />
         )
       ) : (
-        <p className="py-10 text-center text-sm text-muted-foreground">장르를 선택하면 해당 공연을 볼 수 있습니다.</p>
+        <p className="py-6 text-center text-sm text-muted-foreground">장르를 선택하면 해당 공연을 볼 수 있습니다.</p>
       )}
     </div>
   )
