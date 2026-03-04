@@ -100,8 +100,12 @@ public class PerformanceService implements PerformanceServiceBehavior {
     }
 
     private void updateSearchWord(String prfnm, String prfcast) {
-        if (prfnm != null) performanceSearchService.updatePopularSearchWord(prfnm);
-        if (prfcast != null) performanceSearchService.updatePopularSearchWord(prfcast);
+        try {
+            if (prfnm != null) performanceSearchService.updatePopularSearchWord(prfnm);
+            if (prfcast != null) performanceSearchService.updatePopularSearchWord(prfcast);
+        } catch (Exception e) {
+            log.warn("인기검색어 업데이트 실패 (검색 결과에는 영향 없음): {}", e.getMessage());
+        }
     }
 
     private BasePerformancesResponseDto createPerformanceDto(Elements element) {
