@@ -1,9 +1,9 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import { useTopTen, usePopularityByRegion, usePopularityByGenreRegion } from '@/hooks/useRanking'
 import { usePerformances } from '@/hooks/usePerformances'
 import PerformanceGrid from '@/components/performance/PerformanceGrid'
 import ErrorFallback from '@/components/common/ErrorFallback'
-import { TrendingUp, Loader2, Trophy, MapPin, Music, Inbox } from 'lucide-react'
+import { TrendingUp, Loader2, Trophy, MapPin, Music, Inbox, Search, ChevronDown, X } from 'lucide-react'
 import type { RankingCount, Performance } from '@/types/performance'
 
 type Tab = 'topten' | 'facility' | 'genre'
@@ -113,6 +113,92 @@ function TopTenSection({ performances }: { performances: Performance[] }) {
   )
 }
 
+function FacilitySearchSelect({
+  items,
+  selected,
+  onSelect,
+}: {
+  items: RankingCount[]
+  selected: string | null
+  onSelect: (name: string | null) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const filtered = items.filter((item) => item.name.toLowerCase().includes(query.toLowerCase()))
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center justify-between rounded-xl border border-border/60 bg-card px-4 py-3 text-sm shadow-sm transition-all hover:shadow-md"
+      >
+        <span className={selected ? 'font-medium text-foreground' : 'text-muted-foreground'}>
+          {selected ?? '시설을 선택하세요'}
+        </span>
+        <div className="flex items-center gap-1">
+          {selected && (
+            <span
+              role="button"
+              onClick={(e) => { e.stopPropagation(); onSelect(null); setQuery('') }}
+              className="rounded-full p-0.5 hover:bg-muted"
+            >
+              <X className="h-3.5 w-3.5 text-muted-foreground" />
+            </span>
+          )}
+          <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${open ? 'rotate-180' : ''}`} />
+        </div>
+      </button>
+
+      {open && (
+        <div className="absolute z-10 mt-1 w-full rounded-xl border border-border/60 bg-card shadow-lg">
+          <div className="flex items-center gap-2 border-b border-border/40 px-3 py-2">
+            <Search className="h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="시설명 검색..."
+              className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
+              autoFocus
+            />
+          </div>
+          <ul className="max-h-60 overflow-y-auto py-1">
+            {filtered.length > 0 ? (
+              filtered.map((item) => (
+                <li key={item.name}>
+                  <button
+                    onClick={() => { onSelect(item.name); setOpen(false); setQuery('') }}
+                    className={`flex w-full items-center justify-between px-4 py-2.5 text-sm transition-colors ${
+                      selected === item.name
+                        ? 'bg-primary/10 font-medium text-primary'
+                        : 'text-foreground hover:bg-muted/50'
+                    }`}
+                  >
+                    <span>{item.name}</span>
+                    <span className="text-xs text-muted-foreground">{item.count}개</span>
+                  </button>
+                </li>
+              ))
+            ) : (
+              <li className="px-4 py-3 text-center text-sm text-muted-foreground">검색 결과가 없습니다</li>
+            )}
+          </ul>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function FacilitySection({ performances }: { performances: Performance[] }) {
   const { data: facilities, isLoading, isError, refetch } = usePopularityByRegion()
   const [selected, setSelected] = useState<string | null>(null)
@@ -128,7 +214,7 @@ function FacilitySection({ performances }: { performances: Performance[] }) {
 
   return (
     <div className="space-y-6">
-      <CategoryChips items={facilities} selected={selected} onSelect={setSelected} />
+      <FacilitySearchSelect items={facilities} selected={selected} onSelect={setSelected} />
       {selected ? (
         filtered.length > 0 ? (
           <PerformanceGrid performances={filtered} />
