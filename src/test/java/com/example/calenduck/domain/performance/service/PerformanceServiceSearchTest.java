@@ -123,6 +123,18 @@ class PerformanceServiceSearchTest {
 
             verify(performanceSearchService).updatePopularSearchWord("캣츠");
         }
+
+        @Test
+        @DisplayName("인기검색어 업데이트 실패 시에도 검색 결과는 정상 반환한다")
+        void search_withRedisFailure_stillReturnsResults() throws Exception {
+            doThrow(new RuntimeException("Redis 연결 실패"))
+                    .when(performanceSearchService).updatePopularSearchWord(any());
+
+            List<BasePerformancesResponseDto> result = performanceService.getAllPerformances("캣츠", null);
+
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).getPrfnm()).contains("캣츠");
+        }
     }
 
     @Nested
