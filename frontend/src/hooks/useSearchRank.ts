@@ -9,12 +9,7 @@ export function useSearchRank() {
     queryKey: ['searchRank'],
     queryFn: async () => {
       if (USE_MOCK) return mockSearchRanks
-      try {
-        const data = await getSearchRank()
-        return data.length > 0 ? data : mockSearchRanks
-      } catch {
-        return mockSearchRanks
-      }
+      return await getSearchRank()
     },
     staleTime: 1000 * 60 * 5,
   })

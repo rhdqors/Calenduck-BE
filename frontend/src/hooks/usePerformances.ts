@@ -9,12 +9,7 @@ export function usePerformances(prfnm?: string, prfcast?: string) {
     queryKey: ['performances', prfnm, prfcast],
     queryFn: async () => {
       if (USE_MOCK) return mockPerformances
-      try {
-        const data = await getPerformances(prfnm, prfcast)
-        return data.length > 0 ? data : mockPerformances
-      } catch {
-        return mockPerformances
-      }
+      return await getPerformances(prfnm, prfcast)
     },
     staleTime: 1000 * 60 * 10,
   })
