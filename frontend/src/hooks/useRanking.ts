@@ -9,12 +9,7 @@ export function useTopTen() {
     queryKey: ['topTen'],
     queryFn: async () => {
       if (USE_MOCK) return mockTopTen
-      try {
-        const data = await getTopTen()
-        return data || mockTopTen
-      } catch {
-        return mockTopTen
-      }
+      return await getTopTen()
     },
     staleTime: 1000 * 60 * 30,
   })
@@ -25,12 +20,7 @@ export function usePopularityByRegion() {
     queryKey: ['popularityByRegion'],
     queryFn: async () => {
       if (USE_MOCK) return mockPopularityByRegion
-      try {
-        const data = await getPopularityByRegion()
-        return data || mockPopularityByRegion
-      } catch {
-        return mockPopularityByRegion
-      }
+      return await getPopularityByRegion()
     },
     staleTime: 1000 * 60 * 30,
   })
@@ -41,12 +31,7 @@ export function usePopularityByGenreRegion() {
     queryKey: ['popularityByGenreRegion'],
     queryFn: async () => {
       if (USE_MOCK) return mockPopularityByGenreRegion
-      try {
-        const data = await getPopularityByGenreRegion()
-        return data || mockPopularityByGenreRegion
-      } catch {
-        return mockPopularityByGenreRegion
-      }
+      return await getPopularityByGenreRegion()
     },
     staleTime: 1000 * 60 * 30,
   })

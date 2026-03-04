@@ -10,11 +10,7 @@ export function useBookmarks() {
     queryKey: ['bookmarks'],
     queryFn: async () => {
       if (USE_MOCK) return mockBookmarks
-      try {
-        return await getBookmarks()
-      } catch {
-        return mockBookmarks
-      }
+      return await getBookmarks()
     },
   })
 }

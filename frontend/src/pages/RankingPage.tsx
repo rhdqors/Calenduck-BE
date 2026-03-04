@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTopTen, usePopularityByRegion, usePopularityByGenreRegion } from '@/hooks/useRanking'
+import ErrorFallback from '@/components/common/ErrorFallback'
 import { TrendingUp, Loader2, Trophy, MapPin, Music } from 'lucide-react'
 
 type Tab = 'topten' | 'region' | 'genre'
@@ -45,9 +46,10 @@ export default function RankingPage() {
 }
 
 function TopTenSection() {
-  const { data, isLoading } = useTopTen()
+  const { data, isLoading, isError, refetch } = useTopTen()
 
   if (isLoading) return <LoadingState />
+  if (isError) return <ErrorFallback message="TOP 10 데이터를 불러올 수 없습니다." onRetry={() => refetch()} />
   if (!data || !Array.isArray(data)) return null
 
   return (
@@ -90,9 +92,10 @@ function TopTenSection() {
 }
 
 function RegionSection() {
-  const { data, isLoading } = usePopularityByRegion()
+  const { data, isLoading, isError, refetch } = usePopularityByRegion()
 
   if (isLoading) return <LoadingState />
+  if (isError) return <ErrorFallback message="지역별 인기 데이터를 불러올 수 없습니다." onRetry={() => refetch()} />
   if (!data || !Array.isArray(data)) return null
 
   const maxCount = Math.max(...data.map((item: Record<string, unknown>) => (item.count || item.cnt || 0) as number))
@@ -123,9 +126,10 @@ function RegionSection() {
 }
 
 function GenreSection() {
-  const { data, isLoading } = usePopularityByGenreRegion()
+  const { data, isLoading, isError, refetch } = usePopularityByGenreRegion()
 
   if (isLoading) return <LoadingState />
+  if (isError) return <ErrorFallback message="장르별 인기 데이터를 불러올 수 없습니다." onRetry={() => refetch()} />
   if (!data || !Array.isArray(data)) return null
 
   return (
