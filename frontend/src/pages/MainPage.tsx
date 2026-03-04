@@ -24,7 +24,7 @@ export default function MainPage() {
             <span className="text-sm font-medium text-white/80">Calenduck</span>
           </div>
           <h1 className="text-2xl font-bold md:text-3xl">
-            오늘의 공연을 발견하세요
+            나만의 일정을 관리하세요
           </h1>
           <p className="mt-2 text-sm text-white/70 md:text-base">
             뮤지컬, 연극, 콘서트 등 다양한 공연 정보를 한눈에
