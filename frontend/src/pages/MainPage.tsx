@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { usePerformances } from '@/hooks/usePerformances'
 import { useSearchRank } from '@/hooks/useSearchRank'
 import PerformanceGrid from '@/components/performance/PerformanceGrid'
@@ -6,6 +7,7 @@ import { SkeletonGrid } from '@/components/common/SkeletonCard'
 import { TrendingUp, Sparkles } from 'lucide-react'
 
 export default function MainPage() {
+  const navigate = useNavigate()
   const { data: performances, isLoading, isError, refetch } = usePerformances()
   const { data: searchRanks } = useSearchRank()
 
@@ -36,13 +38,14 @@ export default function MainPage() {
           </div>
           <div className="flex flex-wrap gap-2">
             {searchRanks.map((item, index) => (
-              <span
+              <button
                 key={item.rankKeyword}
-                className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3.5 py-1.5 text-sm transition-all hover:bg-primary/10 hover:shadow-sm cursor-default"
+                onClick={() => navigate(`/search?query=${encodeURIComponent(item.rankKeyword)}`)}
+                className="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary/5 px-3.5 py-1.5 text-sm transition-all hover:bg-primary/10 hover:shadow-sm cursor-pointer"
               >
                 <span className="font-bold text-primary">{index + 1}</span>
                 <span className="text-foreground">{item.rankKeyword}</span>
-              </span>
+              </button>
             ))}
           </div>
         </section>
