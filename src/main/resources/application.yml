@@ -54,12 +54,12 @@ kakao:
   client-id: ${KAKAO_CLIENT_ID}
   redirect_url: ${KAKAO_REDIRECT_URL}
 
-# ===== Redash API =====
-redash:
-  api-key:
-    genre-region: ${REDASH_API_KEY_GENRE_REGION}
-    top-ten: ${REDASH_API_KEY_TOP_TEN}
-    region: ${REDASH_API_KEY_REGION}
+# ===== Redash API (미사용 — 캐시 기반으로 대체) =====
+# redash:
+#   api-key:
+#     genre-region: ${REDASH_API_KEY_GENRE_REGION}
+#     top-ten: ${REDASH_API_KEY_TOP_TEN}
+#     region: ${REDASH_API_KEY_REGION}
 
 # ===== KOPIS API =====
 kopis:

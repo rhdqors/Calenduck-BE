@@ -2,12 +2,18 @@ package com.example.calenduck.domain.bookmark.repository;
 
 import com.example.calenduck.domain.bookmark.entity.Bookmark;
 import com.example.calenduck.domain.user.entity.User;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
 import java.util.List;
 
 public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 
     List<Bookmark> findAllByUser(User user);
     Bookmark findByUserAndMt20idAndReservationDate(User user, String mt20id, String reservationDate);
+
+    @Query("SELECT b.mt20id, COUNT(b) FROM Bookmark b WHERE b.deletedAt IS NULL GROUP BY b.mt20id ORDER BY COUNT(b) DESC")
+    List<Object[]> findTopBookmarkedPerformances(Pageable pageable);
 
 }
