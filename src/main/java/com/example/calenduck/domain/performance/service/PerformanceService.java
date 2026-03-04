@@ -2,6 +2,7 @@ package com.example.calenduck.domain.performance.service;
 
 import com.example.calenduck.domain.performance.dto.response.BasePerformancesResponseDto;
 import com.example.calenduck.domain.performance.http.BatchManager;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.select.Elements;
@@ -27,6 +28,7 @@ public class PerformanceService implements PerformanceServiceBehavior {
     private final PerformanceSearchBehavior performanceSearchService;
     private final BatchManager batchManager;
     private final CacheManager cacheManager;
+    private final ObjectMapper objectMapper;
 
     private static final String CACHE_NAME = "elementsCache";
     private static final String CACHE_KEY = "getAllPerformances";
@@ -72,13 +74,13 @@ public class PerformanceService implements PerformanceServiceBehavior {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private List<BasePerformancesResponseDto> getOrLoadAllPerformances() throws ExecutionException, InterruptedException {
         Cache cache = cacheManager.getCache(CACHE_NAME);
         if (cache != null) {
             Cache.ValueWrapper cached = cache.get(CACHE_KEY);
             if (cached != null) {
-                return (List<BasePerformancesResponseDto>) cached.get();
+                List<?> rawList = (List<?>) cached.get();
+                return safeCastCachedList(rawList);
             }
         }
 
@@ -131,6 +133,19 @@ public class PerformanceService implements PerformanceServiceBehavior {
         boolean nameMatch = lowerPrfnm != null && dto.getPrfnm().toLowerCase().contains(lowerPrfnm);
         boolean castMatch = lowerPrfcast != null && dto.getPrfcast().toLowerCase().contains(lowerPrfcast);
         return nameMatch || castMatch;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<BasePerformancesResponseDto> safeCastCachedList(List<?> rawList) {
+        if (rawList.isEmpty()) {
+            return Collections.emptyList();
+        }
+        if (rawList.get(0) instanceof BasePerformancesResponseDto) {
+            return (List<BasePerformancesResponseDto>) rawList;
+        }
+        return rawList.stream()
+                .map(item -> objectMapper.convertValue(item, BasePerformancesResponseDto.class))
+                .collect(Collectors.toList());
     }
 
     private List<BasePerformancesResponseDto> convertAllToDto(List<Elements> elements) {

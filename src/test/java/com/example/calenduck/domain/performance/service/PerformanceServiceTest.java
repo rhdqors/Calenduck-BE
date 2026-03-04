@@ -7,6 +7,7 @@ import org.jsoup.select.Elements;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -34,6 +35,9 @@ class PerformanceServiceTest {
 
     @Mock
     private CacheManager cacheManager;
+
+    @Mock
+    private ObjectMapper objectMapper;
 
     @Mock
     private Cache cache;

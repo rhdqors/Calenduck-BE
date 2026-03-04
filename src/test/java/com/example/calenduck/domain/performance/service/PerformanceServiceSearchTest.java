@@ -2,6 +2,7 @@ package com.example.calenduck.domain.performance.service;
 
 import com.example.calenduck.domain.performance.dto.response.BasePerformancesResponseDto;
 import com.example.calenduck.domain.performance.http.BatchManager;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +16,7 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,7 +59,7 @@ class PerformanceServiceSearchTest {
 
     @BeforeEach
     void setUp() {
-        performanceService = new PerformanceService(performanceSearchService, batchManager, cacheManager);
+        performanceService = new PerformanceService(performanceSearchService, batchManager, cacheManager, new ObjectMapper());
     }
 
     @Nested
@@ -150,6 +152,45 @@ class PerformanceServiceSearchTest {
             performanceService.getAllPerformances("캣츠", null);
 
             verify(batchManager, never()).getElements();
+        }
+
+        @Test
+        @DisplayName("캐시에서 LinkedHashMap으로 역직렬화된 데이터도 정상 변환하여 검색한다")
+        void search_withLinkedHashMapCache_convertsAndSearches() throws Exception {
+            when(cacheManager.getCache("elementsCache")).thenReturn(cache);
+
+            LinkedHashMap<String, String> map1 = new LinkedHashMap<>();
+            map1.put("mt20id", "PF001");
+            map1.put("poster", "poster1.jpg");
+            map1.put("prfnm", "뮤지컬 캣츠");
+            map1.put("prfcast", "배우A");
+            map1.put("genrenm", "뮤지컬");
+            map1.put("fcltynm", "극장1");
+            map1.put("dtguidance", "19:30");
+            map1.put("stdate", "2024.01.01");
+            map1.put("eddate", "2024.03.01");
+            map1.put("pcseguidance", "50000원");
+
+            LinkedHashMap<String, String> map2 = new LinkedHashMap<>();
+            map2.put("mt20id", "PF002");
+            map2.put("poster", "poster2.jpg");
+            map2.put("prfnm", "오페라의 유령");
+            map2.put("prfcast", "배우B");
+            map2.put("genrenm", "뮤지컬");
+            map2.put("fcltynm", "극장2");
+            map2.put("dtguidance", "19:30");
+            map2.put("stdate", "2024.01.01");
+            map2.put("eddate", "2024.03.01");
+            map2.put("pcseguidance", "60000원");
+
+            List<LinkedHashMap<String, String>> rawList = Arrays.asList(map1, map2);
+            when(cache.get("getAllPerformances")).thenReturn(() -> rawList);
+
+            List<BasePerformancesResponseDto> result = performanceService.getAllPerformances("캣츠", null);
+
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).getPrfnm()).contains("캣츠");
+            assertThat(result.get(0).getMt20id()).isEqualTo("PF001");
         }
 
         @Test
