@@ -1,18 +1,22 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useTopTen, usePopularityByRegion, usePopularityByGenreRegion } from '@/hooks/useRanking'
+import { usePerformances } from '@/hooks/usePerformances'
+import PerformanceGrid from '@/components/performance/PerformanceGrid'
 import ErrorFallback from '@/components/common/ErrorFallback'
-import { TrendingUp, Loader2, Trophy, MapPin, Music } from 'lucide-react'
+import { TrendingUp, Loader2, Trophy, MapPin, Music, Inbox } from 'lucide-react'
+import type { RankingCount, Performance } from '@/types/performance'
 
-type Tab = 'topten' | 'region' | 'genre'
+type Tab = 'topten' | 'facility' | 'genre'
 
 const tabs: { key: Tab; label: string; icon: typeof Trophy }[] = [
   { key: 'topten', label: 'TOP 10', icon: Trophy },
-  { key: 'region', label: '지역별', icon: MapPin },
+  { key: 'facility', label: '시설별', icon: MapPin },
   { key: 'genre', label: '장르별', icon: Music },
 ]
 
 export default function RankingPage() {
   const [activeTab, setActiveTab] = useState<Tab>('topten')
+  const { data: performances } = usePerformances()
 
   return (
     <div className="space-y-6">
@@ -38,130 +42,131 @@ export default function RankingPage() {
         ))}
       </div>
 
-      {activeTab === 'topten' && <TopTenSection />}
-      {activeTab === 'region' && <RegionSection />}
-      {activeTab === 'genre' && <GenreSection />}
+      {activeTab === 'topten' && <TopTenSection performances={performances ?? []} />}
+      {activeTab === 'facility' && <FacilitySection performances={performances ?? []} />}
+      {activeTab === 'genre' && <GenreSection performances={performances ?? []} />}
     </div>
   )
 }
 
-function TopTenSection() {
-  const { data, isLoading, isError, refetch } = useTopTen()
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 py-20">
+      <Inbox className="h-12 w-12 text-muted-foreground/50" />
+      <p className="text-muted-foreground">{message}</p>
+    </div>
+  )
+}
+
+function CategoryChips({
+  items,
+  selected,
+  onSelect,
+}: {
+  items: RankingCount[]
+  selected: string | null
+  onSelect: (name: string) => void
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {items.map((item) => (
+        <button
+          key={item.name}
+          onClick={() => onSelect(item.name)}
+          className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm transition-all ${
+            selected === item.name
+              ? 'border-primary bg-primary text-primary-foreground shadow-md'
+              : 'border-border/60 bg-card text-foreground hover:bg-muted hover:shadow-sm'
+          }`}
+        >
+          <span className="font-medium">{item.name}</span>
+          <span className={`text-xs ${selected === item.name ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+            {item.count}
+          </span>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function TopTenSection({ performances }: { performances: Performance[] }) {
+  const { data: ranking, isLoading, isError, refetch } = useTopTen()
+
+  const topPerformances = useMemo(() => {
+    if (!ranking || !performances.length) return []
+    const perfMap = new Map(performances.map((p) => [p.mt20id, p]))
+    return ranking
+      .map((r) => perfMap.get(r.id ?? ''))
+      .filter((p): p is Performance => p !== undefined)
+  }, [ranking, performances])
 
   if (isLoading) return <LoadingState />
   if (isError) return <ErrorFallback message="TOP 10 데이터를 불러올 수 없습니다." onRetry={() => refetch()} />
-  if (!data || !Array.isArray(data)) return null
+  if (!ranking || ranking.length === 0) return <EmptyState message="아직 북마크된 공연이 없습니다." />
+  if (topPerformances.length === 0) return <EmptyState message="공연 데이터를 불러오는 중입니다." />
 
   return (
-    <div className="space-y-2.5">
-      {data.map((item: Record<string, unknown>, index: number) => {
-        const name = (item.name || item.prfnm || '') as string
-        const count = (item.count || item.cnt || 0) as number
-        const rank = index + 1
-        const maxCount = (data[0] as Record<string, unknown>)?.count as number || (data[0] as Record<string, unknown>)?.cnt as number || 1
-
-        return (
-          <div
-            key={index}
-            className="flex items-center gap-4 rounded-2xl border border-border/60 bg-card p-4 shadow-sm transition-all hover:shadow-md"
-          >
-            <span
-              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold shadow-sm ${
-                rank <= 3
-                  ? 'bg-gradient-to-br from-primary to-coral text-white'
-                  : 'bg-muted text-muted-foreground'
-              }`}
-            >
-              {rank}
-            </span>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-card-foreground truncate">{name}</p>
-              <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-primary to-primary/60 transition-all duration-500"
-                  style={{ width: `${(count / maxCount) * 100}%` }}
-                />
-              </div>
-            </div>
-            <span className="shrink-0 text-xs font-medium text-muted-foreground">{count.toLocaleString()}</span>
-          </div>
-        )
-      })}
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">북마크가 많은 인기 공연</p>
+      <PerformanceGrid performances={topPerformances} />
     </div>
   )
 }
 
-function RegionSection() {
-  const { data, isLoading, isError, refetch } = usePopularityByRegion()
+function FacilitySection({ performances }: { performances: Performance[] }) {
+  const { data: facilities, isLoading, isError, refetch } = usePopularityByRegion()
+  const [selected, setSelected] = useState<string | null>(null)
+
+  const filtered = useMemo(() => {
+    if (!selected) return []
+    return performances.filter((p) => p.fcltynm === selected)
+  }, [performances, selected])
 
   if (isLoading) return <LoadingState />
-  if (isError) return <ErrorFallback message="지역별 인기 데이터를 불러올 수 없습니다." onRetry={() => refetch()} />
-  if (!data || !Array.isArray(data)) return null
-
-  const maxCount = Math.max(...data.map((item: Record<string, unknown>) => (item.count || item.cnt || 0) as number))
+  if (isError) return <ErrorFallback message="시설별 데이터를 불러올 수 없습니다." onRetry={() => refetch()} />
+  if (!facilities || facilities.length === 0) return <EmptyState message="시설별 데이터가 없습니다." />
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {data.map((item: Record<string, unknown>, index: number) => {
-        const region = (item.region || item.area || '') as string
-        const count = (item.count || item.cnt || 0) as number
-
-        return (
-          <div key={index} className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm transition-all hover:shadow-md">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-bold text-card-foreground">{region}</span>
-              <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">{count.toLocaleString()}</span>
-            </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-primary to-coral/60 transition-all duration-500"
-                style={{ width: `${(count / maxCount) * 100}%` }}
-              />
-            </div>
-          </div>
+    <div className="space-y-6">
+      <CategoryChips items={facilities} selected={selected} onSelect={setSelected} />
+      {selected ? (
+        filtered.length > 0 ? (
+          <PerformanceGrid performances={filtered} />
+        ) : (
+          <EmptyState message="해당 시설의 공연이 없습니다." />
         )
-      })}
+      ) : (
+        <p className="py-10 text-center text-sm text-muted-foreground">시설을 선택하면 해당 공연을 볼 수 있습니다.</p>
+      )}
     </div>
   )
 }
 
-function GenreSection() {
-  const { data, isLoading, isError, refetch } = usePopularityByGenreRegion()
+function GenreSection({ performances }: { performances: Performance[] }) {
+  const { data: genres, isLoading, isError, refetch } = usePopularityByGenreRegion()
+  const [selected, setSelected] = useState<string | null>(null)
+
+  const filtered = useMemo(() => {
+    if (!selected) return []
+    return performances.filter((p) => p.genrenm === selected)
+  }, [performances, selected])
 
   if (isLoading) return <LoadingState />
-  if (isError) return <ErrorFallback message="장르별 인기 데이터를 불러올 수 없습니다." onRetry={() => refetch()} />
-  if (!data || !Array.isArray(data)) return null
+  if (isError) return <ErrorFallback message="장르별 데이터를 불러올 수 없습니다." onRetry={() => refetch()} />
+  if (!genres || genres.length === 0) return <EmptyState message="장르별 데이터가 없습니다." />
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-sm">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-border/60 bg-muted/30">
-            <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">장르</th>
-            <th className="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">지역</th>
-            <th className="px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">인기도</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((item: Record<string, unknown>, index: number) => {
-            const genre = (item.genre || item.genrenm || '') as string
-            const region = (item.region || item.area || '') as string
-            const count = (item.count || item.cnt || 0) as number
-
-            return (
-              <tr key={index} className="border-b border-border/40 last:border-0 transition-colors hover:bg-primary/5">
-                <td className="px-5 py-3.5 font-semibold text-card-foreground">{genre}</td>
-                <td className="px-5 py-3.5 text-muted-foreground">{region}</td>
-                <td className="px-5 py-3.5 text-right">
-                  <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
-                    {count.toLocaleString()}
-                  </span>
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
+    <div className="space-y-6">
+      <CategoryChips items={genres} selected={selected} onSelect={setSelected} />
+      {selected ? (
+        filtered.length > 0 ? (
+          <PerformanceGrid performances={filtered} />
+        ) : (
+          <EmptyState message="해당 장르의 공연이 없습니다." />
+        )
+      ) : (
+        <p className="py-10 text-center text-sm text-muted-foreground">장르를 선택하면 해당 공연을 볼 수 있습니다.</p>
+      )}
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import client from './client'
 import type { ApiResponse } from '@/types/api'
-import type { Performance, SearchRank } from '@/types/performance'
+import type { Performance, SearchRank, RankingCount } from '@/types/performance'
 
 export async function getPerformances(prfnm?: string, prfcast?: string) {
   const params = new URLSearchParams()
@@ -23,16 +23,16 @@ export async function getSearchRank() {
 }
 
 export async function getTopTen() {
-  const { data } = await client.get<ApiResponse<unknown>>('/performances/topten')
+  const { data } = await client.get<ApiResponse<RankingCount[]>>('/performances/topten')
   return data.data
 }
 
 export async function getPopularityByRegion() {
-  const { data } = await client.get<ApiResponse<unknown>>('/performances/popularity/region')
+  const { data } = await client.get<ApiResponse<RankingCount[]>>('/performances/popularity/region')
   return data.data
 }
 
 export async function getPopularityByGenreRegion() {
-  const { data } = await client.get<ApiResponse<unknown>>('/performances/popularity/genres/region')
+  const { data } = await client.get<ApiResponse<RankingCount[]>>('/performances/popularity/genres/region')
   return data.data
 }

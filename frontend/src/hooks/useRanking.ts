@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { getTopTen, getPopularityByRegion, getPopularityByGenreRegion } from '@/api/performance'
 import { mockTopTen, mockPopularityByRegion, mockPopularityByGenreRegion } from '@/mocks/rankings'
+import type { RankingCount } from '@/types/performance'
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
 
 export function useTopTen() {
-  return useQuery({
+  return useQuery<RankingCount[]>({
     queryKey: ['topTen'],
     queryFn: async () => {
       if (USE_MOCK) return mockTopTen
@@ -16,7 +17,7 @@ export function useTopTen() {
 }
 
 export function usePopularityByRegion() {
-  return useQuery({
+  return useQuery<RankingCount[]>({
     queryKey: ['popularityByRegion'],
     queryFn: async () => {
       if (USE_MOCK) return mockPopularityByRegion
@@ -27,7 +28,7 @@ export function usePopularityByRegion() {
 }
 
 export function usePopularityByGenreRegion() {
-  return useQuery({
+  return useQuery<RankingCount[]>({
     queryKey: ['popularityByGenreRegion'],
     queryFn: async () => {
       if (USE_MOCK) return mockPopularityByGenreRegion

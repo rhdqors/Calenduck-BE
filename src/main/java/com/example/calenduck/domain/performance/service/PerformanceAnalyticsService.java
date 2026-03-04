@@ -30,7 +30,7 @@ public class PerformanceAnalyticsService implements PerformanceAnalyticsBehavior
                 .collect(Collectors.groupingBy(BasePerformancesResponseDto::getGenrenm, Collectors.counting()))
                 .entrySet().stream()
                 .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-                .map(entry -> new RankingCountResponse(entry.getKey(), entry.getValue()))
+                .map(entry -> new RankingCountResponse(null, entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
     }
 
@@ -48,7 +48,7 @@ public class PerformanceAnalyticsService implements PerformanceAnalyticsBehavior
                     String mt20id = (String) row[0];
                     long count = (Long) row[1];
                     String name = performanceNames.getOrDefault(mt20id, mt20id);
-                    return new RankingCountResponse(name, count);
+                    return new RankingCountResponse(mt20id, name, count);
                 })
                 .collect(Collectors.toList());
     }
@@ -60,7 +60,7 @@ public class PerformanceAnalyticsService implements PerformanceAnalyticsBehavior
                 .collect(Collectors.groupingBy(BasePerformancesResponseDto::getFcltynm, Collectors.counting()))
                 .entrySet().stream()
                 .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-                .map(entry -> new RankingCountResponse(entry.getKey(), entry.getValue()))
+                .map(entry -> new RankingCountResponse(null, entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
     }
 

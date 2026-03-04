@@ -15,3 +15,9 @@ export interface SearchRank {
   rankKeyword: string
   rank: number
 }
+
+export interface RankingCount {
+  id?: string
+  name: string
+  count: number
+}
