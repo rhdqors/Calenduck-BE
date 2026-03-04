@@ -1,13 +1,17 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePerformances } from '@/hooks/usePerformances'
 import { useSearchRank } from '@/hooks/useSearchRank'
 import PerformanceGrid from '@/components/performance/PerformanceGrid'
 import ErrorFallback from '@/components/common/ErrorFallback'
 import { SkeletonGrid } from '@/components/common/SkeletonCard'
-import { TrendingUp, Sparkles } from 'lucide-react'
+import { TrendingUp, Sparkles, ChevronDown } from 'lucide-react'
+
+const PAGE_SIZE = 20
 
 export default function MainPage() {
   const navigate = useNavigate()
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const { data: performances, isLoading, isError, refetch } = usePerformances()
   const { data: searchRanks } = useSearchRank()
 
@@ -58,7 +62,20 @@ export default function MainPage() {
         ) : isError ? (
           <ErrorFallback message="공연 목록을 불러올 수 없습니다." onRetry={() => refetch()} />
         ) : (
-          <PerformanceGrid performances={performances ?? []} />
+          <>
+            <PerformanceGrid performances={(performances ?? []).slice(0, visibleCount)} />
+            {performances && visibleCount < performances.length && (
+              <div className="mt-8 flex justify-center">
+                <button
+                  onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
+                  className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-2.5 text-sm font-medium text-foreground shadow-sm transition-all hover:bg-muted hover:shadow-md"
+                >
+                  <ChevronDown className="h-4 w-4" />
+                  더 보기 ({performances.length - visibleCount}개 남음)
+                </button>
+              </div>
+            )}
+          </>
         )}
       </section>
     </div>
