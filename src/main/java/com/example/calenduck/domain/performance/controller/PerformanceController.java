@@ -10,8 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -29,9 +27,16 @@ public class PerformanceController {
     public ResponseEntity<?> getAllPerformances(
             @RequestParam(required = false) String prfnm,
             @RequestParam(required = false) String prfcast
-    ) throws SQLException, IOException, ExecutionException, InterruptedException {
+    ) throws ExecutionException, InterruptedException {
         List<BasePerformancesResponseDto> performances = performanceService.getAllPerformances(prfnm, prfcast);
         return ResponseMessage.SuccessResponse("전체 조회 완료", performances);
+    }
+
+    @Operation(summary = "공연 단건 조회", description = "mt20id로 공연 상세 정보 조회")
+    @GetMapping("/{mt20id}")
+    public ResponseEntity<?> getPerformanceById(@PathVariable String mt20id) throws ExecutionException, InterruptedException {
+        BasePerformancesResponseDto performance = performanceService.getPerformanceById(mt20id);
+        return ResponseMessage.SuccessResponse("공연 조회 완료", performance);
     }
 
     @Operation(summary = "인기검색어 TOP 5", description = "인기검색어 TOP 5")

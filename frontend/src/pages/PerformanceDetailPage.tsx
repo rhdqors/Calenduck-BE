@@ -1,7 +1,9 @@
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
+import { usePerformanceDetail } from '@/hooks/usePerformances'
 import type { Performance } from '@/types/performance'
-import { ArrowLeft, Calendar, MapPin, Clock, Users, CreditCard, Bookmark } from 'lucide-react'
+import ErrorFallback from '@/components/common/ErrorFallback'
+import { ArrowLeft, Calendar, MapPin, Clock, Users, CreditCard, Bookmark, Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { toggleBookmark } from '@/api/bookmark'
 
@@ -17,9 +19,25 @@ export default function PerformanceDetailPage() {
   const { isAuthenticated } = useAuth()
   const [bookmarkMessage, setBookmarkMessage] = useState<string | null>(null)
 
-  const performance = (location.state as { performance?: Performance })?.performance
+  const statePerformance = (location.state as { performance?: Performance })?.performance
+  const { data: fetchedPerformance, isLoading, isError, refetch } = usePerformanceDetail(
+    statePerformance ? undefined : mt20id,
+  )
+
+  const performance = statePerformance ?? fetchedPerformance
+
+  if (isLoading && !statePerformance) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
 
   if (!performance) {
+    if (isError) {
+      return <ErrorFallback message="공연 정보를 불러올 수 없습니다." onRetry={() => refetch()} />
+    }
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-20">
         <p className="text-muted-foreground">공연 정보를 찾을 수 없습니다.</p>

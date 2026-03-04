@@ -12,6 +12,11 @@ export async function getPerformances(prfnm?: string, prfcast?: string) {
   return data.data
 }
 
+export async function getPerformanceById(mt20id: string) {
+  const { data } = await client.get<ApiResponse<Performance>>(`/performances/${mt20id}`)
+  return data.data
+}
+
 export async function getSearchRank() {
   const { data } = await client.get<ApiResponse<SearchRank[]>>('/performances/search/rank')
   return data.data
