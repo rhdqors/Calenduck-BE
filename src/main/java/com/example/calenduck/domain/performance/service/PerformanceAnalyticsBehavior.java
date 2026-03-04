@@ -1,9 +1,11 @@
 package com.example.calenduck.domain.performance.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.example.calenduck.domain.performance.dto.response.RankingCountResponse;
+
+import java.util.List;
 
 public interface PerformanceAnalyticsBehavior {
-    JsonNode popularityByGenreWithRegion(); // 지역별 장르 인기도
-    JsonNode topTen(); // 인기 공연 탑텐
-    JsonNode popularityByRegion(); // 지역별 인기 공연
+    List<RankingCountResponse> popularityByGenreWithRegion();
+    List<RankingCountResponse> topTen();
+    List<RankingCountResponse> popularityByRegion();
 }

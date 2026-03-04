@@ -1,169 +1,84 @@
 package com.example.calenduck.domain.performance.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.calenduck.domain.bookmark.repository.BookmarkRepository;
+import com.example.calenduck.domain.performance.dto.response.BasePerformancesResponseDto;
+import com.example.calenduck.domain.performance.dto.response.RankingCountResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class PerformanceAnalyticsService implements PerformanceAnalyticsBehavior {
 
-    @Value("${server.url}")
-    private String serverUrl;
+    private final PerformanceServiceBehavior performanceService;
+    private final BookmarkRepository bookmarkRepository;
 
-    @Value("${redash.api-key.genre-region}")
-    private String genreRegionApiKey;
+    private static final int TOP_TEN_SIZE = 10;
 
-    @Value("${redash.api-key.top-ten}")
-    private String topTenApiKey;
-
-    @Value("${redash.api-key.region}")
-    private String regionApiKey;
-
-    @Value("${http.connect-timeout}")
-    private int connectTimeout;
-
-    @Value("${http.read-timeout}")
-    private int readTimeout;
-
-    // 인기도 - 지역별 장르
     @Override
-    public JsonNode popularityByGenreWithRegion() {
-        String url = serverUrl + "/api/queries/3/results.json?api_key=" + genreRegionApiKey;
-        JsonNode rowsNode = null;
-
-        try {
-            URL apiUrl = new URL(url);
-            HttpURLConnection connection = (HttpURLConnection) apiUrl.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Accept", "application/json");
-            connection.setConnectTimeout(connectTimeout);
-            connection.setReadTimeout(readTimeout);
-
-            int responseCode = connection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuilder response = new StringBuilder();
-                String line;
-
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
-                reader.close();
-                String jsonResponse = response.toString();
-
-                ObjectMapper objectMapper = new ObjectMapper();
-                JsonNode jsonNode = objectMapper.readTree(jsonResponse);
-                JsonNode dataNode = jsonNode.path("query_result").path("data");
-                rowsNode = dataNode.path("rows");
-
-                for (JsonNode rowNode : rowsNode) {
-                    String area = rowNode.path("area_nm").asText();
-                    String genre = rowNode.path("genre_nm").asText();
-                    double value = rowNode.path("\uc608\ub9e4\uc728").asDouble();
-                    log.info("area: {}, genre: {}, value: {}", area, genre, value);
-                }
-                log.info("rowsNode: {}", Arrays.toString(new JsonNode[]{rowsNode}));
-            } else {
-                log.error("HTTP 실패 코드: {}", responseCode);
-            }
-            connection.disconnect();
-        } catch (IOException e) {
-            log.error("Redash API(지역별 장르) 호출 실패", e);
-        }
-        return rowsNode;
+    public List<RankingCountResponse> popularityByGenreWithRegion() {
+        List<BasePerformancesResponseDto> performances = getAllPerformancesSafely();
+        return performances.stream()
+                .collect(Collectors.groupingBy(BasePerformancesResponseDto::getGenrenm, Collectors.counting()))
+                .entrySet().stream()
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                .map(entry -> new RankingCountResponse(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
     }
 
-    // 탑텐
     @Override
-    public JsonNode topTen() {
-        String url = serverUrl + "/api/queries/5/results.json?api_key=" + topTenApiKey;
-        JsonNode rowsNode = null;
-
-        try {
-            URL apiUrl = new URL(url);
-            HttpURLConnection connection = (HttpURLConnection) apiUrl.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Accept", "application/json");
-            connection.setConnectTimeout(connectTimeout);
-            connection.setReadTimeout(readTimeout);
-
-            int responseCode = connection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuilder response = new StringBuilder();
-                String line;
-
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
-                reader.close();
-                String jsonResponse = response.toString();
-
-                ObjectMapper objectMapper = new ObjectMapper();
-                JsonNode jsonNode = objectMapper.readTree(jsonResponse);
-                JsonNode dataNode = jsonNode.path("query_result").path("data");
-                rowsNode = dataNode.path("rows");
-
-                log.info("topTen rowsNode: {}", rowsNode);
-            } else {
-                log.error("HTTP 실패 코드: {}", responseCode);
-            }
-            connection.disconnect();
-        } catch (IOException e) {
-            log.error("Redash API(탑텐) 호출 실패", e);
+    public List<RankingCountResponse> topTen() {
+        List<Object[]> bookmarkCounts = bookmarkRepository.findTopBookmarkedPerformances(PageRequest.of(0, TOP_TEN_SIZE));
+        if (bookmarkCounts.isEmpty()) {
+            return Collections.emptyList();
         }
-        return rowsNode;
+
+        Map<String, String> performanceNames = getPerformanceNameMap();
+
+        return bookmarkCounts.stream()
+                .map(row -> {
+                    String mt20id = (String) row[0];
+                    long count = (Long) row[1];
+                    String name = performanceNames.getOrDefault(mt20id, mt20id);
+                    return new RankingCountResponse(name, count);
+                })
+                .collect(Collectors.toList());
     }
 
-    // 지역별 인기 공연
     @Override
-    public JsonNode popularityByRegion() {
-        String url = serverUrl + "/api/queries/1/results.json?api_key=" + regionApiKey;
-        JsonNode rowsNode = null;
+    public List<RankingCountResponse> popularityByRegion() {
+        List<BasePerformancesResponseDto> performances = getAllPerformancesSafely();
+        return performances.stream()
+                .collect(Collectors.groupingBy(BasePerformancesResponseDto::getFcltynm, Collectors.counting()))
+                .entrySet().stream()
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                .map(entry -> new RankingCountResponse(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+    }
 
+    private List<BasePerformancesResponseDto> getAllPerformancesSafely() {
         try {
-            URL apiUrl = new URL(url);
-            HttpURLConnection connection = (HttpURLConnection) apiUrl.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Accept", "application/json");
-            connection.setConnectTimeout(connectTimeout);
-            connection.setReadTimeout(readTimeout);
-
-            int responseCode = connection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuilder response = new StringBuilder();
-                String line;
-
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
-                reader.close();
-                String jsonResponse = response.toString();
-
-                ObjectMapper objectMapper = new ObjectMapper();
-                JsonNode jsonNode = objectMapper.readTree(jsonResponse);
-                JsonNode dataNode = jsonNode.path("query_result").path("data");
-                rowsNode = dataNode.path("rows");
-
-                log.info("rowsNode: {}", Arrays.toString(new JsonNode[]{rowsNode}));
-            } else {
-                log.error("HTTP 실패 코드: {}", responseCode);
-            }
-            connection.disconnect();
-        } catch (IOException e) {
-            log.error("Redash API(지역별 인기) 호출 실패", e);
+            return performanceService.getAllPerformances(null, null);
+        } catch (Exception e) {
+            log.error("공연 데이터 로드 실패", e);
+            return Collections.emptyList();
         }
-        return rowsNode;
+    }
+
+    private Map<String, String> getPerformanceNameMap() {
+        return getAllPerformancesSafely().stream()
+                .collect(Collectors.toMap(
+                        BasePerformancesResponseDto::getMt20id,
+                        BasePerformancesResponseDto::getPrfnm,
+                        (existing, replacement) -> existing
+                ));
     }
 }
