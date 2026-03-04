@@ -7,5 +7,6 @@ import java.util.concurrent.ExecutionException;
 
 public interface PerformanceServiceBehavior {
     List<BasePerformancesResponseDto> getAllPerformances(String prfnm, String prfcast) throws ExecutionException, InterruptedException;
+    BasePerformancesResponseDto getPerformanceById(String mt20id) throws ExecutionException, InterruptedException;
     List<BasePerformancesResponseDto> refreshPerformancesCache();
 }

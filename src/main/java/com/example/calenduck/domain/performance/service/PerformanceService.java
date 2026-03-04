@@ -10,6 +10,9 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
 
+import com.example.calenduck.global.exception.GlobalErrorCode;
+import com.example.calenduck.global.exception.GlobalException;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -43,6 +46,15 @@ public class PerformanceService implements PerformanceServiceBehavior {
         return allPerformances.stream()
                 .filter(dto -> isMatch(lowerPrfnm, lowerPrfcast, dto))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public BasePerformancesResponseDto getPerformanceById(String mt20id) throws ExecutionException, InterruptedException {
+        List<BasePerformancesResponseDto> allPerformances = getOrLoadAllPerformances();
+        return allPerformances.stream()
+                .filter(dto -> mt20id.equals(dto.getMt20id()))
+                .findFirst()
+                .orElseThrow(() -> new GlobalException(GlobalErrorCode.NOT_FOUND_PERFORMANCE));
     }
 
     // 스케줄러용 캐시 갱신 메서드

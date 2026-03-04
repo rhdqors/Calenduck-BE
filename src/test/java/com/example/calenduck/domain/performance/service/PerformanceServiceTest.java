@@ -13,11 +13,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 
+import com.example.calenduck.global.exception.GlobalException;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -107,5 +110,56 @@ class PerformanceServiceTest {
 
         // Then
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("캐시에 데이터가 있을 때 mt20id로 공연을 조회한다")
+    void getPerformanceById_withCachedData_returnsPerformance() throws Exception {
+        // Given
+        List<BasePerformancesResponseDto> cached = Arrays.asList(
+                new BasePerformancesResponseDto("PF001", "poster1.jpg", "뮤지컬 캣츠", "배우A", "뮤지컬", "극장1", "19:30", "2024.01.01", "2024.03.01", "50000원"),
+                new BasePerformancesResponseDto("PF002", "poster2.jpg", "오페라의 유령", "배우B", "뮤지컬", "극장2", "19:30", "2024.01.01", "2024.03.01", "60000원")
+        );
+        when(cacheManager.getCache("elementsCache")).thenReturn(cache);
+        when(cache.get("getAllPerformances")).thenReturn(() -> cached);
+
+        // When
+        BasePerformancesResponseDto result = performanceService.getPerformanceById("PF001");
+
+        // Then
+        assertThat(result.getMt20id()).isEqualTo("PF001");
+        assertThat(result.getPrfnm()).isEqualTo("뮤지컬 캣츠");
+    }
+
+    @Test
+    @DisplayName("캐시에 없는 mt20id 조회 시 NOT_FOUND_PERFORMANCE 예외를 던진다")
+    void getPerformanceById_notFound_throwsException() throws Exception {
+        // Given
+        List<BasePerformancesResponseDto> cached = Arrays.asList(
+                new BasePerformancesResponseDto("PF001", "poster1.jpg", "뮤지컬 캣츠", "배우A", "뮤지컬", "극장1", "19:30", "2024.01.01", "2024.03.01", "50000원")
+        );
+        when(cacheManager.getCache("elementsCache")).thenReturn(cache);
+        when(cache.get("getAllPerformances")).thenReturn(() -> cached);
+
+        // When & Then
+        assertThatThrownBy(() -> performanceService.getPerformanceById("PF999"))
+                .isInstanceOf(GlobalException.class);
+    }
+
+    @Test
+    @DisplayName("캐시 미스 시 BatchManager에서 로드 후 mt20id로 조회한다")
+    void getPerformanceById_cacheMiss_loadsAndReturns() throws Exception {
+        // Given
+        when(cacheManager.getCache("elementsCache")).thenReturn(cache);
+        when(cache.get("getAllPerformances")).thenReturn(null);
+
+        Elements elements = createTestElements("PF001", "뮤지컬 캣츠", "배우A");
+        when(batchManager.getElements()).thenReturn(Arrays.asList(elements));
+
+        // When
+        BasePerformancesResponseDto result = performanceService.getPerformanceById("PF001");
+
+        // Then
+        assertThat(result.getMt20id()).isEqualTo("PF001");
     }
 }
