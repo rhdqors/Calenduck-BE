@@ -10,6 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,6 +29,12 @@ class PerformanceServiceTest {
     @Mock
     private BatchManager batchManager;
 
+    @Mock
+    private CacheManager cacheManager;
+
+    @Mock
+    private Cache cache;
+
     @InjectMocks
     private PerformanceService performanceService;
 
@@ -41,9 +49,12 @@ class PerformanceServiceTest {
     }
 
     @Test
-    @DisplayName("BatchManager 성공 시 전체 공연 목록을 반환한다")
-    void getAllPerformances_withElements_returnsPerformances() throws Exception {
+    @DisplayName("캐시 미스 시 BatchManager를 호출하여 전체 공연 목록을 반환한다")
+    void getAllPerformances_cacheMiss_returnsPerformances() throws Exception {
         // Given
+        when(cacheManager.getCache("elementsCache")).thenReturn(cache);
+        when(cache.get("getAllPerformances")).thenReturn(null);
+
         Elements elements1 = createTestElements("PF001", "뮤지컬 캣츠", "배우A");
         Elements elements2 = createTestElements("PF002", "오페라의 유령", "배우B");
         when(batchManager.getElements()).thenReturn(Arrays.asList(elements1, elements2));
@@ -59,6 +70,8 @@ class PerformanceServiceTest {
     @DisplayName("BatchManager가 빈 리스트를 반환하면 빈 리스트를 반환한다")
     void getAllPerformances_withEmptyElements_returnsEmptyList() throws Exception {
         // Given
+        when(cacheManager.getCache("elementsCache")).thenReturn(cache);
+        when(cache.get("getAllPerformances")).thenReturn(null);
         when(batchManager.getElements()).thenReturn(Collections.emptyList());
 
         // When
