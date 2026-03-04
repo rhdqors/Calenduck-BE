@@ -110,8 +110,10 @@ class PerformanceAnalyticsServiceTest {
             List<RankingCountResponse> result = analyticsService.topTen();
 
             assertThat(result).hasSize(2);
+            assertThat(result.get(0).getId()).isEqualTo("PF001");
             assertThat(result.get(0).getName()).isEqualTo("뮤지컬 캣츠");
             assertThat(result.get(0).getCount()).isEqualTo(15);
+            assertThat(result.get(1).getId()).isEqualTo("PF003");
             assertThat(result.get(1).getName()).isEqualTo("햄릿");
             assertThat(result.get(1).getCount()).isEqualTo(8);
         }

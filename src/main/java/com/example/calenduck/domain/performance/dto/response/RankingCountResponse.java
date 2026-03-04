@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class RankingCountResponse {
+    private final String id;
     private final String name;
     private final long count;
 }
